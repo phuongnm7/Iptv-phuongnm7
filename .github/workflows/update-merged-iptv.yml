@@ -1,0 +1,59 @@
+name: Update merged IPTV playlist
+
+on:
+  schedule:
+    - cron: "0 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-merged-iptv
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Fetch and merge playlists
+        env:
+          UPSTREAM_URL: https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/main/vmttv
+          EXTRA_PLAYLIST: sources/vAppTV_non_DRM.m3u
+          OUTPUT_PLAYLIST: IPTV_Gop_VMTTV_vAppTV.m3u
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 3 --retry-delay 2 "$UPSTREAM_URL" --output upstream.m3u
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+
+          upstream = Path("upstream.m3u").read_text(encoding="utf-8-sig").rstrip()
+          extra_lines = Path(os.environ["EXTRA_PLAYLIST"]).read_text(encoding="utf-8-sig").splitlines()
+
+          if not upstream.startswith("#EXTM3U"):
+              raise SystemExit("The upstream playlist does not start with #EXTM3U.")
+
+          if extra_lines and extra_lines[0].startswith("#EXTM3U"):
+              extra_lines = extra_lines[1:]
+
+          extra = "\n".join(extra_lines).strip()
+          merged = upstream + "\n\n" + extra + "\n"
+          Path(os.environ["OUTPUT_PLAYLIST"]).write_text(merged, encoding="utf-8")
+          PY
+
+      - name: Commit an update when needed
+        run: |
+          if git diff --quiet -- IPTV_Gop_VMTTV_vAppTV.m3u; then
+            echo "Playlist is already up to date."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add IPTV_Gop_VMTTV_vAppTV.m3u
+          git commit -m "Update merged IPTV playlist"
+          git push
