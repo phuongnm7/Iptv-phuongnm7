@@ -22,21 +22,51 @@ jobs:
       - name: Fetch, filter, and merge playlists
         env:
           UPSTREAM_URL: https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/main/vmttv
+          VTVCAP_URL: https://tv.vietanhtv.top/sex/
           EXTRA_PLAYLIST: sources/vAppTV_non_DRM.m3u
+          VTVCAP_FALLBACK: sources/vtvcab-on-sports.m3u
           EXCLUDED_GROUPS: sources/excluded-groups.txt
           OUTPUT_PLAYLIST: IPTV_Gop_VMTTV_vAppTV.m3u
         run: |
           set -euo pipefail
           curl --fail --location --retry 3 --retry-delay 2 "$UPSTREAM_URL" --output upstream.m3u
+          if ! curl --fail --location --retry 3 --retry-delay 2 "$VTVCAP_URL" --output vtvcab-source.m3u; then
+            cp "$VTVCAP_FALLBACK" vtvcab-source.m3u
+          fi
           python3 - <<'PY'
           import os
           import re
           import unicodedata
           from pathlib import Path
 
+          TARGET_CHANNELS = ["ON SPORTS", "ON SPORTS+", "ON FOOTBALL", "ON SPORTS NEWS"]
+
           def normalize(value):
               decomposed = unicodedata.normalize("NFD", value)
               return "".join(char for char in decomposed if unicodedata.category(char) != "Mn").casefold().replace("đ", "d").strip()
+
+          def extract_vtvcab_entries(lines):
+              entries = {}
+              current = []
+
+              def consider():
+                  if not current:
+                      return
+                  extinf = current[0]
+                  group_match = re.search(r'''group-title=(?:"([^"]*)"|'([^']*)')''', extinf, flags=re.I)
+                  group = normalize((group_match.group(1) or group_match.group(2)) if group_match else "")
+                  name = extinf.rsplit(",", 1)[-1].strip().upper()
+                  if "vtvcab" in group and name in TARGET_CHANNELS:
+                      entries[name] = "\n".join(current).strip()
+
+              for line in lines:
+                  if line.startswith("#EXTINF:"):
+                      consider()
+                      current = [line]
+                  elif current:
+                      current.append(line)
+              consider()
+              return entries
 
           excluded = {
               normalize(line)
@@ -59,8 +89,13 @@ jobs:
           if extra_lines and extra_lines[0].startswith("#EXTM3U"):
               extra_lines = extra_lines[1:]
 
-          merged = "\n".join(filtered_lines).rstrip() + "\n\n" + "\n".join(extra_lines).strip() + "\n"
-          Path(os.environ["OUTPUT_PLAYLIST"]).write_text(merged, encoding="utf-8")
+          fresh_vtvcab = extract_vtvcab_entries(Path("vtvcab-source.m3u").read_text(encoding="utf-8-sig").splitlines())
+          fallback_vtvcab = extract_vtvcab_entries(Path(os.environ["VTVCAP_FALLBACK"]).read_text(encoding="utf-8-sig").splitlines())
+          vtvcab_entries = [fresh_vtvcab.get(name) or fallback_vtvcab.get(name) for name in TARGET_CHANNELS]
+          vtvcab_entries = [entry for entry in vtvcab_entries if entry]
+
+          merged_sections = ["\n".join(filtered_lines).rstrip(), "\n".join(extra_lines).strip(), "\n\n".join(vtvcab_entries)]
+          Path(os.environ["OUTPUT_PLAYLIST"]).write_text("\n\n".join(section for section in merged_sections if section) + "\n", encoding="utf-8")
           PY
 
       - name: Commit an update when needed
