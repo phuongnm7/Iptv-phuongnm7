@@ -24,6 +24,7 @@ jobs:
           UPSTREAM_URL: https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/main/vmttv
           VTVCAP_URL: https://tv.vietanhtv.top/sex/
           EXTRA_PLAYLIST: sources/vAppTV_non_DRM.m3u
+          SPORT_PLAYLIST: sources/sport-selected.m3u
           VTVCAP_FALLBACK: sources/vtvcab-on-sports.m3u
           EXCLUDED_GROUPS: sources/excluded-groups.txt
           OUTPUT_PLAYLIST: IPTV_Gop_VMTTV_vAppTV.m3u
@@ -89,12 +90,16 @@ jobs:
           if extra_lines and extra_lines[0].startswith("#EXTM3U"):
               extra_lines = extra_lines[1:]
 
+          sport_lines = Path(os.environ["SPORT_PLAYLIST"]).read_text(encoding="utf-8-sig").splitlines()
+          if sport_lines and sport_lines[0].startswith("#EXTM3U"):
+              sport_lines = sport_lines[1:]
+
           fresh_vtvcab = extract_vtvcab_entries(Path("vtvcab-source.m3u").read_text(encoding="utf-8-sig").splitlines())
           fallback_vtvcab = extract_vtvcab_entries(Path(os.environ["VTVCAP_FALLBACK"]).read_text(encoding="utf-8-sig").splitlines())
           vtvcab_entries = [fresh_vtvcab.get(name) or fallback_vtvcab.get(name) for name in TARGET_CHANNELS]
           vtvcab_entries = [entry for entry in vtvcab_entries if entry]
 
-          merged_sections = ["\n".join(filtered_lines).rstrip(), "\n".join(extra_lines).strip(), "\n\n".join(vtvcab_entries)]
+          merged_sections = ["\n".join(filtered_lines).rstrip(), "\n".join(extra_lines).strip(), "\n\n".join(vtvcab_entries), "\n".join(sport_lines).strip()]
           Path(os.environ["OUTPUT_PLAYLIST"]).write_text("\n\n".join(section for section in merged_sections if section) + "\n", encoding="utf-8")
           PY
 
