@@ -23,9 +23,11 @@ jobs:
         env:
           UPSTREAM_URL: https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/main/vmttv
           VTVCAP_URL: https://tv.vietanhtv.top/sex/
+          GOLDEN_TV_URL: https://byvn.net/6ZQ5
           EXTRA_PLAYLIST: sources/vAppTV_non_DRM.m3u
           SPORT_PLAYLIST: sources/sport-selected.m3u
           VTVCAP_FALLBACK: sources/vtvcab-on-sports.m3u
+          GOLDEN_TV_FALLBACK: sources/golden-tv-selected.m3u
           EXCLUDED_GROUPS: sources/excluded-groups.txt
           OUTPUT_PLAYLIST: IPTV_Gop_VMTTV_vAppTV.m3u
         run: |
@@ -34,6 +36,11 @@ jobs:
           if ! curl --fail --location --retry 3 --retry-delay 2 "$VTVCAP_URL" --output vtvcab-source.m3u; then
             cp "$VTVCAP_FALLBACK" vtvcab-source.m3u
           fi
+          if curl --fail --location --retry 3 --retry-delay 2 "$GOLDEN_TV_URL" --output golden-tv-source.m3u; then
+            export GOLDEN_TV_SOURCE_READY=1
+          else
+            export GOLDEN_TV_SOURCE_READY=0
+          fi
           python3 - <<'PY'
           import os
           import re
@@ -41,6 +48,7 @@ jobs:
           from pathlib import Path
 
           TARGET_CHANNELS = ["ON SPORTS", "ON SPORTS+", "ON FOOTBALL", "ON SPORTS NEWS"]
+          GOLDEN_TV_GROUPS = ("ga vang tv", "gio vang tv", "phao hoa tv")
 
           def normalize(value):
               decomposed = unicodedata.normalize("NFD", value)
@@ -59,6 +67,30 @@ jobs:
                   name = extinf.rsplit(",", 1)[-1].strip().upper()
                   if "vtvcab" in group and name in TARGET_CHANNELS:
                       entries[name] = "\n".join(current).strip()
+
+              for line in lines:
+                  if line.startswith("#EXTINF:"):
+                      consider()
+                      current = [line]
+                  elif current:
+                      current.append(line)
+              consider()
+              return entries
+
+          def extract_golden_tv_entries(lines):
+              entries = []
+              current = []
+
+              def consider():
+                  if not current:
+                      return
+                  extinf = current[0]
+                  group_match = re.search(r'''group-title=(?:"([^"]*)"|'([^']*)')''', extinf, flags=re.I)
+                  group = normalize((group_match.group(1) or group_match.group(2)) if group_match else "")
+                  if any(name in group for name in GOLDEN_TV_GROUPS):
+                      entry = "\n".join(line for line in current if not line.lstrip().startswith("<")).strip()
+                      if entry:
+                          entries.append(entry)
 
               for line in lines:
                   if line.startswith("#EXTINF:"):
@@ -99,19 +131,24 @@ jobs:
           vtvcab_entries = [fresh_vtvcab.get(name) or fallback_vtvcab.get(name) for name in TARGET_CHANNELS]
           vtvcab_entries = [entry for entry in vtvcab_entries if entry]
 
+          if os.environ.get("GOLDEN_TV_SOURCE_READY") == "1":
+              golden_entries = extract_golden_tv_entries(Path("golden-tv-source.m3u").read_text(encoding="utf-8-sig").splitlines())
+              if golden_entries:
+                  Path(os.environ["GOLDEN_TV_FALLBACK"]).write_text("#EXTM3U\n" + "\n\n".join(golden_entries) + "\n", encoding="utf-8")
+
           merged_sections = ["\n".join(filtered_lines).rstrip(), "\n".join(extra_lines).strip(), "\n\n".join(vtvcab_entries), "\n".join(sport_lines).strip()]
           Path(os.environ["OUTPUT_PLAYLIST"]).write_text("\n\n".join(section for section in merged_sections if section) + "\n", encoding="utf-8")
           PY
 
       - name: Commit an update when needed
         run: |
-          if git diff --quiet -- IPTV_Gop_VMTTV_vAppTV.m3u; then
+          if git diff --quiet -- IPTV_Gop_VMTTV_vAppTV.m3u sources/golden-tv-selected.m3u; then
             echo "Playlist is already up to date."
             exit 0
           fi
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add IPTV_Gop_VMTTV_vAppTV.m3u
-          git commit -m "Update filtered IPTV playlist"
+          git add IPTV_Gop_VMTTV_vAppTV.m3u sources/golden-tv-selected.m3u
+          git commit -m "Update IPTV playlists"
           git push
