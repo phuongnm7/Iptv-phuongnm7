@@ -58,7 +58,7 @@ jobs:
           from pathlib import Path
 
           TARGET_CHANNELS = ["ON SPORTS", "ON SPORTS+", "ON FOOTBALL", "ON SPORTS NEWS"]
-          GOLDEN_TV_GROUPS = ("ga vang tv", "gio vang tv", "phao hoa tv")
+          GOLDEN_TV_GROUPS = ("ga vang tv", "ga vang 33 tv", "gio vang tv", "phao hoa tv")
           UK_FOOTBALL_GROUPS = {
               "uk | sports",
               "live | bundesliga",
