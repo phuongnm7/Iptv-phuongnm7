@@ -155,6 +155,8 @@ https://livevliatmcdw.seenow.vn/live/data8/SKSS1/Live_DASHDRM/SKSS1.mpd
 #KODIPROP:inputstream.adaptive.license_type=clearkey
 #KODIPROP:inputstream.adaptive.license_key=ca0576ec419f490789860894bb50c977:25d2e703eee38718240e7038d1908fef
 https://livevliatmcdw.seenow.vn/live/data8/SKSS2/Live_DASHDRM/SKSS2.mpd
+#EXTINF:-1 group-title="Sự Kiện FPT PLAY" tvg-logo="https://images.fptplay53.net/media/home_event/OTT_ECS/2026/09/09/slide-thumb_1788937100802.jpg", Sự Kiện 2
+https://vips-livecdn.fptplay.net/live/media/su-kien-02/hls_avc_v6/index.m3u8
 #EXTINF:-1 tvg-id="vtv1hd" group-title="VTV" tvg-logo="https://raw.githubusercontent.com/vuminhthanh12/Logo/refs/heads/main/VTV1.jpg", VTV1
 https://vips-livecdn.fptplay.net/live/media/vtv1/live247-hls-avc/vtv1-avc1_5600000=10000-mp4a_131600=20000.m3u8
 #EXTINF:-1 tvg-id="vtv2hd" group-title="VTV" tvg-logo="https://raw.githubusercontent.com/vuminhthanh12/Logo/refs/heads/main/VTV2_ident2026.jpg", VTV2
@@ -323,7 +325,7 @@ https://live.fptplay53.net/fnxhd1/vtv5tnb_vhls.smil/chunklist.m3u8
 #KODIPROP:inputstream.adaptive.manifest_type=dash 
 #KODIPROP:inputstream.adaptive.license_type=clearkey 
 #KODIPROP:inputstream.adaptive.license_key=https://tv.vietanhtv.top/sex/cleankey.php?id=tv360173&token=98b686ba8c65005af1fb96e9671934f3
-https://tv.vietanhtv.top/tv360/tv360.php?id=173&expires=1789081028&token=84d713d78be08bb0245868dfb63d8dbc
+https://tv.vietanhtv.top/tv360/tv360.php?id=173&expires=1789088154&token=ce5d0805cb8ac227948b7d974cb5c368
 
 #EXTINF:-1 tvg-id="onsportsplus" group-title="VTVcab" tvg-logo="https://assets-vtvcab.gviet.vn/images/hq/posters/onsportscongmoi1.jpg", ON SPORTS+ 
 #EXTVLCOPT:http-user-agent=Dalvik/2.1.0
@@ -331,7 +333,7 @@ https://tv.vietanhtv.top/tv360/tv360.php?id=173&expires=1789081028&token=84d713d
 #KODIPROP:inputstream.adaptive.manifest_type=dash 
 #KODIPROP:inputstream.adaptive.license_type=clearkey 
 #KODIPROP:inputstream.adaptive.license_key=https://tv.vietanhtv.top/sex/cleankey.php?id=tv360183&token=98b686ba8c65005af1fb96e9671934f3
-https://tv.vietanhtv.top/tv360/tv360.php?id=183&expires=1789081028&token=56c3ec3a1cb64599b010c8377fb153b4
+https://tv.vietanhtv.top/tv360/tv360.php?id=183&expires=1789088154&token=a0b0ecea621eabe22f5973b723252909
 
 #EXTINF:-1 tvg-id="onfootball" group-title="VTVcab" tvg-logo="https://assets-vtvcab.gviet.vn/images/hq/posters/_ootball_-_opyright_by_cab_logo_202212.jpg", ON FOOTBALL
 #EXTVLCOPT:http-user-agent=Dalvik/2.1.0
@@ -339,7 +341,7 @@ https://tv.vietanhtv.top/tv360/tv360.php?id=183&expires=1789081028&token=56c3ec3
 #KODIPROP:inputstream.adaptive.manifest_type=dash 
 #KODIPROP:inputstream.adaptive.license_type=clearkey 
 #KODIPROP:inputstream.adaptive.license_key=https://tv.vietanhtv.top/sex/cleankey.php?id=tv360174&token=98b686ba8c65005af1fb96e9671934f3
-https://tv.vietanhtv.top/tv360/tv360.php?id=174&expires=1789081028&token=6c9d96ef66db799bde1bc11122d36e2a
+https://tv.vietanhtv.top/tv360/tv360.php?id=174&expires=1789088154&token=ad0d256ed54ccd61be0ecf72900a17d2
 
 #EXTINF:-1 tvg-id="onsportsnews" group-title="VTVcab" tvg-logo="https://assets-vtvcab.gviet.vn/images/v2/channel/20220613/2022061306/Logo_ONSPORTSNEWS_150x904_1675158858.webp", ON SPORTS NEWS 
 #EXTVLCOPT:http-user-agent=Dalvik/2.1.0
@@ -347,7 +349,7 @@ https://tv.vietanhtv.top/tv360/tv360.php?id=174&expires=1789081028&token=6c9d96e
 #KODIPROP:inputstream.adaptive.manifest_type=dash 
 #KODIPROP:inputstream.adaptive.license_type=clearkey 
 #KODIPROP:inputstream.adaptive.license_key=https://tv.vietanhtv.top/sex/cleankey.php?id=tv360170&token=98b686ba8c65005af1fb96e9671934f3
-https://tv.vietanhtv.top/tv360/tv360.php?id=170&expires=1789081028&token=9798f91c3d7a83c0caf8813794f3c00b
+https://tv.vietanhtv.top/tv360/tv360.php?id=170&expires=1789088154&token=50fd2c4378ff003bde5b4c2191e26973
 
 #EXTINF:-1 group-title="┃UK┃ EPL PREMIER LEAGUE TEAMS" tvg-logo="http://picon.tivi-ott.net:25461/picon/UK/UK EPL Premier League TEAMS/MANCHESTER UNITED.png" tvg-id="" tvg-name="┃UK┃ MANCHESTER UNITED F.C (MATCH TIME)" tvg-expire="20/06/2027" gau-status="CHƯA TEST" gau-open="" gau-resolution="" gau-bitrate="" gau-subtitle="CHƯA XÁC ĐỊNH" gau-subtitle-lang="" gau-subtitle-type="",┃UK┃ MANCHESTER UNITED F.C (MATCH TIME)
 http://mag.tivi-one-iptv.net:80/play/live.php?mac=00:1A:79:0E:0F:8E&stream=794966&extension=ts&play_token=QDuVFvG1IG
@@ -979,43 +981,43 @@ http://lordstreams.live:80/live/9857855271/8369553594/826459.ts
 #EXTINF:-1 tvg-id="" tvg-name="Football Event 11ⓧ: UEFA, Champions League | Como 1907 vs. RB Leipzig | Thursday, 10 September 2026 20:00" tvg-logo="http://xplatinmedia.com:8080/images/836b75cfe266fa40acc2ffa3888e1abf.png" group-title="LIVE | Football",Football Event 11ⓧ: UEFA, Champions League | Como 1907 vs. RB Leipzig | Thursday, 10 September 2026 20:00
 http://lordstreams.live:80/live/9857855271/8369553594/826458.ts
 
-#EXTINF:-1 tvg-id="" tvg-name="Football Event 12ⓧ: Netherlands, Eredivisie | FC Twente Enschede vs. SC Telstar | Wednesday, 09 September 2026 17:45" tvg-logo="http://xplatinmedia.com:8080/images/836b75cfe266fa40acc2ffa3888e1abf.png" group-title="LIVE | Football",Football Event 12ⓧ: Netherlands, Eredivisie | FC Twente Enschede vs. SC Telstar | Wednesday, 09 September 2026 17:45
+#EXTINF:-1 tvg-id="" tvg-name="Football Event 12ⓧ: UEFA, Champions League | Manchester United vs. Sabah Masazir | Thursday, 10 September 2026 20:00" tvg-logo="http://xplatinmedia.com:8080/images/836b75cfe266fa40acc2ffa3888e1abf.png" group-title="LIVE | Football",Football Event 12ⓧ: UEFA, Champions League | Manchester United vs. Sabah Masazir | Thursday, 10 September 2026 20:00
 http://lordstreams.live:80/live/9857855271/8369553594/826457.ts
 
-#EXTINF:-1 tvg-id="" tvg-name="Football Event 13ⓧ: UEFA, Champions League | FC Barcelona vs. Feyenoord Rotterdam | Wednesday, 09 September 2026 17:45" tvg-logo="http://xplatinmedia.com:8080/images/836b75cfe266fa40acc2ffa3888e1abf.png" group-title="LIVE | Football",Football Event 13ⓧ: UEFA, Champions League | FC Barcelona vs. Feyenoord Rotterdam | Wednesday, 09 September 2026 17:45
+#EXTINF:-1 tvg-id="" tvg-name="Football Event 13ⓧ: UEFA, Champions League | SK Slavia Prague vs. RC Lens | Thursday, 10 September 2026 20:00" tvg-logo="http://xplatinmedia.com:8080/images/836b75cfe266fa40acc2ffa3888e1abf.png" group-title="LIVE | Football",Football Event 13ⓧ: UEFA, Champions League | SK Slavia Prague vs. RC Lens | Thursday, 10 September 2026 20:00
 http://lordstreams.live:80/live/9857855271/8369553594/826456.ts
 
-#EXTINF:-1 tvg-id="" tvg-name="Football Event 14ⓧ: UEFA, Champions League | VfB Stuttgart vs. Viking FK | Wednesday, 09 September 2026 17:45" tvg-logo="http://xplatinmedia.com:8080/images/836b75cfe266fa40acc2ffa3888e1abf.png" group-title="LIVE | Football",Football Event 14ⓧ: UEFA, Champions League | VfB Stuttgart vs. Viking FK | Wednesday, 09 September 2026 17:45
+#EXTINF:-1 tvg-id="" tvg-name="Football Event 14ⓧ: No Scheduled Event5" tvg-logo="http://xplatinmedia.com:8080/images/836b75cfe266fa40acc2ffa3888e1abf.png" group-title="LIVE | Football",Football Event 14ⓧ: No Scheduled Event5
 http://lordstreams.live:80/live/9857855271/8369553594/826455.ts
 
-#EXTINF:-1 tvg-id="" tvg-name="Football Event 15ⓧ: Montenegro, 1. CFL | FK Decic Tuzi vs. OFK Petrovac | Wednesday, 09 September 2026 18:00" tvg-logo="http://xplatinmedia.com:8080/images/836b75cfe266fa40acc2ffa3888e1abf.png" group-title="LIVE | Football",Football Event 15ⓧ: Montenegro, 1. CFL | FK Decic Tuzi vs. OFK Petrovac | Wednesday, 09 September 2026 18:00
+#EXTINF:-1 tvg-id="" tvg-name="Football Event 15ⓧ: No Scheduled Event" tvg-logo="http://xplatinmedia.com:8080/images/836b75cfe266fa40acc2ffa3888e1abf.png" group-title="LIVE | Football",Football Event 15ⓧ: No Scheduled Event
 http://lordstreams.live:80/live/9857855271/8369553594/826454.ts
 
-#EXTINF:-1 tvg-id="" tvg-name="Football Event 16ⓧ: Sweden, Superettan | Landskrona BoIS vs. Helsingborgs IF | Wednesday, 09 September 2026 18:00" tvg-logo="http://xplatinmedia.com:8080/images/836b75cfe266fa40acc2ffa3888e1abf.png" group-title="LIVE | Football",Football Event 16ⓧ: Sweden, Superettan | Landskrona BoIS vs. Helsingborgs IF | Wednesday, 09 September 2026 18:00
+#EXTINF:-1 tvg-id="" tvg-name="Football Event 16ⓧ: No Scheduled Event" tvg-logo="http://xplatinmedia.com:8080/images/836b75cfe266fa40acc2ffa3888e1abf.png" group-title="LIVE | Football",Football Event 16ⓧ: No Scheduled Event
 http://lordstreams.live:80/live/9857855271/8369553594/826453.ts
 
-#EXTINF:-1 tvg-id="" tvg-name="Football Event 17ⓧ: Saudi Arabia, Saudi Professional League | Al Nassr FC vs. Abha Club | Wednesday, 09 September 2026 19:00" tvg-logo="http://xplatinmedia.com:8080/images/836b75cfe266fa40acc2ffa3888e1abf.png" group-title="LIVE | Football",Football Event 17ⓧ: Saudi Arabia, Saudi Professional League | Al Nassr FC vs. Abha Club | Wednesday, 09 September 2026 19:00
+#EXTINF:-1 tvg-id="" tvg-name="Football Event 17ⓧ: No Scheduled Event" tvg-logo="http://xplatinmedia.com:8080/images/836b75cfe266fa40acc2ffa3888e1abf.png" group-title="LIVE | Football",Football Event 17ⓧ: No Scheduled Event
 http://lordstreams.live:80/live/9857855271/8369553594/826452.ts
 
-#EXTINF:-1 tvg-id="" tvg-name="Football Event 18ⓧ: England, EFL Cup | Everton FC vs. Wolverhampton Wanderers | Wednesday, 09 September 2026 19:45" tvg-logo="http://xplatinmedia.com:8080/images/836b75cfe266fa40acc2ffa3888e1abf.png" group-title="LIVE | Football",Football Event 18ⓧ: England, EFL Cup | Everton FC vs. Wolverhampton Wanderers | Wednesday, 09 September 2026 19:45
+#EXTINF:-1 tvg-id="" tvg-name="Football Event 18ⓧ: No Scheduled Event" tvg-logo="http://xplatinmedia.com:8080/images/836b75cfe266fa40acc2ffa3888e1abf.png" group-title="LIVE | Football",Football Event 18ⓧ: No Scheduled Event
 http://lordstreams.live:80/live/9857855271/8369553594/826451.ts
 
-#EXTINF:-1 tvg-id="" tvg-name="Football Event 19ⓧ: England, EFL Cup | Chelsea FC vs. Leeds United | Wednesday, 09 September 2026 20:00" tvg-logo="http://xplatinmedia.com:8080/images/836b75cfe266fa40acc2ffa3888e1abf.png" group-title="LIVE | Football",Football Event 19ⓧ: England, EFL Cup | Chelsea FC vs. Leeds United | Wednesday, 09 September 2026 20:00
+#EXTINF:-1 tvg-id="" tvg-name="Football Event 19ⓧ: No Scheduled Event" tvg-logo="http://xplatinmedia.com:8080/images/836b75cfe266fa40acc2ffa3888e1abf.png" group-title="LIVE | Football",Football Event 19ⓧ: No Scheduled Event
 http://lordstreams.live:80/live/9857855271/8369553594/826450.ts
 
-#EXTINF:-1 tvg-id="" tvg-name="Football Event 20ⓧ: UEFA, Champions League | Sporting Lisbon vs. Galatasaray Istanbul | Wednesday, 09 September 2026 20:00" tvg-logo="http://xplatinmedia.com:8080/images/836b75cfe266fa40acc2ffa3888e1abf.png" group-title="LIVE | Football",Football Event 20ⓧ: UEFA, Champions League | Sporting Lisbon vs. Galatasaray Istanbul | Wednesday, 09 September 2026 20:00
+#EXTINF:-1 tvg-id="" tvg-name="Football Event 20ⓧ: No Scheduled Event" tvg-logo="http://xplatinmedia.com:8080/images/836b75cfe266fa40acc2ffa3888e1abf.png" group-title="LIVE | Football",Football Event 20ⓧ: No Scheduled Event
 http://lordstreams.live:80/live/9857855271/8369553594/826449.ts
 
-#EXTINF:-1 tvg-id="" tvg-name="Football Event 21ⓧ: UEFA, Champions League | Paris Saint-Germain vs. SK Slovan Bratislava | Wednesday, 09 September 2026 20:00" tvg-logo="http://xplatinmedia.com:8080/images/836b75cfe266fa40acc2ffa3888e1abf.png" group-title="LIVE | Football",Football Event 21ⓧ: UEFA, Champions League | Paris Saint-Germain vs. SK Slovan Bratislava | Wednesday, 09 September 2026 20:00
+#EXTINF:-1 tvg-id="" tvg-name="Football Event 21ⓧ: No Scheduled Event" tvg-logo="http://xplatinmedia.com:8080/images/836b75cfe266fa40acc2ffa3888e1abf.png" group-title="LIVE | Football",Football Event 21ⓧ: No Scheduled Event
 http://lordstreams.live:80/live/9857855271/8369553594/826448.ts
 
-#EXTINF:-1 tvg-id="" tvg-name="Football Event 22ⓧ: UEFA, Champions League | SSC Napoli vs. Arsenal FC | Wednesday, 09 September 2026 20:00" tvg-logo="http://xplatinmedia.com:8080/images/836b75cfe266fa40acc2ffa3888e1abf.png" group-title="LIVE | Football",Football Event 22ⓧ: UEFA, Champions League | SSC Napoli vs. Arsenal FC | Wednesday, 09 September 2026 20:00
+#EXTINF:-1 tvg-id="" tvg-name="Football Event 22ⓧ: No Scheduled Event" tvg-logo="http://xplatinmedia.com:8080/images/836b75cfe266fa40acc2ffa3888e1abf.png" group-title="LIVE | Football",Football Event 22ⓧ: No Scheduled Event
 http://lordstreams.live:80/live/9857855271/8369553594/826447.ts
 
-#EXTINF:-1 tvg-id="" tvg-name="Football Event 23ⓧ: UEFA, Champions League | Liverpool FC vs. Atletico Madrid | Wednesday, 09 September 2026 20:00" tvg-logo="http://xplatinmedia.com:8080/images/836b75cfe266fa40acc2ffa3888e1abf.png" group-title="LIVE | Football",Football Event 23ⓧ: UEFA, Champions League | Liverpool FC vs. Atletico Madrid | Wednesday, 09 September 2026 20:00
+#EXTINF:-1 tvg-id="" tvg-name="Football Event 23ⓧ: No Scheduled Event" tvg-logo="http://xplatinmedia.com:8080/images/836b75cfe266fa40acc2ffa3888e1abf.png" group-title="LIVE | Football",Football Event 23ⓧ: No Scheduled Event
 http://lordstreams.live:80/live/9857855271/8369553594/826446.ts
 
-#EXTINF:-1 tvg-id="" tvg-name="Football Event 24ⓧ: Portugal, Primeira Liga | Moreirense FC vs. Benfica Lisbon | Wednesday, 09 September 2026 20:45" tvg-logo="http://xplatinmedia.com:8080/images/836b75cfe266fa40acc2ffa3888e1abf.png" group-title="LIVE | Football",Football Event 24ⓧ: Portugal, Primeira Liga | Moreirense FC vs. Benfica Lisbon | Wednesday, 09 September 2026 20:45
+#EXTINF:-1 tvg-id="" tvg-name="Football Event 24ⓧ: No Scheduled Event" tvg-logo="http://xplatinmedia.com:8080/images/836b75cfe266fa40acc2ffa3888e1abf.png" group-title="LIVE | Football",Football Event 24ⓧ: No Scheduled Event
 http://lordstreams.live:80/live/9857855271/8369553594/826445.ts
 
 #EXTINF:-1 tvg-id="" tvg-name="Football Event 25ⓧ: No Scheduled Event" tvg-logo="http://xplatinmedia.com:8080/images/836b75cfe266fa40acc2ffa3888e1abf.png" group-title="LIVE | Football",Football Event 25ⓧ: No Scheduled Event
