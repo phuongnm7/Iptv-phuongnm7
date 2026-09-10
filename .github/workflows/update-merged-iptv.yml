@@ -61,15 +61,8 @@ jobs:
           GOLDEN_TV_GROUPS = ("ga vang tv", "ga vang 33 tv", "gio vang tv", "phao hoa tv")
           UK_FOOTBALL_GROUPS = {
               "uk | sports",
-              "live | bundesliga",
-              "live | epl",
-              "live | football",
-              "live | ligue 1",
               "live | laliga",
-              "live | now hk",
-              "live | premier league+",
               "live | serie a",
-              "live | saudi pro league",
           }
 
           def normalize(value):
