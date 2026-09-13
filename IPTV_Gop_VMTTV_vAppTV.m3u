@@ -114,7 +114,6 @@ https://vmttv.dpdns.org/tv360/?id=tv360-15
 #EXTINF:-1 group-title="Sự Kiện TV360" tvg-logo="https://img-zlr1.tv360.vn/image1/2025/09/17/17/175810574912/a5f8181388ab_640_360.png", TV360 Promo
 #EXTVLCOPT:http-user-agent=Dalvik/2.1.0
 https://freem3u.xyz/api/live/play.m3u8?vid=9904
-#EXTINF:-1
 #EXTINF:-1 group-title="Sự Kiện VTVPrime" tvg-logo="https://vtvprime.vn/sideLogoBig.png", VTVPrime 1
 #EXTVLCOPT:http-user-agent=Dalvik/2.1.0
 #KODIPROP:inputstream.adaptive.manifest_type=mpd
@@ -187,8 +186,6 @@ https://livevliatmcdw.seenow.vn/live/data8/SKSS1/Live_DASHDRM/SKSS1.mpd
 #KODIPROP:inputstream.adaptive.license_type=clearkey
 #KODIPROP:inputstream.adaptive.license_key=ca0576ec419f490789860894bb50c977:25d2e703eee38718240e7038d1908fef
 https://livevliatmcdw.seenow.vn/live/data8/SKSS2/Live_DASHDRM/SKSS2.mpd
-#EXTINF:-1 group-title="Sự Kiện FPT PLAY" tvg-logo="https://images.fptplay53.net/media/home_event/OTT_ECS/2026/09/09/slide-thumb_1788937905293.jpg", Event 2
-https://vips-livecdn.fptplay.net/live/media/event-02/hls_avc_v6/index.m3u8
 #EXTINF:-1 group-title="Sự Kiện FPT PLAY" tvg-logo="https://images.fptplay53.net/media/home_event/OTT_ECS/2026/09/11/finals_1789067492144.jpg", FC Online Vietnam Pro League 2026 - Chung Kết (4K)
 https://vips-livecdn.fptplay.net/live/media/event-02-4k/dash_hvc/index.mpd
 #EXTINF:-1 group-title="Sự Kiện FPT PLAY" tvg-logo="https://images.fptplay53.net/media/home_event/OTT_ECS/2026/09/11/finals_1789067492144.jpg", FC Online Vietnam Pro League 2026 - Chung Kết (FHD)
@@ -375,7 +372,7 @@ https://live.fptplay53.net/fnxhd1/vtv5tnb_vhls.smil/chunklist.m3u8
 #KODIPROP:inputstream.adaptive.manifest_type=dash 
 #KODIPROP:inputstream.adaptive.license_type=clearkey 
 #KODIPROP:inputstream.adaptive.license_key=https://tv.vietanhtv.top/sex/cleankey.php?id=tv360173&token=df5c6d6633b8f2170492cf18092b174d
-https://tv.vietanhtv.top/tv360/tv360.php?id=173&expires=1789383204&token=a0ed3df932990a90b497b65d5d8961f5
+https://tv.vietanhtv.top/tv360/tv360.php?id=173&expires=1789386874&token=07995452ee59191d93e0f4a1f37b8ce0
 
 #EXTINF:-1 tvg-id="onsportsplus" group-title="VTVcab" tvg-logo="https://assets-vtvcab.gviet.vn/images/hq/posters/onsportscongmoi1.jpg", ON SPORTS+ 
 #EXTVLCOPT:http-user-agent=Dalvik/2.1.0
@@ -383,7 +380,7 @@ https://tv.vietanhtv.top/tv360/tv360.php?id=173&expires=1789383204&token=a0ed3df
 #KODIPROP:inputstream.adaptive.manifest_type=dash 
 #KODIPROP:inputstream.adaptive.license_type=clearkey 
 #KODIPROP:inputstream.adaptive.license_key=https://tv.vietanhtv.top/sex/cleankey.php?id=tv360183&token=df5c6d6633b8f2170492cf18092b174d
-https://tv.vietanhtv.top/tv360/tv360.php?id=183&expires=1789383204&token=e6da4229786c3a2ad6e06ec1b741a464
+https://tv.vietanhtv.top/tv360/tv360.php?id=183&expires=1789386874&token=65bbabd4eb59b5a22372646742db0140
 
 #EXTINF:-1 tvg-id="onfootball" group-title="VTVcab" tvg-logo="https://assets-vtvcab.gviet.vn/images/hq/posters/_ootball_-_opyright_by_cab_logo_202212.jpg", ON FOOTBALL
 #EXTVLCOPT:http-user-agent=Dalvik/2.1.0
@@ -391,7 +388,7 @@ https://tv.vietanhtv.top/tv360/tv360.php?id=183&expires=1789383204&token=e6da422
 #KODIPROP:inputstream.adaptive.manifest_type=dash 
 #KODIPROP:inputstream.adaptive.license_type=clearkey 
 #KODIPROP:inputstream.adaptive.license_key=https://tv.vietanhtv.top/sex/cleankey.php?id=tv360174&token=df5c6d6633b8f2170492cf18092b174d
-https://tv.vietanhtv.top/tv360/tv360.php?id=174&expires=1789383204&token=282c35a98f014653357e41ae936b1534
+https://tv.vietanhtv.top/tv360/tv360.php?id=174&expires=1789386874&token=9f958e8e5dad778839d5c7f21b2396b1
 
 #EXTINF:-1 tvg-id="onsportsnews" group-title="VTVcab" tvg-logo="https://assets-vtvcab.gviet.vn/images/v2/channel/20220613/2022061306/Logo_ONSPORTSNEWS_150x904_1675158858.webp", ON SPORTS NEWS 
 #EXTVLCOPT:http-user-agent=Dalvik/2.1.0
@@ -399,7 +396,7 @@ https://tv.vietanhtv.top/tv360/tv360.php?id=174&expires=1789383204&token=282c35a
 #KODIPROP:inputstream.adaptive.manifest_type=dash 
 #KODIPROP:inputstream.adaptive.license_type=clearkey 
 #KODIPROP:inputstream.adaptive.license_key=https://tv.vietanhtv.top/sex/cleankey.php?id=tv360170&token=df5c6d6633b8f2170492cf18092b174d
-https://tv.vietanhtv.top/tv360/tv360.php?id=170&expires=1789383204&token=8d95441c46558679eed64540f266f6af
+https://tv.vietanhtv.top/tv360/tv360.php?id=170&expires=1789386874&token=d97d7cdadf2093daf08946decfefece7
 
 #EXTINF:-1 group-title="┃UK┃ EPL PREMIER LEAGUE TEAMS" tvg-logo="http://picon.tivi-ott.net:25461/picon/UK/UK EPL Premier League TEAMS/MANCHESTER UNITED.png" tvg-id="" tvg-name="┃UK┃ MANCHESTER UNITED F.C (MATCH TIME)" tvg-expire="20/06/2027" gau-status="CHƯA TEST" gau-open="" gau-resolution="" gau-bitrate="" gau-subtitle="CHƯA XÁC ĐỊNH" gau-subtitle-lang="" gau-subtitle-type="",┃UK┃ MANCHESTER UNITED F.C (MATCH TIME)
 http://mag.tivi-one-iptv.net:80/play/live.php?mac=00:1A:79:0E:0F:8E&stream=794966&extension=ts&play_token=QDuVFvG1IG
