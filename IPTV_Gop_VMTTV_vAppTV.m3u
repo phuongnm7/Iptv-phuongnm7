@@ -30,8 +30,12 @@ https://tglmp03.akamaized.net/out/v1/926637c1aba44cffa74adc74bf786816/manifest.m
 #KODIPROP:inputstream.adaptive.license_type=clearkey
 #KODIPROP:inputstream.adaptive.license_key=f33acf338ec946fd921a85f870636399:a6c1a2e81fe941a9e2efd2bcad0d1532
 https://tglmp01.akamaized.net/out/v1/d43dbc5da1334ec088ed9eb5796eee7c/manifest.mpd
-#EXTINF:-1 group-title="Asian Games Aichi-Nagoya 2026" tvg-logo="https://turanews.kz/wp-content/uploads/2025/07/r2hnnhtmmwlpewv2lenia9v2orbntsguxssmaj4h.webp", Nữ Trung Quốc vs Nữ Uzbekistan (Bảng G môn bóng đá nữ Asiad 20)
-https://live2.zundrixmediapipeline.com/live/channel4.m3u8
+#EXTINF:-1 group-title="Asian Games Aichi-Nagoya 2026" tvg-logo="https://turanews.kz/wp-content/uploads/2025/07/r2hnnhtmmwlpewv2lenia9v2orbntsguxssmaj4h.webp", Nữ Hồng Kông vs Nữ Philippines (Bảng G môn bóng đá nữ Asiad 20)
+https://live2.zundrixmediapipeline.com/live/channel12.m3u8
+#EXTINF:-1 group-title="Asian Games Aichi-Nagoya 2026" tvg-logo="https://turanews.kz/wp-content/uploads/2025/07/r2hnnhtmmwlpewv2lenia9v2orbntsguxssmaj4h.webp", Nữ Việt Nam vs Nữ Nhật Bản (Bảng E môn bóng đá nữ Asiad 20)
+https://live2.domaincdn.cc/livecdn/channel-1.m3u8?auth_key=3000001789640459-0-0-9d2360e7007df4bf728ce7e48589f20e
+#EXTINF:-1 group-title="Asian Games Aichi-Nagoya 2026" tvg-logo="https://turanews.kz/wp-content/uploads/2025/07/r2hnnhtmmwlpewv2lenia9v2orbntsguxssmaj4h.webp", Nữ Myanmar vs Nữ CHDCND Triều Tiên (Bảng F môn bóng đá nữ Asiad 20)
+https://live2.zundrixmediapipeline.com/live/channel21.m3u8
 #EXTINF:-1 tvg-id="tv360plus1" group-title="Sự Kiện TV360" tvg-logo="https://img-zlr1.tv360.vn/image1/2026/04/15/22/1776266760359/ba1ca843cd06_480_270.png", TV360+1
 #EXTVLCOPT:http-user-agent=Dalvik/2.1.0
 #KODIPROP:inputstream.adaptive.manifest_type=mpd
@@ -188,6 +192,10 @@ https://livevliatmcdw.seenow.vn/live/data8/SKSS1/Live_DASHDRM/SKSS1.mpd
 #KODIPROP:inputstream.adaptive.license_type=clearkey
 #KODIPROP:inputstream.adaptive.license_key=ca0576ec419f490789860894bb50c977:25d2e703eee38718240e7038d1908fef
 https://livevliatmcdw.seenow.vn/live/data8/SKSS2/Live_DASHDRM/SKSS2.mpd
+#EXTINF:-1 group-title="Sự Kiện FPT PLAY" tvg-logo="https://images.fptplay53.net/media/home_event/OTT_ECS/2026/09/16/17_1789574971941.jpg", Event 5
+https://vips-livecdn.fptplay.net/live/media/event-05/hls_avc_v6/index.m3u8
+#EXTINF:-1 group-title="Sự Kiện FPT PLAY" tvg-logo="https://images.fptplay53.net/media/home_event/OTT_ECS/2026/09/16/slide-thumb_1789542887989.jpg", Sự Kiện 2
+https://vips-livecdn.fptplay.net/live/media/su-kien-02/hls_avc_v6/index.m3u8
 #EXTINF:-1 tvg-id="vtv1hd" group-title="VTV" tvg-logo="https://raw.githubusercontent.com/vuminhthanh12/Logo/refs/heads/main/VTV1.jpg", VTV1
 https://vips-livecdn.fptplay.net/live/media/vtv1/live247-hls-avc/vtv1-avc1_5600000=10000-mp4a_131600=20000.m3u8
 #EXTINF:-1 tvg-id="vtv2hd" group-title="VTV" tvg-logo="https://raw.githubusercontent.com/vuminhthanh12/Logo/refs/heads/main/VTV2_ident2026.jpg", VTV2
@@ -208,10 +216,10 @@ https://vips-livecdn.fptplay.net/live/media/vtv5tn/live-hls-avc/vtv5tn-avc1_4000
 #EXTINF:-1 tvg-id="vtv6hd" group-title="VTV" tvg-logo="https://raw.githubusercontent.com/vuminhthanh12/Logo/refs/heads/main/VTV6_logo2026.jpg", VTV6
 https://vips-livecdn.fptplay.net/live/media/vtv6/live247-hls-avc/vtv6-avc1_5600000=10000-mp4a_140800_vie=20000.m3u8
 #EXTINF:-1 tvg-id="vtv7hd" group-title="VTV" tvg-logo="https://raw.githubusercontent.com/vuminhthanh12/Logo/refs/heads/main/VTV7_logo2026.jpg", VTV7
-https://vips-livecdn.fptplay.net/live/media/vtv7/live247-hls-avc/vtv7-avc1_5600000=10000-mp4a_140800_vie=20000.m3u8
+https://vmttv.dpdns.org/tv360/?id=vtv7-hd
 #EXTINF:-1 tvg-id="vtv8hd" group-title="VTV" tvg-logo="https://raw.githubusercontent.com/vuminhthanh12/Logo/refs/heads/main/VTV8.jpg" catchup="default" catchup-days="2", VTV8
 https://vips-livecdn.fptplay.net/live/media/vtv8/live-hls-avc/vtv8-avc1_4000000=10000-mp4a_131600=20000.m3u8
-#EXTINF:-1 tvg-id="vtv9hd" group-title="VTV" tvg-logo="https://raw.githubusercontent.com/vuminhthanh12/Logo/refs/heads/main/VTV9.png" catchup="default" catchup-days="2" catchup-source="http://sv.cvtv.xyz:3000/mytvod.m3u8?id=381&time=${start}&offset=${duration}", VTV9
+#EXTINF:-1 tvg-id="vtv9hd" group-title="VTV" tvg-logo="1", VTV9
 https://vips-livecdn.fptplay.net/live/media/vtv9/live247-hls-avc/vtv9-avc1_5600000=10000-mp4a_131600=20000.m3u8
 #EXTINF:-1 tvg-id="vtv10hd" group-title="VTV" tvg-logo="https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/VTV10.png", VTV10
 https://vips-livecdn.fptplay.net/live/media/vtv10/live247-hls-avc/vtv10-avc1_5600000=10000-mp4a_131600=20000.m3u8
@@ -396,24 +404,34 @@ https://live2.zktsva.app/live/294335.flv
 #EXTINF:-1 group-title="🔴 ⚽ GÀ VÀNG 33 SV2" tvg-logo="https://raw.githubusercontent.com/quanlehong539/VTC-Now/refs/heads/main/GaVang33_logo.png", BLV Gà Siêu Son
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36
 https://live2.zktsva.app/live/306290.flv
-#EXTINF:-1 group-title="🔴 ⚽ KHÔ GÀ TV" tvg-logo="https://khoga.live/images/logo-220.webp", BLV Chè
+
+#EXTINF:-1 group-title="🔴 ⚽ 🏐 KHÁN ĐÀI TV" tvg-logo="https://khandai1.link/images/logo-220.webp", BLV Chim Nhỏ
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36
-https://livecdn.cdnfastter.xyz/live/livehub5/index.m3u8
-#EXTINF:-1 group-title="🔴 ⚽ KHÔ GÀ TV" tvg-logo="https://khoga.live/images/logo-220.webp", BLV Gà Rừng
+https://luong.phaohoa.live/live/phaohoa5/index.m3u8
+#EXTINF:-1 group-title="🔴 ⚽ 🏐 KHÁN ĐÀI TV" tvg-logo="https://khandai1.link/images/logo-220.webp", BLV Enzo
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36
-https://livecdn.cdnfastter.xyz/live/livehub4/index.m3u8
-#EXTINF:-1 group-title="🔴 ⚽ KHÔ GÀ TV" tvg-logo="https://khoga.live/images/logo-220.webp", BLV Kaka
+https://luong.phaohoa.live/live/phaohoa2/index.m3u8
+#EXTINF:-1 group-title="🔴 ⚽ 🏐 KHÁN ĐÀI TV" tvg-logo="https://khandai1.link/images/logo-220.webp", BLV Famy
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36
-https://livecdn.cdnfastter.xyz/live/livehub3/index.m3u8
-#EXTINF:-1 group-title="🔴 ⚽ KHÔ GÀ TV" tvg-logo="https://khoga.live/images/logo-220.webp", BLV Khô Cay
+https://luong.phaohoa.live/live/phaohoa6/index.m3u8
+#EXTINF:-1 group-title="🔴 ⚽ 🏐 KHÁN ĐÀI TV" tvg-logo="https://khandai1.link/images/logo-220.webp", BLV Người Kiến
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36
-https://livecdn.cdnfastter.xyz/live/livehub9/index.m3u8
-#EXTINF:-1 group-title="🔴 ⚽ KHÔ GÀ TV" tvg-logo="https://khoga.live/images/logo-220.webp", BLV Tam Mao
+https://luong.phaohoa.live/live/phaohoa1/index.m3u8
+#EXTINF:-1 group-title="🔴 ⚽ 🏐 KHÁN ĐÀI TV" tvg-logo="https://khandai1.link/images/logo-220.webp", BLV KaKa
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36
-https://livecdn.cdnfastter.xyz/live/livehub8/index.m3u8
-#EXTINF:-1 group-title="🔴 ⚽ KHÔ GÀ TV" tvg-logo="https://khoga.live/images/logo-220.webp", BLV Văn Tài
+https://luong.phaohoa.live/live/phaohoa7/index.m3u8
+#EXTINF:-1 group-title="🔴 ⚽ 🏐 KHÁN ĐÀI TV" tvg-logo="https://khandai1.link/images/logo-220.webp", BLV Pháo Thủ
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36
-https://livecdn.cdnfastter.xyz/live/livehub7/index.m3u8
+https://luong.phaohoa.live/live/phaohoa4/index.m3u8
+#EXTINF:-1 group-title="🔴 ⚽ 🏐 KHÁN ĐÀI TV" tvg-logo="https://khandai1.link/images/logo-220.webp", BLV Tày
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36
+https://luong.phaohoa.live/live/phaohoa8/index.m3u8
+#EXTINF:-1 group-title="🔴 ⚽ 🏐 KHÁN ĐÀI TV" tvg-logo="https://khandai1.link/images/logo-220.webp", BLV Tiểu Mây
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36
+https://luong.phaohoa.live/live/phaohoa9/index.m3u8
+#EXTINF:-1 group-title="🔴 ⚽ 🏐 KHÁN ĐÀI TV" tvg-logo="https://khandai1.link/images/logo-220.webp", BLV Văn Minh
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36
+https://luong.phaohoa.live/live/phaohoa3/index.m3u8
 
 #EXTINF:-1 tvg-id="VTV1.vn" group-title="Truyền hình Việt Nam",VTV1 HD
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
@@ -437,7 +455,7 @@ https://live.fptplay53.net/fnxhd1/vtv5tnb_vhls.smil/chunklist.m3u8
 #KODIPROP:inputstream.adaptive.manifest_type=dash 
 #KODIPROP:inputstream.adaptive.license_type=clearkey 
 #KODIPROP:inputstream.adaptive.license_key=https://tv.vietanhtv.top/sex/cleankey.php?id=tv360173&token=17eb47346a7811ebd64a4dedd0cba445
-https://tv.vietanhtv.top/tv360/tv360.php?id=173&expires=1789710431&token=5bd77fc579f6110ff1f8bbebc767308d
+https://tv.vietanhtv.top/tv360/tv360.php?id=173&expires=1789729399&token=d40293f8854ed1e4794b9ed39d8b3b7a
 
 #EXTINF:-1 tvg-id="onsportsplus" group-title="VTVcab" tvg-logo="https://assets-vtvcab.gviet.vn/images/hq/posters/onsportscongmoi1.jpg", ON SPORTS+ 
 #EXTVLCOPT:http-user-agent=Dalvik/2.1.0
@@ -445,7 +463,7 @@ https://tv.vietanhtv.top/tv360/tv360.php?id=173&expires=1789710431&token=5bd77fc
 #KODIPROP:inputstream.adaptive.manifest_type=dash 
 #KODIPROP:inputstream.adaptive.license_type=clearkey 
 #KODIPROP:inputstream.adaptive.license_key=https://tv.vietanhtv.top/sex/cleankey.php?id=tv360183&token=17eb47346a7811ebd64a4dedd0cba445
-https://tv.vietanhtv.top/tv360/tv360.php?id=183&expires=1789710431&token=bee202b618199801e9d47b507c37ffdb
+https://tv.vietanhtv.top/tv360/tv360.php?id=183&expires=1789729399&token=450354369443ca9a017e444f5070f9f3
 
 #EXTINF:-1 tvg-id="onfootball" group-title="VTVcab" tvg-logo="https://assets-vtvcab.gviet.vn/images/hq/posters/_ootball_-_opyright_by_cab_logo_202212.jpg", ON FOOTBALL
 #EXTVLCOPT:http-user-agent=Dalvik/2.1.0
@@ -453,7 +471,7 @@ https://tv.vietanhtv.top/tv360/tv360.php?id=183&expires=1789710431&token=bee202b
 #KODIPROP:inputstream.adaptive.manifest_type=dash 
 #KODIPROP:inputstream.adaptive.license_type=clearkey 
 #KODIPROP:inputstream.adaptive.license_key=https://tv.vietanhtv.top/sex/cleankey.php?id=tv360174&token=17eb47346a7811ebd64a4dedd0cba445
-https://tv.vietanhtv.top/tv360/tv360.php?id=174&expires=1789710431&token=9f4f351f8e93a11bf5a0e81bbd7855bc
+https://tv.vietanhtv.top/tv360/tv360.php?id=174&expires=1789729399&token=e11747a73ff6563c9de5da1cbce7e178
 
 #EXTINF:-1 tvg-id="onsportsnews" group-title="VTVcab" tvg-logo="https://assets-vtvcab.gviet.vn/images/v2/channel/20220613/2022061306/Logo_ONSPORTSNEWS_150x904_1675158858.webp", ON SPORTS NEWS 
 #EXTVLCOPT:http-user-agent=Dalvik/2.1.0
@@ -461,7 +479,7 @@ https://tv.vietanhtv.top/tv360/tv360.php?id=174&expires=1789710431&token=9f4f351
 #KODIPROP:inputstream.adaptive.manifest_type=dash 
 #KODIPROP:inputstream.adaptive.license_type=clearkey 
 #KODIPROP:inputstream.adaptive.license_key=https://tv.vietanhtv.top/sex/cleankey.php?id=tv360170&token=17eb47346a7811ebd64a4dedd0cba445
-https://tv.vietanhtv.top/tv360/tv360.php?id=170&expires=1789710431&token=0243006f5703193608244fe00b5af110
+https://tv.vietanhtv.top/tv360/tv360.php?id=170&expires=1789729399&token=bf62bbbdef41718614cc73c540d8772c
 
 #EXTINF:-1 group-title="┃UK┃ EPL PREMIER LEAGUE TEAMS" tvg-logo="http://picon.tivi-ott.net:25461/picon/UK/UK EPL Premier League TEAMS/MANCHESTER UNITED.png" tvg-id="" tvg-name="┃UK┃ MANCHESTER UNITED F.C (MATCH TIME)" tvg-expire="20/06/2027" gau-status="CHƯA TEST" gau-open="" gau-resolution="" gau-bitrate="" gau-subtitle="CHƯA XÁC ĐỊNH" gau-subtitle-lang="" gau-subtitle-type="",┃UK┃ MANCHESTER UNITED F.C (MATCH TIME)
 http://mag.tivi-one-iptv.net:80/play/live.php?mac=00:1A:79:0E:0F:8E&stream=794966&extension=ts&play_token=QDuVFvG1IG
