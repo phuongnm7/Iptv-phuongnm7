@@ -1,4 +1,4 @@
-name: Update sports auto playlist
+name: Update sports auto playlist (multi-source)
 
 on:
   push:
@@ -22,59 +22,85 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Fetch upstream sports playlist
+      - name: Fetch available sources
         run: |
-          set -euo pipefail
-          curl -L --fail --retry 3 --retry-delay 2 --max-time 60             -A 'Mozilla/5.0 NM7-IPTV-Sports/1.0'             -H 'Cache-Control: no-cache'             'https://thcoban.github.io/thtt/tttt.m3u'             -o /tmp/upstream.m3u
-          grep -qi '#EXTINF' /tmp/upstream.m3u
+          set +e
+          fetch() {
+            name="$1"
+            url="$2"
+            echo "Fetching $name"
+            curl -L --fail --retry 3 --retry-delay 2 --max-time 60 \
+              -A 'Mozilla/5.0 NM7-IPTV-Sports/2.0' \
+              -H 'Cache-Control: no-cache' "$url" -o "/tmp/$name.m3u"
+            rc=$?
+            if [ $rc -eq 0 ] && grep -qi '#EXTINF' "/tmp/$name.m3u"; then
+              echo "SOURCE_${name}=1" >> "$GITHUB_ENV"
+              echo "$name: OK"
+            else
+              echo "SOURCE_${name}=0" >> "$GITHUB_ENV"
+              rm -f "/tmp/$name.m3u"
+              echo "$name: unavailable"
+            fi
+          }
+          fetch A 'https://thcoban.github.io/thtt/tttt.m3u'
+          fetch B 'https://tinyurl.com/ttthethao2'
+          if [ -s "sources/golden-tv-selected.m3u" ] && grep -qi '#EXTINF' "sources/golden-tv-selected.m3u"; then
+            echo 'SOURCE_C=1' >> "$GITHUB_ENV"
+          else
+            echo 'SOURCE_C=0' >> "$GITHUB_ENV"
+          fi
 
-      - name: Build sports-only playlist
+      - name: Build resilient sports playlist
         run: |
           python3 - <<'PY'
+          import os, re
           from pathlib import Path
-          import re
-
-          src=Path('/tmp/upstream.m3u').read_text(encoding='utf-8',errors='ignore').replace('\r','')
-          groups={
-            'Vua Sân Cỏ TV','Khán Đài TV','Cola TV','Gà Vàng TV',
-            'Xôi Lạc Z TV','Gà Vàng 33 TV','S8 TV','Sao Kê TV',
-            'Bia Ôm TV','Chuối Chiên TV','Giờ Vàng TV','Socolive TV'
-          }
-
-          blocks=re.split(r'(?=#EXTINF\s*:)',src)
-          out=['#EXTM3U']
-          seen=set()
-
-          for block in blocks:
-              if not re.match(r'\s*#EXTINF\s*:',block,re.I):
-                  continue
-              gm=re.search(r'group-title="([^"]+)"',block,re.I)
-              if not gm or gm.group(1).strip() not in groups:
-                  continue
-
+          GROUPS={'Vua Sân Cỏ TV','Khán Đài TV','Cola TV','Gà Vàng TV','Xôi Lạc Z TV','Gà Vàng 33 TV','S8 TV','Sao Kê TV','Bia Ôm TV','Chuối Chiên TV','Giờ Vàng TV','Socolive TV'}
+          def blocks(text):
+              return [b for b in re.split(r'(?=#EXTINF\s*:)',text.replace('\r','')) if re.match(r'\s*#EXTINF\s*:',b,re.I)]
+          def usable(block):
               lines=[x.strip() for x in block.splitlines() if x.strip()]
               urls=[x for x in lines if re.match(r'^https?://',x,re.I)]
-              if not urls:
-                  continue
-
-              # Reject explicit unavailable entries such as "None".
-              if any(x.strip().lower() == 'none' for x in urls):
-                  continue
-
-              url=urls[0]
-              idx=lines.index(url)
-              item='\n'.join(lines[:idx+1])
-
-              if item in seen:
-                  continue
-              seen.add(item)
-              out.append(item)
-
-          if len(out) <= 1:
-              raise SystemExit('No playable sports entries found; refusing to overwrite output')
-
-          Path('sports-auto.m3u').write_text('\n'.join(out)+'\n',encoding='utf-8')
-          print('sports entries:',len(out)-1)
+              if not urls or any(x.lower()=='none' for x in urls): return None
+              return '\n'.join(lines[:lines.index(urls[0])+1])
+          def group_of(item):
+              m=re.search(r'group-title="([^"]+)"',item,re.I); return m.group(1).strip() if m else ''
+          def key_of(item):
+              ext=item.splitlines()[0]; name=ext.rsplit(',',1)[-1].strip() if ',' in ext else ext
+              return (group_of(item).casefold(),re.sub(r'\s+',' ',name).casefold())
+          out=[]; seen=set(); counts=[]
+          def add_file(path,label):
+              p=Path(path)
+              if not p.exists(): return 0
+              added=0
+              for b in blocks(p.read_text(encoding='utf-8',errors='ignore')):
+                  if group_of(b) not in GROUPS: continue
+                  item=usable(b)
+                  if not item: continue
+                  k=key_of(item)
+                  if k in seen: continue
+                  seen.add(k); out.append(item); added+=1
+              counts.append((label,added)); return added
+          if os.getenv('SOURCE_A')=='1': add_file('/tmp/A.m3u','A')
+          if os.getenv('SOURCE_B')=='1': add_file('/tmp/B.m3u','B')
+          add_file('sources/golden-tv-selected.m3u','C')
+          p=Path('sources/sport-selected.m3u')
+          if p.exists():
+              fixed=0
+              for b in blocks(p.read_text(encoding='utf-8',errors='ignore')):
+                  item=usable(b)
+                  if not item: continue
+                  k=('fixed:'+group_of(item).casefold(),re.sub(r'\s+',' ',item.splitlines()[0]).casefold())
+                  if k not in seen: seen.add(k); out.append(item); fixed+=1
+              counts.append(('fixed',fixed))
+          if not out:
+              old=Path('sports-auto.m3u')
+              if old.exists() and '#EXTINF' in old.read_text(encoding='utf-8',errors='ignore'):
+                  print('All sources unavailable; keeping last known good sports-auto.m3u'); raise SystemExit(0)
+              raise SystemExit('No usable source and no previous playlist; refusing overwrite')
+          Path('sports-auto.m3u').write_text('#EXTM3U\n'+'\n'.join(out)+'\n',encoding='utf-8')
+          print('Built entries:',len(out))
+          for label,count in counts: print(f'{label}: {count}')
           PY
 
       - name: Commit changed playlist
@@ -83,9 +109,6 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add sports-auto.m3u
-          if git diff --cached --quiet; then
-            echo 'Playlist unchanged.'
-            exit 0
-          fi
-          git commit -m 'auto: update sports playlist'
+          if git diff --cached --quiet; then echo 'Playlist unchanged.'; exit 0; fi
+          git commit -m 'auto: update resilient sports playlist'
           git push
