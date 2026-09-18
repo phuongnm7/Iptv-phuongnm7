@@ -1,0 +1,91 @@
+name: Update sports auto playlist
+
+on:
+  push:
+    paths:
+      - '.github/workflows/update-sports-auto.yml'
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-sports-auto
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Fetch upstream sports playlist
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 --max-time 60             -A 'Mozilla/5.0 NM7-IPTV-Sports/1.0'             -H 'Cache-Control: no-cache'             'https://thcoban.github.io/thtt/tttt.m3u'             -o /tmp/upstream.m3u
+          grep -qi '#EXTINF' /tmp/upstream.m3u
+
+      - name: Build sports-only playlist
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          src=Path('/tmp/upstream.m3u').read_text(encoding='utf-8',errors='ignore').replace('\r','')
+          groups={
+            'Vua Sân Cỏ TV','Khán Đài TV','Cola TV','Gà Vàng TV',
+            'Xôi Lạc Z TV','Gà Vàng 33 TV','S8 TV','Sao Kê TV',
+            'Bia Ôm TV','Chuối Chiên TV','Giờ Vàng TV','Socolive TV'
+          }
+
+          blocks=re.split(r'(?=#EXTINF\s*:)',src)
+          out=['#EXTM3U']
+          seen=set()
+
+          for block in blocks:
+              if not re.match(r'\s*#EXTINF\s*:',block,re.I):
+                  continue
+              gm=re.search(r'group-title="([^"]+)"',block,re.I)
+              if not gm or gm.group(1).strip() not in groups:
+                  continue
+
+              lines=[x.strip() for x in block.splitlines() if x.strip()]
+              urls=[x for x in lines if re.match(r'^https?://',x,re.I)]
+              if not urls:
+                  continue
+
+              # Reject explicit unavailable entries such as "None".
+              if any(x.strip().lower() == 'none' for x in urls):
+                  continue
+
+              url=urls[0]
+              idx=lines.index(url)
+              item='\n'.join(lines[:idx+1])
+
+              if item in seen:
+                  continue
+              seen.add(item)
+              out.append(item)
+
+          if len(out) <= 1:
+              raise SystemExit('No playable sports entries found; refusing to overwrite output')
+
+          Path('sports-auto.m3u').write_text('\n'.join(out)+'\n',encoding='utf-8')
+          print('sports entries:',len(out)-1)
+          PY
+
+      - name: Commit changed playlist
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add sports-auto.m3u
+          if git diff --cached --quiet; then
+            echo 'Playlist unchanged.'
+            exit 0
+          fi
+          git commit -m 'auto: update sports playlist'
+          git push
