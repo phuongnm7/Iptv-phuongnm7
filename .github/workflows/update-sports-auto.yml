@@ -162,4 +162,5 @@ jobs:
           git add sports-auto.m3u
           if git diff --cached --quiet; then echo 'Playlist unchanged.'; exit 0; fi
           git commit -m 'auto: update resilient sports playlist'
+          git pull --rebase origin main
           git push
