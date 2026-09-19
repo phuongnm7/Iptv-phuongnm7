@@ -136,17 +136,17 @@ jobs:
           # Prefer a healthy URL, but NEVER drop a match merely because its
           # stream endpoint rejects a probe. This keeps all scheduled matches
           # from the upstream source (the previous version could reduce 6 to 4).
-          live={}
-          for c,ok,status in results:
-              if ok: live.setdefault(c['key'],[]).append(c)
+          # Preserve completeness: for each match, use the highest-priority
+          # source that contains it, but KEEP ALL commentator/stream variants
+          # from that source. The previous code published only one entry per
+          # match, which could turn 6 upstream entries into 3.
           priority={'A':0,'B':1,'C':2,'D':3,'LAST_GOOD':9}
           selected=[]
           for key,xs_all in cand.items():
-              healthy=live.get(key,[])
-              pool=healthy if healthy else xs_all
-              if pool:
-                  selected.append(sorted(pool,key=lambda x:(priority.get(x['source'],8),x['source']))[0])
-          selected.sort(key=lambda x:(x['when'] is None,x['when'] or '',x['group'],x['name']))
+              best=min(priority.get(x['source'],8) for x in xs_all)
+              pool=[x for x in xs_all if priority.get(x['source'],8)==best]
+              selected.extend(pool)
+          selected.sort(key=lambda x:(x['when'] is None,x['when'] or '',x['group'],x['name'],x['url']))
 
           print('Candidates:',len(allc),'matches:',len(cand),'health-tested:',len(results),'live:',sum(1 for _,ok,_ in results if ok),'selected:',len(selected))
           if not selected:
@@ -155,7 +155,7 @@ jobs:
                   print('No live candidate; keeping last known good playlist'); raise SystemExit(0)
               raise SystemExit('No live source and no previous playlist; refusing overwrite')
           Path('sports-auto.m3u').write_text('#EXTM3U\n'+'\n'.join(x['block'] for x in selected)+'\n',encoding='utf-8')
-          print('Rule: one published entry per match; healthy URLs are preferred, but a match is retained with its best available source if health probing fails.')
+          print('Rule: completeness-first. For each match, use the highest-priority source, but publish every commentator/stream variant from that source; do not collapse variants into one entry.')
           print('Rule: explicit match times older than 180 minutes are excluded.')
           PY
       - name: Commit changed playlist
