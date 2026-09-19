@@ -164,3 +164,5 @@ jobs:
           git commit -m 'auto: update resilient sports playlist'
           git pull --rebase origin main
           git push
+
+# validation trigger: run current resilient workflow without changing playlist logic
