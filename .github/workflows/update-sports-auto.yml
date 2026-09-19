@@ -133,14 +133,19 @@ jobs:
           with concurrent.futures.ThreadPoolExecutor(max_workers=WORKERS) as ex:
               for r in ex.map(health,allc): results.append(r)
 
+          # Prefer a healthy URL, but NEVER drop a match merely because its
+          # stream endpoint rejects a probe. This keeps all scheduled matches
+          # from the upstream source (the previous version could reduce 6 to 4).
           live={}
           for c,ok,status in results:
               if ok: live.setdefault(c['key'],[]).append(c)
           priority={'A':0,'B':1,'C':2,'D':3,'LAST_GOOD':9}
           selected=[]
-          for key in cand:
-              xs=live.get(key,[])
-              if xs: selected.append(sorted(xs,key=lambda x:(priority.get(x['source'],8),x['source']))[0])
+          for key,xs_all in cand.items():
+              healthy=live.get(key,[])
+              pool=healthy if healthy else xs_all
+              if pool:
+                  selected.append(sorted(pool,key=lambda x:(priority.get(x['source'],8),x['source']))[0])
           selected.sort(key=lambda x:(x['when'] is None,x['when'] or '',x['group'],x['name']))
 
           print('Candidates:',len(allc),'matches:',len(cand),'health-tested:',len(results),'live:',sum(1 for _,ok,_ in results if ok),'selected:',len(selected))
@@ -150,7 +155,7 @@ jobs:
                   print('No live candidate; keeping last known good playlist'); raise SystemExit(0)
               raise SystemExit('No live source and no previous playlist; refusing overwrite')
           Path('sports-auto.m3u').write_text('#EXTM3U\n'+'\n'.join(x['block'] for x in selected)+'\n',encoding='utf-8')
-          print('Rule: one published entry per match; multiple candidate URLs are retained internally, health-tested, then a live source is selected.')
+          print('Rule: one published entry per match; healthy URLs are preferred, but a match is retained with its best available source if health probing fails.')
           print('Rule: explicit match times older than 180 minutes are excluded.')
           PY
       - name: Commit changed playlist
