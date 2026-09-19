@@ -7,6 +7,10 @@ on:
       - 'sources/**'
   schedule:
     - cron: '*/10 * * * *'
+  pull_request:
+    paths:
+      - '.github/workflows/update-sports-auto.yml'
+      - 'sources/**'
   workflow_dispatch:
 
 permissions:
@@ -150,6 +154,7 @@ jobs:
           print('Rule: explicit match times older than 180 minutes are excluded.')
           PY
       - name: Commit changed playlist
+        if: github.event_name != 'pull_request'
         run: |
           set -euo pipefail
           git config user.name 'github-actions[bot]'
