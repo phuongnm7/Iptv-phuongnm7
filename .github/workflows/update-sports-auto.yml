@@ -41,7 +41,7 @@ jobs:
             fi
           }
           fetch A 'https://thcoban.github.io/thtt/tttt.m3u'
-          fetch B 'https://tinyurl.com/ttthethao2'
+          fetch B 'https://thcoban.github.io/thtt/tttt.m3u'
       - name: Build resilient sports playlist
         env:
           TZ: Asia/Ho_Chi_Minh
