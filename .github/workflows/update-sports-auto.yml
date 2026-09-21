@@ -66,7 +66,9 @@ jobs:
           def blocks(t):
               return [b for b in re.split(r'(?=#EXTINF\s*:)',t.replace('\r','')) if re.match(r'\s*#EXTINF\s*:',b,re.I)]
           def group_of(b):
-              m=re.search(r'group-title="([^"]+)"',b,re.I); return m.group(1).strip() if m else ''
+              m=re.search(r'group-title="([^"]+)"',b,re.I)
+              raw=m.group(1).strip() if m else ''
+              return GROUP_MAP.get(norm_group(raw),raw)
           def parse(b):
               lines=[x.strip() for x in b.splitlines() if x.strip()]
               ext=lines[0] if lines else ''
