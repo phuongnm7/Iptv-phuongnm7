@@ -53,6 +53,13 @@ jobs:
           from zoneinfo import ZoneInfo
 
           GROUPS={'Vua Sân Cỏ TV','Khán Đài TV','Cola TV','Gà Vàng TV','Xôi Lạc Z TV','Gà Vàng 33 TV','S8 TV','Sao Kê TV','Bia Ôm TV','Chuối Chiên TV','Giờ Vàng TV','Socolive TV','Pháo Hoa TV','Nấu Xôi TV','SP TV (China)','Sút Bóng TV','Phá Làng TV'}
+          def norm_group(s):
+              s=unicodedata.normalize('NFKD',s)
+              s=''.join(c for c in s if not unicodedata.combining(c))
+              s=s.lower().replace('&',' and ')
+              s=re.sub(r'[^a-z0-9]+',' ',s)
+              return re.sub(r'\s+',' ',s).strip()
+          GROUP_MAP={norm_group(g):g for g in GROUPS}
           VN=ZoneInfo('Asia/Ho_Chi_Minh'); NOW=dt.datetime.now(VN)
           MAX_AGE=180; TIMEOUT=7; WORKERS=24
 
@@ -104,12 +111,18 @@ jobs:
               return {'name':name,'group':group,'url':url,'block':'\n'.join(kept),'key':match_key(name),'when':when.isoformat() if when else None}
 
           cand={}
+          source_group_counts={}
           def add(path,label):
               p=Path(path)
               if not p.exists(): return
-              for b in blocks(p.read_text(encoding='utf-8',errors='ignore')):
+              raw=p.read_text(encoding='utf-8',errors='ignore')
+              counts={}
+              for b in blocks(raw):
+                  g=group_of(b)
+                  counts[g]=counts.get(g,0)+1
                   x=usable(b)
                   if x: cand.setdefault(x['key'],[]).append({**x,'source':label})
+              source_group_counts[label]=counts
 
           if os.getenv('SOURCE_A')=='1': add('/tmp/A.m3u','A')
           if os.getenv('SOURCE_B')=='1': add('/tmp/B.m3u','B')
@@ -149,6 +162,10 @@ jobs:
           selected.sort(key=lambda x:(x['when'] is None,x['when'] or '',x['group'],x['name'],x['url']))
 
           print('Candidates:',len(allc),'matches:',len(cand),'health-tested:',len(results),'live:',sum(1 for _,ok,_ in results if ok),'selected:',len(selected))
+          for label in ('A','B','C','D','LAST_GOOD'):
+              counts=source_group_counts.get(label,{})
+              wanted={g:counts.get(g,0) for g in GROUPS if counts.get(g,0)}
+              print(f'GROUPS_{label}:',wanted)
           if not selected:
               old=Path('sports-auto.m3u')
               if old.exists() and '#EXTINF' in old.read_text(encoding='utf-8',errors='ignore'):
