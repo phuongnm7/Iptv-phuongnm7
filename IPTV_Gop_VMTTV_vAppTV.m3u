@@ -37,12 +37,8 @@ https://tglmp01.akamaized.net/out/v1/d43dbc5da1334ec088ed9eb5796eee7c/manifest.m
 https://tglmp02.akamaized.net/out/v1/3b1dd652def14c0d88ad4d65b8a63103/manifest.mpd
 #EXTINF:-1 group-title="Asian Games Aichi-Nagoya 2026" tvg-logo="https://thumb.vtvdigital.org/transform?url=https://vtvgo-assets.vtvdigital.vn/assets/images/v2/metadata/20260921/2026092112/w0KN0afzVZ-Luong1-Chieu.webp&width=1080", TRỰC TIẾP | ASIAD 20 - Ngày thi đấu 21/9 | Luồng 1
 https://vtvgoliveapp1-aws-plus-tn.vtvdigital.vn/aws-sk/asiad_1_paid/live/asiad_1_1080p/chunks.m3u8
-#EXTINF:-1 group-title="Asian Games Aichi-Nagoya 2026" tvg-logo="https://thumb.vtvdigital.org/transform?url=https://vtvgo-assets.vtvdigital.vn/assets/images/v2/metadata/20260921/2026092112/Wx3pELXMY7-Luong2-Chieu.webp&width=1080", TRỰC TIẾP | ASIAD 20 - Ngày thi đấu 21/9 | Luồng 2
+#EXTINF:-1 group-title="Asian Games Aichi-Nagoya 2026" tvg-logo="https://thumb.vtvdigital.org/transform?url=https://vtvgo-assets.vtvdigital.vn/assets/images/v2/metadata/20260921/2026092117/56HCpSng1z-thumbliveasiadvtvgohngngy1.webp&width=1080", TRỰC TIẾP | ASIAD 20 - Ngày thi đấu 21/9 | Luồng 2
 https://vtvgoliveapp1-aws-plus-tn.vtvdigital.vn/aws-sk/asiad_2_paid/live/asiad_2_1080p/chunks.m3u8
-#EXTINF:-1 group-title="Asian Games Aichi-Nagoya 2026" tvg-logo="https://cdn-img.thethao247.vn/storage/files/qa19081999/2026/05/30/asiad-6308-7284jpg-6a1ab9948dfb6.jpg", Nữ Bangladesh vs Nữ Đài Bắc Trung Hoa (Bảng E môn bóng đá nữ Asiad 20)
-https://eqr2hdarxfliv.vcdn.cloud/1789933130_hd/1789933130_hd@720p.m3u8
-#EXTINF:-1 group-title="Asian Games Aichi-Nagoya 2026" tvg-logo="https://cdn-img.thethao247.vn/storage/files/qa19081999/2026/05/30/asiad-6308-7284jpg-6a1ab9948dfb6.jpg", Nữ Việt Nam vs Nữ Thái Lan (Bảng E môn bóng đá nữ Asiad 20)
-https://eqr2hdarxfliv.vcdn.cloud/1789931369_hd/1789931369_hd@720p.m3u8
 #EXTINF:-1 tvg-id="tv360plus1" group-title="Sự Kiện TV360" tvg-logo="https://img-zlr1.tv360.vn/image1/2026/04/15/22/1776266760359/ba1ca843cd06_480_270.png", TV360+1
 #EXTVLCOPT:http-user-agent=Dalvik/2.1.0
 #KODIPROP:inputstream.adaptive.manifest_type=mpd
@@ -459,7 +455,7 @@ https://live.fptplay53.net/fnxhd1/vtv5tnb_vhls.smil/chunklist.m3u8
 #KODIPROP:inputstream.adaptive.manifest_type=dash 
 #KODIPROP:inputstream.adaptive.license_type=clearkey 
 #KODIPROP:inputstream.adaptive.license_key=https://tv.vietanhtv.top/sex/cleankey.php?id=tv360173&token=c555bf34c34cd088d94cca242c758050
-https://tv.vietanhtv.top/tv360/tv360.php?id=173&expires=1790073739&token=99ecf80960fb98163693ef51b83d26ed
+https://tv.vietanhtv.top/tv360/tv360.php?id=173&expires=1790084766&token=046d8950ca8850cb1013b11ecafe8e6e
 
 #EXTINF:-1 tvg-id="onsportsplus" group-title="VTVcab" tvg-logo="https://assets-vtvcab.gviet.vn/images/hq/posters/onsportscongmoi1.jpg", ON SPORTS+ 
 #EXTVLCOPT:http-user-agent=Dalvik/2.1.0
@@ -467,7 +463,7 @@ https://tv.vietanhtv.top/tv360/tv360.php?id=173&expires=1790073739&token=99ecf80
 #KODIPROP:inputstream.adaptive.manifest_type=dash 
 #KODIPROP:inputstream.adaptive.license_type=clearkey 
 #KODIPROP:inputstream.adaptive.license_key=https://tv.vietanhtv.top/sex/cleankey.php?id=tv360183&token=c555bf34c34cd088d94cca242c758050
-https://tv.vietanhtv.top/tv360/tv360.php?id=183&expires=1790073739&token=2a6bec45df1f519811b8adc408f6f24b
+https://tv.vietanhtv.top/tv360/tv360.php?id=183&expires=1790084766&token=a8495859634269e2a361dcf5a940ffb5
 
 #EXTINF:-1 tvg-id="onfootball" group-title="VTVcab" tvg-logo="https://assets-vtvcab.gviet.vn/images/hq/posters/_ootball_-_opyright_by_cab_logo_202212.jpg", ON FOOTBALL
 #EXTVLCOPT:http-user-agent=Dalvik/2.1.0
@@ -475,7 +471,7 @@ https://tv.vietanhtv.top/tv360/tv360.php?id=183&expires=1790073739&token=2a6bec4
 #KODIPROP:inputstream.adaptive.manifest_type=dash 
 #KODIPROP:inputstream.adaptive.license_type=clearkey 
 #KODIPROP:inputstream.adaptive.license_key=https://tv.vietanhtv.top/sex/cleankey.php?id=tv360174&token=c555bf34c34cd088d94cca242c758050
-https://tv.vietanhtv.top/tv360/tv360.php?id=174&expires=1790073739&token=b28b68ff45099d9b8d4674359e854f90
+https://tv.vietanhtv.top/tv360/tv360.php?id=174&expires=1790084766&token=1648676351e6383f831402f9d55fbbcc
 
 #EXTINF:-1 tvg-id="onsportsnews" group-title="VTVcab" tvg-logo="https://assets-vtvcab.gviet.vn/images/v2/channel/20220613/2022061306/Logo_ONSPORTSNEWS_150x904_1675158858.webp", ON SPORTS NEWS 
 #EXTVLCOPT:http-user-agent=Dalvik/2.1.0
@@ -483,7 +479,7 @@ https://tv.vietanhtv.top/tv360/tv360.php?id=174&expires=1790073739&token=b28b68f
 #KODIPROP:inputstream.adaptive.manifest_type=dash 
 #KODIPROP:inputstream.adaptive.license_type=clearkey 
 #KODIPROP:inputstream.adaptive.license_key=https://tv.vietanhtv.top/sex/cleankey.php?id=tv360170&token=c555bf34c34cd088d94cca242c758050
-https://tv.vietanhtv.top/tv360/tv360.php?id=170&expires=1790073739&token=084fd264df6c6f719669acd06ce25f0d
+https://tv.vietanhtv.top/tv360/tv360.php?id=170&expires=1790084766&token=0510cef89e2cd2178bec3d889c203bac
 
 #EXTINF:-1 group-title="┃UK┃ EPL PREMIER LEAGUE TEAMS" tvg-logo="http://picon.tivi-ott.net:25461/picon/UK/UK EPL Premier League TEAMS/MANCHESTER UNITED.png" tvg-id="" tvg-name="┃UK┃ MANCHESTER UNITED F.C (MATCH TIME)" tvg-expire="20/06/2027" gau-status="CHƯA TEST" gau-open="" gau-resolution="" gau-bitrate="" gau-subtitle="CHƯA XÁC ĐỊNH" gau-subtitle-lang="" gau-subtitle-type="",┃UK┃ MANCHESTER UNITED F.C (MATCH TIME)
 http://mag.tivi-one-iptv.net:80/play/live.php?mac=00:1A:79:0E:0F:8E&stream=794966&extension=ts&play_token=QDuVFvG1IG
