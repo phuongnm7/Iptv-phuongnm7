@@ -52,7 +52,7 @@ jobs:
           from urllib.parse import urlparse
           from zoneinfo import ZoneInfo
 
-          GROUPS={'Vua Sân Cỏ TV','Khán Đài TV','Cola TV','Gà Vàng TV','Xôi Lạc Z TV','Gà Vàng 33 TV','S8 TV','Sao Kê TV','Bia Ôm TV','Chuối Chiên TV','Giờ Vàng TV','Socolive TV'}
+          GROUPS={'Vua Sân Cỏ TV','Khán Đài TV','Cola TV','Gà Vàng TV','Xôi Lạc Z TV','Gà Vàng 33 TV','S8 TV','Sao Kê TV','Bia Ôm TV','Chuối Chiên TV','Giờ Vàng TV','Socolive TV','Pháo Hoa TV','Nấu Xôi TV','SP TV (China)','Sút Bóng TV','Phá Làng TV'}
           VN=ZoneInfo('Asia/Ho_Chi_Minh'); NOW=dt.datetime.now(VN)
           MAX_AGE=180; TIMEOUT=7; WORKERS=24
 
