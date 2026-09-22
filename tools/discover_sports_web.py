@@ -37,11 +37,12 @@ async def inspect_site(browser, group, root):
     context = await browser.new_context(user_agent=UA, viewport={"width": 390, "height": 844})
     page = await context.new_page()
     found = []
+    current_text = ""
 
     async def response_handler(resp):
         u = unquote(resp.url).strip()
         if likely_stream(u):
-            found.append(u)
+            found.append((u, current_text))
 
     page.on("response", response_handler)
     try:
@@ -66,8 +67,10 @@ async def inspect_site(browser, group, root):
                 if await loc.count() == 0:
                     continue
                 before = page.url
+                current_text = clean(await page.locator("body").inner_text())
                 await loc.click(timeout=3000)
                 await page.wait_for_timeout(3500)
+                current_text = clean(await page.locator("body").inner_text())
                 clicked += 1
                 if page.url != before:
                     await page.go_back(wait_until="domcontentloaded", timeout=15000)
@@ -77,22 +80,16 @@ async def inspect_site(browser, group, root):
     except Exception as e:
         print(f"{group}: {type(e).__name__}: {e}")
     finally:
-        body = ""
-        try:
-            body = clean(await page.locator("body").inner_text(timeout=3000))
-        except Exception:
-            pass
         title = clean(await page.title())
         await context.close()
 
     out = []
     seen = set()
-    name = extract_match(body or title)
-    for u in found:
+    for u, text in found:
         if not u.startswith(("http://", "https://")) or u in seen:
             continue
         seen.add(u)
-        out.append((name, group, u))
+        out.append((extract_match(text or title), group, u))
     return out
 
 async def main():
