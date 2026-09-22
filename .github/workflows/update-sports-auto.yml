@@ -191,8 +191,18 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add sports-auto.m3u
           if git diff --cached --quiet; then echo 'Playlist unchanged.'; exit 0; fi
+
+          # Save the generated playlist, then rebuild the commit on top of the
+          # latest remote main. This avoids rebase conflicts when a queued run
+          # started from an older commit while another run updated the playlist.
+          cp sports-auto.m3u /tmp/generated-sports-auto.m3u
           git commit -m 'auto: update resilient sports playlist'
-          git pull --rebase origin main
-          git push
+          git fetch origin main
+          git reset --hard origin/main
+          cp /tmp/generated-sports-auto.m3u sports-auto.m3u
+          git add sports-auto.m3u
+          if git diff --cached --quiet; then echo 'Remote already contains equivalent playlist.'; exit 0; fi
+          git commit -m 'auto: update resilient sports playlist'
+          git push origin main
 
 # validation trigger: run current resilient workflow without changing playlist logic
