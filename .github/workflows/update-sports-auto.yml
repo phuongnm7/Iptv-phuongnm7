@@ -130,8 +130,10 @@ jobs:
           if os.getenv('SOURCE_B')=='1': add('/tmp/B.m3u','B')
           add('sources/golden-tv-selected.m3u','C')
           add('sources/sport-selected.m3u','D')
-          add('sources/web-discovered.m3u','E')
+          # LAST_GOOD is loaded before E so the web-discovery source can only
+          # add genuinely new URLs; it never duplicates an existing stream.
           add('sports-auto.m3u','LAST_GOOD')
+          add('sources/web-discovered.m3u','E')
 
           def health(c):
               ref=next((l.split('=',1)[1].strip() for l in c['block'].splitlines() if l.lower().startswith('#extvlcopt:http-referrer=')),None)
@@ -163,11 +165,6 @@ jobs:
               pool=[x for x in xs_all if priority.get(x['source'],8)==best]
               selected.extend(pool)
           selected.sort(key=lambda x:(x['when'] is None,x['when'] or '',x['group'],x['name'],x['url']))
-          # Exact URL de-duplication only. Keep distinct commentator/stream variants,
-          # but never publish the same stream URL twice when a supplemental source
-          # rediscovers a URL already present in a higher-priority source.
-          seen_urls=set()
-          selected=[x for x in selected if not (x['url'] in seen_urls or seen_urls.add(x['url']))]
 
           print('Candidates:',len(allc),'matches:',len(cand),'health-tested:',len(results),'live:',sum(1 for _,ok,_ in results if ok),'selected:',len(selected))
           for label in ('A','B','C','D','E','LAST_GOOD'):
