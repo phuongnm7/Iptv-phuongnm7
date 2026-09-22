@@ -114,6 +114,7 @@ jobs:
 
           cand={}
           source_group_counts={}
+          known_urls=set()
           def add(path,label):
               p=Path(path)
               if not p.exists(): return
@@ -123,8 +124,18 @@ jobs:
                   g=group_of(b)
                   counts[g]=counts.get(g,0)+1
                   x=usable(b)
-                  if x: cand.setdefault(x['key'],[]).append({**x,'source':label})
+                  if x:
+                      # E is strictly supplemental: if its exact URL already
+                      # exists in any previously loaded source, do not add it
+                      # again. Other sources retain every variant.
+                      if label=='E' and x['url'] in known_urls:
+                          continue
+                      cand.setdefault(x['key'],[]).append({**x,'source':label})
               source_group_counts[label]=counts
+              for vs in cand.values():
+                  for x in vs:
+                      if x['source']==label:
+                          known_urls.add(x['url'])
 
           if os.getenv('SOURCE_A')=='1': add('/tmp/A.m3u','A')
           if os.getenv('SOURCE_B')=='1': add('/tmp/B.m3u','B')
