@@ -16,8 +16,11 @@ def clean(s):
     return re.sub(r"\s+", " ", s or "").strip()
 
 def likely_stream(u):
-    x = u.lower()
-    return ".m3u8" in x or "/hls/" in x or "playlist.m3u" in x or "chunklist" in x
+    x = u.lower().split("?", 1)[0]
+    if not (x.endswith(".m3u8") or ".m3u8/" in x):
+        return False
+    # Ignore media segments/init files; keep playlist/master/index variants.
+    return not any(part in x for part in ("/segment_", "/init_", ".mp4", ".m4s"))
 
 def extract_match(text):
     text = clean(text)
@@ -58,31 +61,25 @@ async def inspect_site(browser, group, root):
             if likely_stream(u):
                 found.append((u, current_text))
 
-        labels = await page.locator("a,button").all_text_contents()
-        clicked = 0
+        loc = page.get_by_text("Xem ngay", exact=True)
+        count = min(await loc.count(), 10)
 
-        for label in labels:
-            if clicked >= 20:
-                break
-            t = clean(label)
-            if not re.search(r"xem ngay|xem|live|trực tiếp|tham gia live", t, re.I):
-                continue
-
+        for i in range(count):
             try:
-                loc = page.get_by_text(t, exact=True).first
-                if await loc.count() == 0:
-                    continue
+                # Re-resolve the locator after each navigation/back operation.
+                loc = page.get_by_text("Xem ngay", exact=True)
+                if i >= await loc.count():
+                    break
 
                 before = page.url
                 current_text = clean(await page.locator("body").inner_text())
-                await loc.click(timeout=3000)
+                await loc.nth(i).click(timeout=3000)
                 await page.wait_for_timeout(3500)
                 current_text = clean(await page.locator("body").inner_text())
-                clicked += 1
 
                 if page.url != before:
                     await page.go_back(wait_until="domcontentloaded", timeout=15000)
-                    await page.wait_for_timeout(1000)
+                    await page.wait_for_timeout(1200)
                     current_text = clean(await page.locator("body").inner_text())
             except Exception:
                 continue
