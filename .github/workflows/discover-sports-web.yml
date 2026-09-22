@@ -11,6 +11,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 concurrency:
   group: discover-sports-web
@@ -56,3 +57,4 @@ jobs:
           git commit -m 'auto: discover sports web streams'
           git pull --rebase origin main
           git push
+          gh workflow run update-sports-auto.yml --ref main
