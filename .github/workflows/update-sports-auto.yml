@@ -163,6 +163,11 @@ jobs:
               pool=[x for x in xs_all if priority.get(x['source'],8)==best]
               selected.extend(pool)
           selected.sort(key=lambda x:(x['when'] is None,x['when'] or '',x['group'],x['name'],x['url']))
+          # Exact URL de-duplication only. Keep distinct commentator/stream variants,
+          # but never publish the same stream URL twice when a supplemental source
+          # rediscovers a URL already present in a higher-priority source.
+          seen_urls=set()
+          selected=[x for x in selected if not (x['url'] in seen_urls or seen_urls.add(x['url']))]
 
           print('Candidates:',len(allc),'matches:',len(cand),'health-tested:',len(results),'live:',sum(1 for _,ok,_ in results if ok),'selected:',len(selected))
           for label in ('A','B','C','D','E','LAST_GOOD'):
