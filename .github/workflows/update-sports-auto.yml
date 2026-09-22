@@ -156,7 +156,7 @@ jobs:
           # source that contains it, but KEEP ALL commentator/stream variants
           # from that source. The previous code published only one entry per
           # match, which could turn 6 upstream entries into 3.
-          priority={'A':0,'B':1,'C':2,'D':3,'E':4,'LAST_GOOD':9}
+          priority={'A':0,'B':1,'C':2,'D':3,'E':10,'LAST_GOOD':9}
           selected=[]
           for key,xs_all in cand.items():
               best=min(priority.get(x['source'],8) for x in xs_all)
