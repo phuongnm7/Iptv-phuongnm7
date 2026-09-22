@@ -1,0 +1,54 @@
+name: Discover sports streams from GAVANG33 and S8TV
+
+on:
+  schedule:
+    - cron: '17 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: discover-sports-web
+  cancel-in-progress: true
+
+jobs:
+  discover:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Cache Playwright Chromium
+        id: pw-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-chromium-${{ runner.os }}-v1
+          restore-keys: |
+            playwright-chromium-${{ runner.os }}-
+
+      - name: Install Playwright
+        run: |
+          python3 -m pip install --disable-pip-version-check playwright
+          if [ "${{ steps.pw-cache.outputs.cache-hit }}" != "true" ]; then
+            python3 -m playwright install chromium
+          fi
+
+      - name: Discover public HLS streams
+        run: python3 tools/discover_sports_web.py
+
+      - name: Commit discovered source
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add sources/web-discovered.m3u
+          if git diff --cached --quiet; then
+            echo 'No discovered stream changes.'
+            exit 0
+          fi
+          git commit -m 'auto: discover sports web streams'
+          git pull --rebase origin main
+          git push
