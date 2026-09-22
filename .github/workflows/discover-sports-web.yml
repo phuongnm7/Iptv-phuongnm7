@@ -1,6 +1,10 @@
 name: Discover sports streams from GAVANG33 and S8TV
 
 on:
+  push:
+    paths:
+      - '.github/workflows/discover-sports-web.yml'
+      - 'tools/discover_sports_web.py'
   schedule:
     - cron: '17 * * * *'
   workflow_dispatch:
