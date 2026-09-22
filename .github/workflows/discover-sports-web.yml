@@ -57,4 +57,6 @@ jobs:
           git commit -m 'auto: discover sports web streams'
           git pull --rebase origin main
           git push
-          GH_TOKEN="${GITHUB_TOKEN}" gh workflow run update-sports-auto.yml --ref main
+          gh workflow run update-sports-auto.yml --ref main
+        env:
+          GH_TOKEN: ${{ github.token }}
