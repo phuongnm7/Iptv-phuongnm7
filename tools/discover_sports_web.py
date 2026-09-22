@@ -72,10 +72,13 @@ async def inspect_site(browser, group, root):
                     break
 
                 before = page.url
-                current_text = clean(await page.locator("body").inner_text())
+                start = len(found)
                 await loc.nth(i).click(timeout=3000)
                 await page.wait_for_timeout(3500)
-                current_text = clean(await page.locator("body").inner_text())
+                active_text = clean(await page.locator("body").inner_text())
+                for j in range(start, len(found)):
+                    u, _ = found[j]
+                    found[j] = (u, active_text)
 
                 if page.url != before:
                     await page.go_back(wait_until="domcontentloaded", timeout=15000)
