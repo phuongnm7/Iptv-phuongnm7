@@ -130,6 +130,7 @@ jobs:
           if os.getenv('SOURCE_B')=='1': add('/tmp/B.m3u','B')
           add('sources/golden-tv-selected.m3u','C')
           add('sources/sport-selected.m3u','D')
+          add('sources/web-discovered.m3u','E')
           add('sports-auto.m3u','LAST_GOOD')
 
           def health(c):
@@ -155,7 +156,7 @@ jobs:
           # source that contains it, but KEEP ALL commentator/stream variants
           # from that source. The previous code published only one entry per
           # match, which could turn 6 upstream entries into 3.
-          priority={'A':0,'B':1,'C':2,'D':3,'LAST_GOOD':9}
+          priority={'A':0,'B':1,'C':2,'D':3,'E':4,'LAST_GOOD':9}
           selected=[]
           for key,xs_all in cand.items():
               best=min(priority.get(x['source'],8) for x in xs_all)
@@ -164,7 +165,7 @@ jobs:
           selected.sort(key=lambda x:(x['when'] is None,x['when'] or '',x['group'],x['name'],x['url']))
 
           print('Candidates:',len(allc),'matches:',len(cand),'health-tested:',len(results),'live:',sum(1 for _,ok,_ in results if ok),'selected:',len(selected))
-          for label in ('A','B','C','D','LAST_GOOD'):
+          for label in ('A','B','C','D','E','LAST_GOOD'):
               counts=source_group_counts.get(label,{})
               wanted={g:counts.get(g,0) for g in GROUPS if counts.get(g,0)}
               print(f'GROUPS_{label}:',wanted)
