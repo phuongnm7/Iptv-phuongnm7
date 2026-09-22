@@ -13,7 +13,7 @@ OUT = Path("sources/web-discovered.m3u")
 UA = "Mozilla/5.0 (Linux; Android 15) AppleWebKit/537.36 Chrome/140 Safari/537.36 NM7-IPTV-WebDiscovery/1.0"
 
 def clean(s):
-    return re.sub(r"\\s+", " ", s or "").strip()
+    return re.sub(r"\s+", " ", s or "").strip()
 
 def likely_stream(u):
     x = u.lower()
@@ -21,14 +21,15 @@ def likely_stream(u):
 
 def extract_match(text):
     text = clean(text)
-    for p in [
-        r"(\\d{1,2}:\\d{2}\\s+\\d{1,2}/\\d{1,2}[^\\n]{0,220})",
-        r"((?:[A-ZÀ-Ỹ][^\\n]{2,80})\\s+(?:VS|vs|v)\\s+(?:[A-ZÀ-Ỹ][^\\n]{2,80}))",
-    ]:
+    patterns = [
+        r"(\d{1,2}:\d{2}\s+\d{1,2}/\d{1,2}[^\n]{0,220})",
+        r"((?:[A-ZÀ-Ỹ][^\n]{2,80})\s+(?:VS|vs|v)\s+(?:[A-ZÀ-Ỹ][^\n]{2,80}))",
+    ]
+    for p in patterns:
         m = re.search(p, text)
         if m:
             s = clean(m.group(1))
-            s = re.sub(r"\\s+(?:Xem ngay|ĐANG DIỄN RA|Bóng đá)\\b.*$", "", s, flags=re.I)
+            s = re.sub(r"\s+(?:Xem ngay|ĐANG DIỄN RA|Bóng đá)\b.*$", "", s, flags=re.I)
             if len(s) >= 8:
                 return s[:240]
     return "Sports live"
@@ -45,42 +46,54 @@ async def inspect_site(browser, group, root):
             found.append((u, current_text))
 
     page.on("response", response_handler)
+
     try:
         await page.goto(root, wait_until="domcontentloaded", timeout=45000)
         await page.wait_for_timeout(5000)
 
+        current_text = clean(await page.locator("body").inner_text())
         html = await page.content()
-        for u in re.findall(r'https?://[^"\\s<>]+', html):
+        for u in re.findall(r'https?://[^"\s<>]+', html):
+            u = unquote(u).strip("'\"")
             if likely_stream(u):
-                found.append(unquote(u).strip("'\\\""))
+                found.append((u, current_text))
 
         labels = await page.locator("a,button").all_text_contents()
         clicked = 0
+
         for label in labels:
             if clicked >= 20:
                 break
             t = clean(label)
             if not re.search(r"xem ngay|xem|live|trực tiếp|tham gia live", t, re.I):
                 continue
+
             try:
                 loc = page.get_by_text(t, exact=True).first
                 if await loc.count() == 0:
                     continue
+
                 before = page.url
                 current_text = clean(await page.locator("body").inner_text())
                 await loc.click(timeout=3000)
                 await page.wait_for_timeout(3500)
                 current_text = clean(await page.locator("body").inner_text())
                 clicked += 1
+
                 if page.url != before:
                     await page.go_back(wait_until="domcontentloaded", timeout=15000)
                     await page.wait_for_timeout(1000)
+                    current_text = clean(await page.locator("body").inner_text())
             except Exception:
-                pass
+                continue
+
     except Exception as e:
         print(f"{group}: {type(e).__name__}: {e}")
     finally:
-        title = clean(await page.title())
+        try:
+            title = clean(await page.title())
+        except Exception:
+            title = ""
         await context.close()
 
     out = []
@@ -106,7 +119,7 @@ async def main():
         print("No HLS stream discovered; preserving existing source.")
         OUT.parent.mkdir(parents=True, exist_ok=True)
         if not OUT.exists():
-            OUT.write_text("#EXTM3U\\n", encoding="utf-8")
+            OUT.write_text("#EXTM3U\n", encoding="utf-8")
         return
 
     lines = ["#EXTM3U"]
@@ -116,11 +129,12 @@ async def main():
         if key in seen:
             continue
         seen.add(key)
-        lines.append(f'#EXTINF:-1 group-title="{group}",{name.replace(chr(34), chr(39))}')
+        safe_name = name.replace('"', "'")
+        lines.append(f'#EXTINF:-1 group-title="{group}",{safe_name}')
         lines.append(u)
 
     OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text("\\n".join(lines) + "\\n", encoding="utf-8")
+    OUT.write_text("\n".join(lines) + "\n", encoding="utf-8")
     print(f"Wrote {len(seen)} entries to {OUT}")
 
 if __name__ == "__main__":
