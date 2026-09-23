@@ -43,6 +43,7 @@ jobs:
           fetch A 'https://thtt.pages.dev/tttt.m3u'
           fetch B 'https://thcoban.github.io/thtt/tttt.m3u'
       - name: Discover fallback sports streams from public web sources
+        if: env.SOURCE_A != '1' && env.SOURCE_B != '1'
         shell: bash
         run: |
           set -euo pipefail
