@@ -40,8 +40,8 @@ jobs:
               echo "SOURCE_$name=0" >> "$GITHUB_ENV"; rm -f "/tmp/$name.m3u"
             fi
           }
-          fetch A 'https://thcoban.github.io/thtt/tttt.m3u'
-          fetch B 'https://thcoban.github.io/thtt/tttt.m3u'
+          fetch A 'https://thtt.pages.dev/tttt.m3u'
+          fetch B 'https://thtt.pages.dev/tttt.m3u'
       - name: Build resilient sports playlist
         env:
           TZ: Asia/Ho_Chi_Minh
@@ -125,9 +125,6 @@ jobs:
                   counts[g]=counts.get(g,0)+1
                   x=usable(b)
                   if x:
-                      # E is strictly supplemental: if its exact URL already
-                      # exists in any previously loaded source, do not add it
-                      # again. Other sources retain every variant.
                       if label=='E' and x['url'] in known_urls:
                           continue
                       cand.setdefault(x['key'],[]).append({**x,'source':label})
@@ -141,8 +138,6 @@ jobs:
           if os.getenv('SOURCE_B')=='1': add('/tmp/B.m3u','B')
           add('sources/golden-tv-selected.m3u','C')
           add('sources/sport-selected.m3u','D')
-          # LAST_GOOD is loaded before E so the web-discovery source can only
-          # add genuinely new URLs; it never duplicates an existing stream.
           add('sports-auto.m3u','LAST_GOOD')
           add('sources/web-discovered.m3u','E')
 
@@ -162,13 +157,6 @@ jobs:
           with concurrent.futures.ThreadPoolExecutor(max_workers=WORKERS) as ex:
               for r in ex.map(health,allc): results.append(r)
 
-          # Prefer a healthy URL, but NEVER drop a match merely because its
-          # stream endpoint rejects a probe. This keeps all scheduled matches
-          # from the upstream source (the previous version could reduce 6 to 4).
-          # Preserve completeness: for each match, use the highest-priority
-          # source that contains it, but KEEP ALL commentator/stream variants
-          # from that source. The previous code published only one entry per
-          # match, which could turn 6 upstream entries into 3.
           priority={'A':0,'B':1,'C':2,'D':3,'E':10,'LAST_GOOD':9}
           selected=[]
           for key,xs_all in cand.items():
@@ -199,10 +187,6 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add sports-auto.m3u
           if git diff --cached --quiet; then echo 'Playlist unchanged.'; exit 0; fi
-
-          # Save the generated playlist, then rebuild the commit on top of the
-          # latest remote main. This avoids rebase conflicts when a queued run
-          # started from an older commit while another run updated the playlist.
           cp sports-auto.m3u /tmp/generated-sports-auto.m3u
           git commit -m 'auto: update resilient sports playlist'
           git fetch origin main
@@ -212,5 +196,3 @@ jobs:
           if git diff --cached --quiet; then echo 'Remote already contains equivalent playlist.'; exit 0; fi
           git commit -m 'auto: update resilient sports playlist'
           git push origin main
-
-# validation trigger: run current resilient workflow without changing playlist logic
