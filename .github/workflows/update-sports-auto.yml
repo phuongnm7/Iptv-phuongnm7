@@ -90,7 +90,7 @@ jobs:
           from pathlib import Path
           from urllib.parse import urlparse
           from zoneinfo import ZoneInfo
-          GROUPS={'Vua Sân Cỏ TV','Khán Đài TV','Cola TV','Gà Vàng TV','Gà Vàng 24h TV','Xôi Lạc Z TV','Gà Vàng 33 TV','S8 TV','Sao Kê TV','Bia Ôm TV','Chuối Chiên TV','Giờ Vàng TV','Socolive TV','Pháo Hoa TV','Nấu Xôi TV','SP TV (China)','Sút Bóng TV','Phá Làng TV'}
+          GROUPS={'Vua Sân Cỏ TV','Khán Đài TV','Cola TV','Gà Vàng TV','Gà Vàng 24h TV','Xôi Lạc Z TV','Gà Vàng 33 TV','S8 TV','Sao Kê TV','Bia Ôm TV','Chuối Chiên TV','Giờ Vàng TV','Socolive TV','Pháo Hoa TV','Nấu Xôi TV','SP TV (China)','Sút Bóng TV','Phá Làng TV','Web Discovery'}
           def norm_group(s):
               s=unicodedata.normalize('NFKD',s); s=''.join(c for c in s if not unicodedata.combining(c)); s=s.lower().replace('&',' and '); s=re.sub(r'[^a-z0-9]+',' ',s); return re.sub(r'\s+',' ',s).strip()
           GROUP_MAP={norm_group(g):g for g in GROUPS}
@@ -152,7 +152,7 @@ jobs:
                       if x['source']==label: known_urls.add(x['url'])
           if os.getenv('SOURCE_A')=='1': add('/tmp/A.m3u','A')
           if os.getenv('SOURCE_B')=='1': add('/tmp/B.m3u','B')
-          add('sources/golden-tv-selected.m3u','C'); add('sources/sport-selected.m3u','D'); add('sports-auto.m3u','LAST_GOOD'); add('sources/web-discovered.m3u','E')
+          add('sources/golden-tv-selected.m3u','C'); add('sources/sport-selected.m3u','D'); add('sports-auto.m3u','LAST_GOOD'); add('/tmp/E.m3u','E')
           def health(c):
               ref=next((l.split('=',1)[1].strip() for l in c['block'].splitlines() if l.lower().startswith('#extvlcopt:http-referrer=')),None)
               if urlparse(c['url']).scheme not in ('http','https'): return c,False,'scheme'
