@@ -129,6 +129,12 @@ jobs:
           for key,xs_all in cand.items():
               best=min(priority.get(x['source'],8) for x in xs_all); selected.extend([x for x in xs_all if priority.get(x['source'],8)==best])
           selected.sort(key=lambda x:(x['when'] is None,x['when'] or '',x['group'],x['name'],x['url']))
+          # Final safety pass: never publish an explicitly dated event older than MAX_AGE,
+          # including entries inherited from LAST_GOOD or any fallback source.
+          before_stale_filter=len(selected)
+          selected=[x for x in selected if not x['when'] or (NOW-dt.datetime.fromisoformat(x['when'])).total_seconds()/60 <= MAX_AGE]
+          removed_stale=before_stale_filter-len(selected)
+          print(f'Stale entries removed by final 180-minute safety filter: {removed_stale}')
           print('Candidates:',len(allc),'matches:',len(cand),'health-tested:',len(results),'live:',sum(1 for _,ok,_ in results if ok),'selected:',len(selected))
           for label in ('A','B','C','D','E','LAST_GOOD'):
               counts=source_group_counts.get(label,{}); print(f'GROUPS_{label}:',{g:counts.get(g,0) for g in GROUPS if counts.get(g,0)})
