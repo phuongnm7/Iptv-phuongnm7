@@ -51,7 +51,7 @@ jobs:
           from pathlib import Path
           from urllib.parse import urlparse
           from zoneinfo import ZoneInfo
-          GROUPS={'Vua Sân Cỏ TV','Khán Đài TV','Cola TV','Gà Vàng TV','Xôi Lạc Z TV','Gà Vàng 33 TV','S8 TV','Sao Kê TV','Bia Ôm TV','Chuối Chiên TV','Giờ Vàng TV','Socolive TV','Pháo Hoa TV','Nấu Xôi TV','SP TV (China)','Sút Bóng TV','Phá Làng TV'}
+          GROUPS={'Vua Sân Cỏ TV','Khán Đài TV','Cola TV','Gà Vàng TV','Gà Vàng 24h TV','Xôi Lạc Z TV','Gà Vàng 33 TV','S8 TV','Sao Kê TV','Bia Ôm TV','Chuối Chiên TV','Giờ Vàng TV','Socolive TV','Pháo Hoa TV','Nấu Xôi TV','SP TV (China)','Sút Bóng TV','Phá Làng TV'}
           def norm_group(s):
               s=unicodedata.normalize('NFKD',s); s=''.join(c for c in s if not unicodedata.combining(c)); s=s.lower().replace('&',' and '); s=re.sub(r'[^a-z0-9]+',' ',s); return re.sub(r'\s+',' ',s).strip()
           GROUP_MAP={norm_group(g):g for g in GROUPS}
