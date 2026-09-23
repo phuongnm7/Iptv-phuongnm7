@@ -1,17 +1,13 @@
-name: Update sports auto playlist (resilient multi-source v2)
+name: Update sports auto playlist (multi-source)
 
 on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
   push:
     paths:
       - '.github/workflows/update-sports-auto.yml'
       - 'sources/**'
-  schedule:
-    - cron: '*/5 * * * *'
-  pull_request:
-    paths:
-      - '.github/workflows/update-sports-auto.yml'
-      - 'sources/**'
-  workflow_dispatch:
 
 permissions:
   contents: write
@@ -26,384 +22,126 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Fetch available sources
+
+      - name: Fetch sources A/B
         shell: bash
         run: |
           set +e
           fetch() {
             name="$1"; url="$2"
-            curl -L --fail --retry 3 --retry-delay 2 --max-time 60               -A 'Mozilla/5.0 NM7-IPTV-Sports/2.0'               -H 'Cache-Control: no-cache' "$url" -o "/tmp/$name.m3u"
+            rm -f "/tmp/$name.m3u"
+            curl -L --fail --retry 3 --retry-delay 2 --connect-timeout 10 --max-time 60               -A 'Mozilla/5.0 NM7-IPTV-Sports/2.0' -H 'Cache-Control: no-cache' "$url" -o "/tmp/$name.m3u"
             rc=$?
-            if [ $rc -eq 0 ] && grep -qi '#EXTINF' "/tmp/$name.m3u"; then
-              echo "SOURCE_$name=1" >> "$GITHUB_ENV"
+            if [ "$rc" -eq 0 ] && grep -qi '#EXTINF' "/tmp/$name.m3u"; then
+              echo "SOURCE_$name=1" >> "$GITHUB_ENV"; echo "SOURCE_$name=OK"
             else
-              echo "SOURCE_$name=0" >> "$GITHUB_ENV"; rm -f "/tmp/$name.m3u"
+              echo "SOURCE_$name=0" >> "$GITHUB_ENV"; rm -f "/tmp/$name.m3u"; echo "SOURCE_$name=FAIL"
             fi
           }
           fetch A 'https://thtt.pages.dev/tttt.m3u'
           fetch B 'https://thcoban.github.io/thtt/tttt.m3u'
-      - name: Discover fallback sports streams from public web sources
-        if: env.SOURCE_A != '1' && env.SOURCE_B != '1'
+
+      - name: Build and validate sports playlist
+        env:
+          TZ: Asia/Ho_Chi_Minh
         shell: bash
         run: |
           set -euo pipefail
           python3 - <<'PY'
-          import html, re, urllib.request
-          from pathlib import Path
-          from urllib.parse import urljoin
-
-          UA='Mozilla/5.0 NM7-IPTV-Sports/2.0'
-          timeout=20
-          sources=['https://gavangtva.in.net/']
-          out=[]
-          seen=set()
-
-          def get(url):
-              req=urllib.request.Request(url,headers={'User-Agent':UA,'Cache-Control':'no-cache'})
-              with urllib.request.urlopen(req,timeout=timeout) as r:
-                  return r.read().decode('utf-8','ignore')
-
-          for base in sources:
-              try:
-                  home=get(base)
-              except Exception as e:
-                  print('Fallback source failed:',base,type(e).__name__)
-                  continue
-              hrefs=re.findall(r'href=[\\\"\\\']([^\\\"\\\']+)[\\\"\\\']',home,re.I)
-              match_pages=[]
-              for href in hrefs:
-                  u=urljoin(base,html.unescape(href))
-                  if '/truc-tiep/' in u and u not in match_pages:
-                      match_pages.append(u)
-              print('Fallback match pages discovered:',len(match_pages))
-              for page in match_pages[:80]:
-                  try:
-                      body=get(page)
-                  except Exception:
-                      continue
-                  title=re.search(r'<title[^>]*>(.*?)</title>',body,re.I|re.S)
-                  name=re.sub(r'\\s+',' ',html.unescape(re.sub(r'<[^>]+>',' ',title.group(1) if title else page))).strip()
-                  name=re.sub(r'\\s*[-|].*        env:
-          TZ: Asia/Ho_Chi_Minh
-        run: |
-          python3 - <<'PY'
           import concurrent.futures, datetime as dt, os, re, subprocess, unicodedata
           from pathlib import Path
           from urllib.parse import urlparse
           from zoneinfo import ZoneInfo
-          GROUPS={'Vua Sân Cỏ TV','Khán Đài TV','Cola TV','Gà Vàng TV','Gà Vàng 24h TV','Xôi Lạc Z TV','Gà Vàng 33 TV','S8 TV','Sao Kê TV','Bia Ôm TV','Chuối Chiên TV','Giờ Vàng TV','Socolive TV','Pháo Hoa TV','Nấu Xôi TV','SP TV (China)','Sút Bóng TV','Phá Làng TV','Web Discovery'}
+          VN=ZoneInfo("Asia/Ho_Chi_Minh"); NOW=dt.datetime.now(VN); MAX_AGE=180; TIMEOUT=7; WORKERS=24
+          GROUPS={"Vua Sân Cỏ TV","Khán Đài TV","Cola TV","Gà Vàng TV","Gà Vàng 24h TV","Xôi Lạc Z TV","Gà Vàng 33 TV","S8 TV","Sao Kê TV","Bia Ôm TV","Chuối Chiên TV","Giờ Vàng TV","Socolive TV","Pháo Hoa TV","Nấu Xôi TV","SP TV (China)","Sút Bóng TV","Phá Làng TV"}
           def norm_group(s):
-              s=unicodedata.normalize('NFKD',s); s=''.join(c for c in s if not unicodedata.combining(c)); s=s.lower().replace('&',' and '); s=re.sub(r'[^a-z0-9]+',' ',s); return re.sub(r'\s+',' ',s).strip()
+              s=unicodedata.normalize("NFKD",s); s="".join(c for c in s if not unicodedata.combining(c)); s=s.lower().replace("&"," and "); s=re.sub(r"[^a-z0-9]+"," ",s); return re.sub(r"\s+"," ",s).strip()
           GROUP_MAP={norm_group(g):g for g in GROUPS}
-          VN=ZoneInfo('Asia/Ho_Chi_Minh'); NOW=dt.datetime.now(VN); MAX_AGE=180; TIMEOUT=7; WORKERS=24
-          def blocks(t): return [b for b in re.split(r'(?=#EXTINF\s*:)',t.replace('\r','')) if re.match(r'\s*#EXTINF\s*:',b,re.I)]
-          # Source B may add new channel groups over time. Discover them after blocks() exists.
-          bpath=Path('/tmp/B.m3u')
-          if bpath.exists():
-              braw=bpath.read_text(encoding='utf-8',errors='ignore')
-              for _b in blocks(braw):
-                  _m=re.search(r'group-title="([^"]+)"',_b,re.I)
-                  if _m and _m.group(1).strip():
-                      GROUPS.add(_m.group(1).strip())
+          def blocks(t): return [b for b in re.split(r"(?=#EXTINF\s*:)",t.replace("\r","")) if re.match(r"\s*#EXTINF\s*:",b,re.I)]
+          bp=Path("/tmp/B.m3u")
+          if bp.exists():
+              for b in blocks(bp.read_text(encoding="utf-8",errors="ignore")):
+                  m=re.search(r'group-title="([^"]+)"',b,re.I)
+                  if m and m.group(1).strip(): GROUPS.add(m.group(1).strip())
               GROUP_MAP={norm_group(g):g for g in GROUPS}
-          def group_of(b):
-              m=re.search(r'group-title="([^"]+)"',b,re.I); raw=m.group(1).strip() if m else ''; return GROUP_MAP.get(norm_group(raw),raw)
           def parse(b):
-              lines=[x.strip() for x in b.splitlines() if x.strip()]; ext=lines[0] if lines else ''; name=ext.rsplit(',',1)[-1].strip() if ',' in ext else ext; url=next((x for x in lines[1:] if re.match(r'^https?://',x,re.I)),None); return name,group_of(b),url,lines
+              lines=[x.strip() for x in b.splitlines() if x.strip()]; ext=lines[0] if lines else ""; name=ext.rsplit(",",1)[-1].strip() if "," in ext else ext
+              url=next((x for x in lines[1:] if re.match(r"^https?://",x,re.I)),None); gm=re.search(r'group-title="([^"]+)"',ext,re.I); raw=gm.group(1).strip() if gm else ""
+              return name,GROUP_MAP.get(norm_group(raw),raw),url,lines
           def norm(s):
-              s=unicodedata.normalize('NFKD',s); s=''.join(c for c in s if not unicodedata.combining(c)); s=s.lower(); s=re.sub(r'\[hls\]|\b18\+\b',' ',s,flags=re.I); s=re.sub(r'\s*\([^)]*\)\s*$',' ',s); s=re.sub(r'[^a-z0-9]+',' ',s); return re.sub(r'\s+',' ',s).strip()
-          def match_key(name):
-              s=re.sub(r'^\s*[🟢🟡🔴⚽🏐🏀🎾]+\s*','',name); s=re.sub(r'^\s*\d{1,2}:\d{2}\s+\d{1,2}/\d{1,2}\s*','',s); s=re.sub(r'^\s*\d{1,2}:\d{2}\s*','',s); s=re.sub(r'\s*\([^)]*\)\s*$','',s); s=re.sub(r'\s*\[[^]]+\]\s*$','',s); s=re.sub(r'\b18\+\b','',s,flags=re.I); m=re.split(r'\s+v(?:s)?\s+',s,maxsplit=1,flags=re.I); return (norm(m[0])+' vs '+norm(m[1])) if len(m)==2 else norm(s)
+              s=unicodedata.normalize("NFKD",s); s="".join(c for c in s if not unicodedata.combining(c)); s=s.lower(); s=re.sub(r"\[hls\]|\b18\+\b"," ",s,flags=re.I); s=re.sub(r"\s*\([^)]*\)\s*$"," ",s); s=re.sub(r"[^a-z0-9]+"," ",s); return re.sub(r"\s+"," ",s).strip()
+          def key(name):
+              s=re.sub(r"^\s*[🟢🟡🔴⚽🏐🏀🎾]+\s*","",name); s=re.sub(r"^\s*\d{1,2}:\d{2}\s+\d{1,2}/\d{1,2}\s*","",s); s=re.sub(r"^\s*\d{1,2}:\d{2}\s*","",s); s=re.sub(r"\s*\([^)]*\)\s*$","",s); s=re.sub(r"\s*\[[^]]+\]\s*$","",s); s=re.sub(r"\b18\+\b","",s,flags=re.I); m=re.split(r"\s+v(?:s)?\s+",s,maxsplit=1,flags=re.I); return norm(m[0])+" vs "+norm(m[1]) if len(m)==2 else norm(s)
           def event_dt(name):
-              m=re.search(r'(\d{1,2}):(\d{2})\s+(\d{1,2})/(\d{1,2})',name)
+              m=re.search(r"(\d{1,2}):(\d{2})\s+(\d{1,2})/(\d{1,2})",name)
               if m:
                   h,mi,d,mo=map(int,m.groups()); y=NOW.year
-                  if mo < NOW.month-6: y+=1
-                  try: return dt.datetime(y,mo,d,h,mi,tzinfo=VN)
-                  except ValueError: return None
-              m=re.search(r'(\d{1,2}):(\d{2})',name)
+                  if mo<NOW.month-6: y+=1
+                  try:return dt.datetime(y,mo,d,h,mi,tzinfo=VN)
+                  except ValueError:return None
+              m=re.search(r"(\d{1,2}):(\d{2})",name)
               if m:
                   h,mi=map(int,m.groups()); x=NOW.replace(hour=h,minute=mi,second=0,microsecond=0)
-                  if x-NOW < dt.timedelta(hours=-12): x+=dt.timedelta(days=1)
+                  if x-NOW<dt.timedelta(hours=-12): x+=dt.timedelta(days=1)
                   return x
               return None
           def usable(b):
               name,group,url,lines=parse(b)
-              if group not in GROUPS or not url or url.lower()=='none': return None
+              if not group or not url or url.lower()=="none": return None
               when=event_dt(name)
-              if when and (NOW-when).total_seconds()/60 > MAX_AGE: return None
+              if when and (NOW-when).total_seconds()/60>MAX_AGE:return None
               kept=[lines[0]]
               for line in lines[1:]:
-                  if line.startswith('#EXTVLCOPT:'): kept.append(line)
-                  elif re.match(r'^https?://',line,re.I): kept.append(line); break
-              return {'name':name,'group':group,'url':url,'block':'\n'.join(kept),'key':match_key(name),'when':when.isoformat() if when else None}
-          cand={}; source_group_counts={}; known_urls=set()
+                  if line.startswith("#EXTVLCOPT:"): kept.append(line)
+                  elif re.match(r"^https?://",line,re.I): kept.append(line); break
+              return {"name":name,"group":group,"url":url,"block":"\n".join(kept),"key":key(name),"when":when}
+          candidates={}; counts={}
           def add(path,label):
-              p=Path(path)
-              if not p.exists(): return
-              raw=p.read_text(encoding='utf-8',errors='ignore'); counts={}
-              for b in blocks(raw):
-                  g=group_of(b); counts[g]=counts.get(g,0)+1; x=usable(b)
-                  if x:
-                      if label=='E' and x['url'] in known_urls: continue
-                      cand.setdefault(x['key'],[]).append({**x,'source':label})
-              source_group_counts[label]=counts
-              for vs in cand.values():
-                  for x in vs:
-                      if x['source']==label: known_urls.add(x['url'])
-          if os.getenv('SOURCE_A')=='1': add('/tmp/A.m3u','A')
-          if os.getenv('SOURCE_B')=='1': add('/tmp/B.m3u','B')
-          add('sources/golden-tv-selected.m3u','C'); add('sources/sport-selected.m3u','D'); add('sports-auto.m3u','LAST_GOOD'); add('/tmp/E.m3u','E')
-          def health(c):
-              ref=next((l.split('=',1)[1].strip() for l in c['block'].splitlines() if l.lower().startswith('#extvlcopt:http-referrer=')),None)
-              if urlparse(c['url']).scheme not in ('http','https'): return c,False,'scheme'
-              cmd=['curl','-L','--globoff','--silent','--show-error','--connect-timeout','3','--max-time',str(TIMEOUT),'--retry','0','-r','0-4095','-A','Mozilla/5.0 NM7-IPTV-Sports/2.0','-o','/dev/null','-w','%{http_code}',c['url']]
-              if ref: cmd=cmd[:-3]+['-e',ref]+cmd[-3:]
-              try:
-                  p=subprocess.run(cmd,capture_output=True,text=True,timeout=TIMEOUT+2); code=p.stdout.strip()[-3:] if p.stdout else '000'; return c,code.isdigit() and 200<=int(code)<400,code
-              except Exception as e: return c,False,type(e).__name__
-          allc=[x for vs in cand.values() for x in vs]; results=[]
-          with concurrent.futures.ThreadPoolExecutor(max_workers=WORKERS) as ex:
-              for r in ex.map(health,allc): results.append(r)
-          priority={'A':0,'B':1,'C':2,'D':3,'E':10,'LAST_GOOD':9}; selected=[]
-          for key,xs_all in cand.items():
-              best=min(priority.get(x['source'],8) for x in xs_all); selected.extend([x for x in xs_all if priority.get(x['source'],8)==best])
-          selected.sort(key=lambda x:(x['when'] is None,x['when'] or '',x['group'],x['name'],x['url']))
-          # Final safety pass: never publish an explicitly dated event older than MAX_AGE,
-          # including entries inherited from LAST_GOOD or any fallback source.
-          before_stale_filter=len(selected)
-          selected=[x for x in selected if not x['when'] or (NOW-dt.datetime.fromisoformat(x['when'])).total_seconds()/60 <= MAX_AGE]
-          removed_stale=before_stale_filter-len(selected)
-          print(f'Stale entries removed by final 180-minute safety filter: {removed_stale}')
-          print('Candidates:',len(allc),'matches:',len(cand),'health-tested:',len(results),'live:',sum(1 for _,ok,_ in results if ok),'selected:',len(selected))
-          for label in ('A','B','C','D','E','LAST_GOOD'):
-              counts=source_group_counts.get(label,{}); print(f'GROUPS_{label}:',{g:counts.get(g,0) for g in GROUPS if counts.get(g,0)})
-          if not selected:
-              # Never preserve expired timed sports matches just because all live sources are down.
-              # Scrub the existing playlist using the same 180-minute rule before deciding.
-              old=Path('sports-auto.m3u')
-              if old.exists():
-                  old_raw=old.read_text(encoding='utf-8',errors='ignore')
-                  kept_old=[]
-                  for b in blocks(old_raw):
+              p=Path(path); n=0
+              if p.exists():
+                  for b in blocks(p.read_text(encoding="utf-8",errors="ignore")):
                       x=usable(b)
-                      if x:
-                          kept_old.append(x['block'])
-                  Path('sports-auto.m3u').write_text('#EXTM3U\\n'+'\\n'.join(kept_old)+'\\n',encoding='utf-8')
-                  print(f'No live candidate; scrubbed existing playlist with 180-minute expiry. Remaining entries: {len(kept_old)}')
-                  raise SystemExit(0)
-              raise SystemExit('No live source and no previous playlist; refusing overwrite')
-          Path('sports-auto.m3u').write_text('#EXTM3U\n'+'\n'.join(x['block'] for x in selected)+'\n',encoding='utf-8')
-          print('Rule: completeness-first. For each match, use the highest-priority source, but publish every commentator/stream variant from that source; do not collapse variants into one entry.')
-          print('Rule: explicit match times older than 180 minutes are excluded.')
-          PY
-      - name: Final automatic 180-minute expiry sanitizer
-        if: github.event_name != 'pull_request'
-        env:
-          TZ: Asia/Ho_Chi_Minh
-        run: |
-          python3 - <<'PY'
-          import datetime as dt, re
-          from pathlib import Path
-          from zoneinfo import ZoneInfo
-
-          VN=ZoneInfo('Asia/Ho_Chi_Minh')
-          NOW=dt.datetime.now(VN)
-          MAX_AGE=180
-          path=Path('sports-auto.m3u')
-          if not path.exists():
-              raise SystemExit('sports-auto.m3u not found')
-
-          raw=path.read_text(encoding='utf-8',errors='ignore')
-          blocks=[b for b in re.split(r'(?=#EXTINF\\s*:)',raw.replace('\\r',''))
-                  if re.match(r'\\s*#EXTINF\\s*:',b,re.I)]
-
-          kept=[]
-          removed=0
-          for b in blocks:
-              first=b.splitlines()[0] if b.splitlines() else ''
-              name=first.rsplit(',',1)[-1].strip() if ',' in first else first
-              m=re.search(r'(\\d{1,2}):(\\d{2})\\s+(\\d{1,2})/(\\d{1,2})',name)
-              if not m:
-                  m=re.search(r'(\\d{1,2}):(\\d{2})',name)
-                  when=NOW.replace(hour=int(m.group(1)),minute=int(m.group(2)),second=0,microsecond=0) if m else None
-              else:
-                  h,mi,d,mo=map(int,m.groups())
-                  try:
-                      when=dt.datetime(NOW.year,mo,d,h,mi,tzinfo=VN)
-                  except ValueError:
-                      when=None
-              if when is not None and (NOW-when).total_seconds()/60 > MAX_AGE:
-                  removed+=1
-                  continue
-              kept.append(b.strip())
-          path.write_text('#EXTM3U\\n'+'\\n'.join(kept)+'\\n',encoding='utf-8')
-          print(f'FINAL EXPIRY: removed={removed}, remaining={len(kept)}, now={NOW.isoformat()}')
+                      if x: n+=1; candidates.setdefault(x["key"],[]).append({**x,"source":label})
+              counts[label]=n
+          if os.getenv("SOURCE_A")=="1": add("/tmp/A.m3u","A")
+          if os.getenv("SOURCE_B")=="1": add("/tmp/B.m3u","B")
+          add("sources/golden-tv-selected.m3u","C"); add("sources/sport-selected.m3u","D")
+          def health(x):
+              try:
+                  if urlparse(x["url"]).scheme not in ("http","https"): return x,False,"scheme"
+                  ref=next((l.split("=",1)[1].strip() for l in x["block"].splitlines() if l.lower().startswith("#extvlcopt:http-referrer=")),None)
+                  cmd=["curl","-L","--globoff","--silent","--show-error","--connect-timeout","3","--max-time",str(TIMEOUT),"--retry","0","-r","0-4095","-A","Mozilla/5.0 NM7-IPTV-Sports/2.0","-o","/dev/null","-w","%{http_code}",x["url"]]
+                  if ref: cmd += ["-e",ref]
+                  p=subprocess.run(cmd,capture_output=True,text=True,timeout=TIMEOUT+2); code=p.stdout.strip()[-3:] if p.stdout else "000"
+                  return x,code.isdigit() and 200<=int(code)<400,code
+              except Exception as e:return x,False,type(e).__name__
+          allc=[x for xs in candidates.values() for x in xs]
+          with concurrent.futures.ThreadPoolExecutor(max_workers=WORKERS) as ex: results=list(ex.map(health,allc))
+          healthy=[x for x,ok,_ in results if ok]; bykey={}
+          for x,ok,code in results:
+              if ok: bykey.setdefault(x["key"],[]).append(x)
+          priority={"A":0,"B":1,"C":2,"D":3}; selected=[]
+          for xs in bykey.values():
+              best=min(priority.get(x["source"],99) for x in xs); selected += [x for x in xs if priority.get(x["source"],99)==best]
+          selected.sort(key=lambda x:(x["when"] is None,x["when"] or dt.datetime.max.replace(tzinfo=VN),x["group"],x["name"],x["url"]))
+          print("=== SOURCE STATUS ===")
+          for label in ("A","B","C"): print(f"SOURCE_{label}="+("OK" if (os.getenv(f"SOURCE_{label}")=="1" if label!="C" else counts.get("C",0)>0) else "FAIL")+f" entries={counts.get(label,0)}")
+          print(f"CANDIDATES={len(allc)} HEALTHY={len(healthy)} MATCHES={len(candidates)} SELECTED={len(selected)} NOW_VN={NOW.isoformat()}")
+          if not selected:
+              old=Path("sports-auto.m3u")
+              if old.exists():
+                  kept=[usable(b)["block"] for b in blocks(old.read_text(encoding="utf-8",errors="ignore")) if usable(b)]
+                  old.write_text("#EXTM3U\n"+"\n".join(kept)+"\n",encoding="utf-8"); print(f"NO_LIVE_CANDIDATE: scrubbed old playlist, remaining={len(kept)}"); raise SystemExit(0)
+              raise SystemExit("No healthy sports source and no previous playlist")
+          Path("sports-auto.m3u").write_text("#EXTM3U\n"+"\n".join(x["block"] for x in selected)+"\n",encoding="utf-8"); print("PLAYLIST_UPDATED=1")
           PY
 
-      - name: Commit changed playlist
-        if: github.event_name != 'pull_request'
+      - name: Commit updated playlist
         run: |
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add sports-auto.m3u
-          if git diff --cached --quiet; then echo 'Playlist unchanged.'; exit 0; fi
-          cp sports-auto.m3u /tmp/generated-sports-auto.m3u
-          git commit -m 'auto: update resilient sports playlist'
-          git fetch origin main
-          git reset --hard origin/main
-          cp /tmp/generated-sports-auto.m3u sports-auto.m3u
-          git add sports-auto.m3u
-          if git diff --cached --quiet; then echo 'Remote already contains equivalent playlist.'; exit 0; fi
-          git commit -m 'auto: update resilient sports playlist'
-          git push origin main
-,'',name).strip()
-                  # Only collect URLs explicitly exposed by the public match page.
-                  urls=re.findall(r'https?://[^\\\"\\\'\\s<>]+\\.(?:m3u8|m3u|flv)(?:\\?[^\\\"\\\'\\s<>]*)?',body,re.I)
-                  for u in urls:
-                      u=html.unescape(u)
-                      if u in seen: continue
-                      seen.add(u)
-                      out.append((name or 'Web Discovery',u))
-
-          lines=['#EXTM3U']
-          for name,u in out:
-              lines.append(f'#EXTINF:-1 group-title="Web Discovery",{name}')
-              lines.append(u)
-          Path('/tmp/E.m3u').write_text('\\n'.join(lines)+'\\n',encoding='utf-8')
-          print('Fallback streams discovered:',len(out))
-          PY
-
-      - name: Build resilient sports playlist
-        env:
-          TZ: Asia/Ho_Chi_Minh
-        run: |
-          python3 - <<'PY'
-          import concurrent.futures, datetime as dt, os, re, subprocess, unicodedata
-          from pathlib import Path
-          from urllib.parse import urlparse
-          from zoneinfo import ZoneInfo
-          GROUPS={'Vua Sân Cỏ TV','Khán Đài TV','Cola TV','Gà Vàng TV','Gà Vàng 24h TV','Xôi Lạc Z TV','Gà Vàng 33 TV','S8 TV','Sao Kê TV','Bia Ôm TV','Chuối Chiên TV','Giờ Vàng TV','Socolive TV','Pháo Hoa TV','Nấu Xôi TV','SP TV (China)','Sút Bóng TV','Phá Làng TV'}
-          def norm_group(s):
-              s=unicodedata.normalize('NFKD',s); s=''.join(c for c in s if not unicodedata.combining(c)); s=s.lower().replace('&',' and '); s=re.sub(r'[^a-z0-9]+',' ',s); return re.sub(r'\s+',' ',s).strip()
-          GROUP_MAP={norm_group(g):g for g in GROUPS}
-          VN=ZoneInfo('Asia/Ho_Chi_Minh'); NOW=dt.datetime.now(VN); MAX_AGE=180; TIMEOUT=7; WORKERS=24
-          def blocks(t): return [b for b in re.split(r'(?=#EXTINF\s*:)',t.replace('\r','')) if re.match(r'\s*#EXTINF\s*:',b,re.I)]
-          # Source B may add new channel groups over time. Discover them after blocks() exists.
-          bpath=Path('/tmp/B.m3u')
-          if bpath.exists():
-              braw=bpath.read_text(encoding='utf-8',errors='ignore')
-              for _b in blocks(braw):
-                  _m=re.search(r'group-title="([^"]+)"',_b,re.I)
-                  if _m and _m.group(1).strip():
-                      GROUPS.add(_m.group(1).strip())
-              GROUP_MAP={norm_group(g):g for g in GROUPS}
-          def group_of(b):
-              m=re.search(r'group-title="([^"]+)"',b,re.I); raw=m.group(1).strip() if m else ''; return GROUP_MAP.get(norm_group(raw),raw)
-          def parse(b):
-              lines=[x.strip() for x in b.splitlines() if x.strip()]; ext=lines[0] if lines else ''; name=ext.rsplit(',',1)[-1].strip() if ',' in ext else ext; url=next((x for x in lines[1:] if re.match(r'^https?://',x,re.I)),None); return name,group_of(b),url,lines
-          def norm(s):
-              s=unicodedata.normalize('NFKD',s); s=''.join(c for c in s if not unicodedata.combining(c)); s=s.lower(); s=re.sub(r'\[hls\]|\b18\+\b',' ',s,flags=re.I); s=re.sub(r'\s*\([^)]*\)\s*$',' ',s); s=re.sub(r'[^a-z0-9]+',' ',s); return re.sub(r'\s+',' ',s).strip()
-          def match_key(name):
-              s=re.sub(r'^\s*[🟢🟡🔴⚽🏐🏀🎾]+\s*','',name); s=re.sub(r'^\s*\d{1,2}:\d{2}\s+\d{1,2}/\d{1,2}\s*','',s); s=re.sub(r'^\s*\d{1,2}:\d{2}\s*','',s); s=re.sub(r'\s*\([^)]*\)\s*$','',s); s=re.sub(r'\s*\[[^]]+\]\s*$','',s); s=re.sub(r'\b18\+\b','',s,flags=re.I); m=re.split(r'\s+v(?:s)?\s+',s,maxsplit=1,flags=re.I); return (norm(m[0])+' vs '+norm(m[1])) if len(m)==2 else norm(s)
-          def event_dt(name):
-              m=re.search(r'(\d{1,2}):(\d{2})\s+(\d{1,2})/(\d{1,2})',name)
-              if m:
-                  h,mi,d,mo=map(int,m.groups()); y=NOW.year
-                  if mo < NOW.month-6: y+=1
-                  try: return dt.datetime(y,mo,d,h,mi,tzinfo=VN)
-                  except ValueError: return None
-              m=re.search(r'(\d{1,2}):(\d{2})',name)
-              if m:
-                  h,mi=map(int,m.groups()); x=NOW.replace(hour=h,minute=mi,second=0,microsecond=0)
-                  if x-NOW < dt.timedelta(hours=-12): x+=dt.timedelta(days=1)
-                  return x
-              return None
-          def usable(b):
-              name,group,url,lines=parse(b)
-              if group not in GROUPS or not url or url.lower()=='none': return None
-              when=event_dt(name)
-              if when and (NOW-when).total_seconds()/60 > MAX_AGE: return None
-              kept=[lines[0]]
-              for line in lines[1:]:
-                  if line.startswith('#EXTVLCOPT:'): kept.append(line)
-                  elif re.match(r'^https?://',line,re.I): kept.append(line); break
-              return {'name':name,'group':group,'url':url,'block':'\n'.join(kept),'key':match_key(name),'when':when.isoformat() if when else None}
-          cand={}; source_group_counts={}; known_urls=set()
-          def add(path,label):
-              p=Path(path)
-              if not p.exists(): return
-              raw=p.read_text(encoding='utf-8',errors='ignore'); counts={}
-              for b in blocks(raw):
-                  g=group_of(b); counts[g]=counts.get(g,0)+1; x=usable(b)
-                  if x:
-                      if label=='E' and x['url'] in known_urls: continue
-                      cand.setdefault(x['key'],[]).append({**x,'source':label})
-              source_group_counts[label]=counts
-              for vs in cand.values():
-                  for x in vs:
-                      if x['source']==label: known_urls.add(x['url'])
-          if os.getenv('SOURCE_A')=='1': add('/tmp/A.m3u','A')
-          if os.getenv('SOURCE_B')=='1': add('/tmp/B.m3u','B')
-          add('sources/golden-tv-selected.m3u','C'); add('sources/sport-selected.m3u','D'); add('sports-auto.m3u','LAST_GOOD'); add('sources/web-discovered.m3u','E')
-          def health(c):
-              ref=next((l.split('=',1)[1].strip() for l in c['block'].splitlines() if l.lower().startswith('#extvlcopt:http-referrer=')),None)
-              if urlparse(c['url']).scheme not in ('http','https'): return c,False,'scheme'
-              cmd=['curl','-L','--globoff','--silent','--show-error','--connect-timeout','3','--max-time',str(TIMEOUT),'--retry','0','-r','0-4095','-A','Mozilla/5.0 NM7-IPTV-Sports/2.0','-o','/dev/null','-w','%{http_code}',c['url']]
-              if ref: cmd=cmd[:-3]+['-e',ref]+cmd[-3:]
-              try:
-                  p=subprocess.run(cmd,capture_output=True,text=True,timeout=TIMEOUT+2); code=p.stdout.strip()[-3:] if p.stdout else '000'; return c,code.isdigit() and 200<=int(code)<400,code
-              except Exception as e: return c,False,type(e).__name__
-          allc=[x for vs in cand.values() for x in vs]; results=[]
-          with concurrent.futures.ThreadPoolExecutor(max_workers=WORKERS) as ex:
-              for r in ex.map(health,allc): results.append(r)
-          priority={'A':0,'B':1,'C':2,'D':3,'E':10,'LAST_GOOD':9}; selected=[]
-          for key,xs_all in cand.items():
-              best=min(priority.get(x['source'],8) for x in xs_all); selected.extend([x for x in xs_all if priority.get(x['source'],8)==best])
-          selected.sort(key=lambda x:(x['when'] is None,x['when'] or '',x['group'],x['name'],x['url']))
-          # Final safety pass: never publish an explicitly dated event older than MAX_AGE,
-          # including entries inherited from LAST_GOOD or any fallback source.
-          before_stale_filter=len(selected)
-          selected=[x for x in selected if not x['when'] or (NOW-dt.datetime.fromisoformat(x['when'])).total_seconds()/60 <= MAX_AGE]
-          removed_stale=before_stale_filter-len(selected)
-          print(f'Stale entries removed by final 180-minute safety filter: {removed_stale}')
-          print('Candidates:',len(allc),'matches:',len(cand),'health-tested:',len(results),'live:',sum(1 for _,ok,_ in results if ok),'selected:',len(selected))
-          for label in ('A','B','C','D','E','LAST_GOOD'):
-              counts=source_group_counts.get(label,{}); print(f'GROUPS_{label}:',{g:counts.get(g,0) for g in GROUPS if counts.get(g,0)})
-          if not selected:
-              # If all live sources fail, never publish stale matches from LAST_GOOD.
-              # Scrub the existing playlist with the exact same 180-minute rule.
-              old=Path('sports-auto.m3u')
-              if old.exists():
-                  old_raw=old.read_text(encoding='utf-8',errors='ignore')
-                  kept_old=[]
-                  for b in blocks(old_raw):
-                      x=usable(b)
-                      if x:
-                          kept_old.append(x['block'])
-                  Path('sports-auto.m3u').write_text('#EXTM3U\\n'+'\\n'.join(kept_old)+'\\n',encoding='utf-8')
-                  print(f'No live candidate; stale-scrubbed LAST_GOOD. Remaining entries: {len(kept_old)}')
-                  raise SystemExit(0)
-              raise SystemExit('No live source and no previous playlist; refusing overwrite')
-          Path('sports-auto.m3u').write_text('#EXTM3U\n'+'\n'.join(x['block'] for x in selected)+'\n',encoding='utf-8')
-          print('Rule: completeness-first. For each match, use the highest-priority source, but publish every commentator/stream variant from that source; do not collapse variants into one entry.')
-          print('Rule: explicit match times older than 180 minutes are excluded.')
-          PY
-      - name: Commit changed playlist
-        if: github.event_name != 'pull_request'
-        run: |
-          set -euo pipefail
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add sports-auto.m3u
-          if git diff --cached --quiet; then echo 'Playlist unchanged.'; exit 0; fi
-          cp sports-auto.m3u /tmp/generated-sports-auto.m3u
-          git commit -m 'auto: update resilient sports playlist'
-          git fetch origin main
-          git reset --hard origin/main
-          cp /tmp/generated-sports-auto.m3u sports-auto.m3u
-          git add sports-auto.m3u
-          if git diff --cached --quiet; then echo 'Remote already contains equivalent playlist.'; exit 0; fi
+          if git diff --cached --quiet; then echo "Playlist unchanged."; exit 0; fi
           git commit -m 'auto: update resilient sports playlist'
           git push origin main
