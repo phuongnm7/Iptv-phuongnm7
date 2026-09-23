@@ -179,8 +179,19 @@ jobs:
           for label in ('A','B','C','D','E','LAST_GOOD'):
               counts=source_group_counts.get(label,{}); print(f'GROUPS_{label}:',{g:counts.get(g,0) for g in GROUPS if counts.get(g,0)})
           if not selected:
+              # Never preserve expired timed sports matches just because all live sources are down.
+              # Scrub the existing playlist using the same 180-minute rule before deciding.
               old=Path('sports-auto.m3u')
-              if old.exists() and '#EXTINF' in old.read_text(encoding='utf-8',errors='ignore'): print('No live candidate; keeping last known good playlist'); raise SystemExit(0)
+              if old.exists():
+                  old_raw=old.read_text(encoding='utf-8',errors='ignore')
+                  kept_old=[]
+                  for b in blocks(old_raw):
+                      x=usable(b)
+                      if x:
+                          kept_old.append(x['block'])
+                  Path('sports-auto.m3u').write_text('#EXTM3U\\n'+'\\n'.join(kept_old)+'\\n',encoding='utf-8')
+                  print(f'No live candidate; scrubbed existing playlist with 180-minute expiry. Remaining entries: {len(kept_old)}')
+                  raise SystemExit(0)
               raise SystemExit('No live source and no previous playlist; refusing overwrite')
           Path('sports-auto.m3u').write_text('#EXTM3U\n'+'\n'.join(x['block'] for x in selected)+'\n',encoding='utf-8')
           print('Rule: completeness-first. For each match, use the highest-priority source, but publish every commentator/stream variant from that source; do not collapse variants into one entry.')
