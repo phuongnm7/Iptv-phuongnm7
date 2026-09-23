@@ -75,10 +75,16 @@ jobs:
           def event_dt(name):
               m=re.search(r"(\d{1,2}):(\d{2})\s+(\d{1,2})/(\d{1,2})",name)
               if m:
-                  h,mi,d,mo=map(int,m.groups()); y=NOW.year
-                  if mo<NOW.month-6: y+=1
-                  try:return dt.datetime(y,mo,d,h,mi,tzinfo=VN)
-                  except ValueError:return None
+                  h,mi,d,mo=map(int,m.groups())
+                  candidates=[]
+                  for y in (NOW.year-1, NOW.year, NOW.year+1):
+                      try:
+                          candidates.append(dt.datetime(y,mo,d,h,mi,tzinfo=VN))
+                      except ValueError:
+                          pass
+                  if candidates:
+                      return min(candidates, key=lambda x: abs((x-NOW).total_seconds()))
+                  return None
               m=re.search(r"(\d{1,2}):(\d{2})",name)
               if m:
                   h,mi=map(int,m.groups()); x=NOW.replace(hour=h,minute=mi,second=0,microsecond=0)
@@ -144,4 +150,9 @@ jobs:
           git add sports-auto.m3u
           if git diff --cached --quiet; then echo "Playlist unchanged."; exit 0; fi
           git commit -m 'auto: update resilient sports playlist'
+          # Another workflow in this repository can update a different playlist
+          # at the same time. Rebase before pushing so a successful sports
+          # refresh is not lost to a non-fast-forward race.
+          git fetch origin main
+          git rebase origin/main
           git push origin main
