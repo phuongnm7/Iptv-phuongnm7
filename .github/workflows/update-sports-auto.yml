@@ -6,7 +6,7 @@ on:
       - '.github/workflows/update-sports-auto.yml'
       - 'sources/**'
   schedule:
-    - cron: '*/10 * * * *'
+    - cron: '*/5 * * * *'
   pull_request:
     paths:
       - '.github/workflows/update-sports-auto.yml'
@@ -197,6 +197,50 @@ jobs:
           print('Rule: completeness-first. For each match, use the highest-priority source, but publish every commentator/stream variant from that source; do not collapse variants into one entry.')
           print('Rule: explicit match times older than 180 minutes are excluded.')
           PY
+      - name: Final automatic 180-minute expiry sanitizer
+        if: github.event_name != 'pull_request'
+        env:
+          TZ: Asia/Ho_Chi_Minh
+        run: |
+          python3 - <<'PY'
+          import datetime as dt, re
+          from pathlib import Path
+          from zoneinfo import ZoneInfo
+
+          VN=ZoneInfo('Asia/Ho_Chi_Minh')
+          NOW=dt.datetime.now(VN)
+          MAX_AGE=180
+          path=Path('sports-auto.m3u')
+          if not path.exists():
+              raise SystemExit('sports-auto.m3u not found')
+
+          raw=path.read_text(encoding='utf-8',errors='ignore')
+          blocks=[b for b in re.split(r'(?=#EXTINF\\s*:)',raw.replace('\\r',''))
+                  if re.match(r'\\s*#EXTINF\\s*:',b,re.I)]
+
+          kept=[]
+          removed=0
+          for b in blocks:
+              first=b.splitlines()[0] if b.splitlines() else ''
+              name=first.rsplit(',',1)[-1].strip() if ',' in first else first
+              m=re.search(r'(\\d{1,2}):(\\d{2})\\s+(\\d{1,2})/(\\d{1,2})',name)
+              if not m:
+                  m=re.search(r'(\\d{1,2}):(\\d{2})',name)
+                  when=NOW.replace(hour=int(m.group(1)),minute=int(m.group(2)),second=0,microsecond=0) if m else None
+              else:
+                  h,mi,d,mo=map(int,m.groups())
+                  try:
+                      when=dt.datetime(NOW.year,mo,d,h,mi,tzinfo=VN)
+                  except ValueError:
+                      when=None
+              if when is not None and (NOW-when).total_seconds()/60 > MAX_AGE:
+                  removed+=1
+                  continue
+              kept.append(b.strip())
+          path.write_text('#EXTM3U\\n'+'\\n'.join(kept)+'\\n',encoding='utf-8')
+          print(f'FINAL EXPIRY: removed={removed}, remaining={len(kept)}, now={NOW.isoformat()}')
+          PY
+
       - name: Commit changed playlist
         if: github.event_name != 'pull_request'
         run: |
@@ -328,8 +372,19 @@ jobs:
           for label in ('A','B','C','D','E','LAST_GOOD'):
               counts=source_group_counts.get(label,{}); print(f'GROUPS_{label}:',{g:counts.get(g,0) for g in GROUPS if counts.get(g,0)})
           if not selected:
+              # If all live sources fail, never publish stale matches from LAST_GOOD.
+              # Scrub the existing playlist with the exact same 180-minute rule.
               old=Path('sports-auto.m3u')
-              if old.exists() and '#EXTINF' in old.read_text(encoding='utf-8',errors='ignore'): print('No live candidate; keeping last known good playlist'); raise SystemExit(0)
+              if old.exists():
+                  old_raw=old.read_text(encoding='utf-8',errors='ignore')
+                  kept_old=[]
+                  for b in blocks(old_raw):
+                      x=usable(b)
+                      if x:
+                          kept_old.append(x['block'])
+                  Path('sports-auto.m3u').write_text('#EXTM3U\\n'+'\\n'.join(kept_old)+'\\n',encoding='utf-8')
+                  print(f'No live candidate; stale-scrubbed LAST_GOOD. Remaining entries: {len(kept_old)}')
+                  raise SystemExit(0)
               raise SystemExit('No live source and no previous playlist; refusing overwrite')
           Path('sports-auto.m3u').write_text('#EXTM3U\n'+'\n'.join(x['block'] for x in selected)+'\n',encoding='utf-8')
           print('Rule: completeness-first. For each match, use the highest-priority source, but publish every commentator/stream variant from that source; do not collapse variants into one entry.')
