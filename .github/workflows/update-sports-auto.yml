@@ -55,8 +55,9 @@ jobs:
           def norm_group(s):
               s=unicodedata.normalize('NFKD',s); s=''.join(c for c in s if not unicodedata.combining(c)); s=s.lower().replace('&',' and '); s=re.sub(r'[^a-z0-9]+',' ',s); return re.sub(r'\s+',' ',s).strip()
           GROUP_MAP={norm_group(g):g for g in GROUPS}
-          # Source B may add new channel groups over time. Discover its group-title values
-          # and merge them into the allowed group set before parsing/selection.
+          VN=ZoneInfo('Asia/Ho_Chi_Minh'); NOW=dt.datetime.now(VN); MAX_AGE=180; TIMEOUT=7; WORKERS=24
+          def blocks(t): return [b for b in re.split(r'(?=#EXTINF\s*:)',t.replace('\r','')) if re.match(r'\s*#EXTINF\s*:',b,re.I)]
+          # Source B may add new channel groups over time. Discover them after blocks() exists.
           bpath=Path('/tmp/B.m3u')
           if bpath.exists():
               braw=bpath.read_text(encoding='utf-8',errors='ignore')
@@ -65,8 +66,6 @@ jobs:
                   if _m and _m.group(1).strip():
                       GROUPS.add(_m.group(1).strip())
               GROUP_MAP={norm_group(g):g for g in GROUPS}
-          VN=ZoneInfo('Asia/Ho_Chi_Minh'); NOW=dt.datetime.now(VN); MAX_AGE=180; TIMEOUT=7; WORKERS=24
-          def blocks(t): return [b for b in re.split(r'(?=#EXTINF\s*:)',t.replace('\r','')) if re.match(r'\s*#EXTINF\s*:',b,re.I)]
           def group_of(b):
               m=re.search(r'group-title="([^"]+)"',b,re.I); raw=m.group(1).strip() if m else ''; return GROUP_MAP.get(norm_group(raw),raw)
           def parse(b):
