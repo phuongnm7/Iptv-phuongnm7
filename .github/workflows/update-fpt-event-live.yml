@@ -8,15 +8,19 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: fpt-event-live
+  cancel-in-progress: true
+
 jobs:
   update:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 10
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Filter live FPT events
+      - name: Scan and filter live FPT events
         run: python3 tools/filter_fpt_events.py
 
       - name: Commit changed playlist
