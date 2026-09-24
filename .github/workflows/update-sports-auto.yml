@@ -173,7 +173,6 @@ jobs:
           # Do not probe every stream here. The probe results were diagnostic-only
           # and could make a 5-minute scheduled run overlap/queue. The playlist
           # is built from source data and validated by the 180-minute rule.
-          healthy=[]
           priority={"A":0,"B":1,"C":2,"D":3}
           # Health checks are diagnostic only. They must NEVER remove a
           # source/group from the playlist: a stream can be temporarily
@@ -229,7 +228,8 @@ jobs:
               s=stats.get(label,{})
               status=("OK" if (os.getenv(f"SOURCE_{label}")== "1" if label in ("A","B") else s.get("raw",0)>0) else "FAIL")
               print(f"SOURCE_{label}={status} RAW={s.get('raw',0)} DATED={s.get('dated',0)} KEPT={s.get('kept',0)} EXPIRED_GT_{MAX_AGE}M={s.get('expired',0)} UNDATED={s.get('undated',0)} INVALID={s.get('invalid',0)}")
-          print(f"CANDIDATES={len(allc)} HEALTHY={len(healthy)} MATCHES={len(candidates)} SELECTED={len(selected)} STATIC_PRESERVED={len(static_blocks)} OUTPUT_BLOCKS={len(merged)} NOW_VN={NOW.isoformat()}")
+          candidate_count=sum(len(xs) for xs in candidates.values())
+          print(f"CANDIDATES={candidate_count} MATCHES={len(candidates)} SELECTED={len(selected)} STATIC_PRESERVED={len(static_blocks)} OUTPUT_BLOCKS={len(merged)} NOW_VN={NOW.isoformat()}")
           print(f"FILTER_RULE=remove_only_dated_matches_older_than_{MAX_AGE}_minutes; DEDUPE_SCOPE=GROUP+MATCH")
 
           if not merged:
