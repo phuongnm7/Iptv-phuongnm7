@@ -198,28 +198,39 @@ jobs:
 
           selected.sort(key=lambda x:(x["when"] is None,x["when"] or dt.datetime.max.replace(tzinfo=VN),x["group"],x["name"],x["url"]))
 
-          # IMPORTANT: preserve every existing static channel/group entry.
-          # Only existing entries with a parseable event time are treated as
-          # dynamic matches and replaced by the newly selected matches.
+          # Preserve the previous playlist as a short-term fallback.
+          # This prevents a temporary source A/B failure from wiping current
+          # matches/groups. Stale dated matches are still removed after 180m.
           old=Path("sports-auto.m3u")
+          fallback_by_key={}
           static_blocks=[]
           if old.exists():
               for b in blocks(old.read_text(encoding="utf-8",errors="ignore")):
                   name,group,url,lines=parse(b)
                   if not group or not url or url.lower()=="none":
                       continue
-                  if event_dt(name) is None:
-                      x=usable(b)
-                      if x:
-                          static_blocks.append(x["block"])
+                  x=usable(b)
+                  if not x:
+                      continue
+                  if x["when"] is None:
+                      static_blocks.append(x["block"])
+                  else:
+                      fallback_by_key[x["key"]]=x
 
-          # Deduplicate while preserving order.
+          # New source data replaces the same Group+Match fallback; otherwise
+          # the still-fresh previous entry remains.
+          selected_by_key={x["key"]:x for x in selected}
           merged=[]
           seen=set()
-          for block in static_blocks + [x["block"] for x in selected]:
+          for block in static_blocks:
               if block not in seen:
-                  seen.add(block)
-                  merged.append(block)
+                  seen.add(block); merged.append(block)
+          for k,x in fallback_by_key.items():
+              if k not in selected_by_key and x["block"] not in seen:
+                  seen.add(x["block"]); merged.append(x["block"])
+          for x in selected:
+              if x["block"] not in seen:
+                  seen.add(x["block"]); merged.append(x["block"])
 
           print("=== SOURCE STATUS ===")
           for label in ("A","B","C","D"):
