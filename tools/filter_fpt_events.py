@@ -121,24 +121,9 @@ def live_check(item):
         return None
 
 def display_url(name, verified_url, source):
-    # If VIPS itself was verified, publish the original master URL.
-    # Do NOT publish a selected video rendition here: the master playlist can
-    # reference the separate AAC/audio rendition, and some IPTV players lose
-    # audio when given only the video media playlist.
-    if source == "VIPS":
-        return verified_url
-
-    # LIVECDN is a detection fallback. Prefer the matching VIPS URL only when
-    # the corresponding VIPS endpoint also exists; otherwise keep the verified
-    # LIVECDN stream so we never publish an unverified URL.
-    m = re.search(r"/sukien(\d+)_vhls\.smil/", verified_url)
-    if m:
-        candidate = f"{VIPS}/su-kien-{m.group(1)}/hls_avc_v6/index.m3u8"
-        try:
-            if resolve_media(candidate):
-                return candidate
-        except Exception:
-            pass
+    # Prefer LIVECDN direct media playlists for standard su-kien-XX events.
+    # They are single media playlists and are more compatible with IPTV
+    # players than a VIPS master whose audio may be represented separately.
     return verified_url
 
 def main():
@@ -155,7 +140,7 @@ def main():
                 out_url = display_url(name, verified_url, source)
                 # Prefer non-4K VIPS over fallback duplicates; otherwise keep
                 # the first verified result for the same display name.
-                if name not in live or source == "VIPS":
+                if name not in live or source == "LIVECDN":
                     live[name] = (name, out_url)
 
     if not live:
