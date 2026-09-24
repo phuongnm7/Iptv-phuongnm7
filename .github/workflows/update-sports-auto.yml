@@ -3,7 +3,7 @@ name: Update sports auto playlist (multi-source)
 
 on:
   schedule:
-    - cron: '2-59/5 * * * *'
+    - cron: '*/5 * * * *'
   workflow_dispatch:
   push:
     paths:
@@ -196,7 +196,9 @@ jobs:
               best=min(priority.get(x["source"],99) for x in xs)
               selected += [x for x in xs if priority.get(x["source"],99)==best]
 
-          selected.sort(key=lambda x:(x["when"] is None,x["when"] or dt.datetime.max.replace(tzinfo=VN),x["group"],x["name"],x["url"]))
+          GROUP_ORDER=["Vua Sân Cỏ TV","Khán Đài TV","Cola TV","Gà Vàng TV","Gà Vàng 24h TV","Xôi Lạc Z TV","Gà Vàng 33 TV","S8 TV","Sao Kê TV","Bia Ôm TV","Chuối Chiên TV","Giờ Vàng TV","Socolive TV","Pháo Hoa TV","Nấu Xôi TV","SP TV (China)","Sút Bóng TV","Phá Làng TV"]
+          GROUP_ORDER_MAP={norm_group(g):i for i,g in enumerate(GROUP_ORDER)}
+          selected.sort(key=lambda x:(GROUP_ORDER_MAP.get(norm_group(x["group"]),9999),x["when"] is None,x["when"] or dt.datetime.max.replace(tzinfo=VN),x["name"],x["url"]))
 
           # Preserve the previous playlist as a short-term fallback.
           # This prevents a temporary source A/B failure from wiping current
@@ -218,19 +220,22 @@ jobs:
                       fallback_by_key[x["key"]]=x
 
           # New source data replaces the same Group+Match fallback; otherwise
-          # the still-fresh previous entry remains.
+          # the still-fresh previous entry remains. Dynamic groups ALWAYS come
+          # first; static/undated channels ALWAYS come last.
           selected_by_key={x["key"]:x for x in selected}
-          merged=[]
+          dynamic=[]
           seen=set()
+          for k,x in fallback_by_key.items():
+              if k not in selected_by_key and x["block"] not in seen:
+                  seen.add(x["block"]); dynamic.append(x)
+          for x in selected:
+              if x["block"] not in seen:
+                  seen.add(x["block"]); dynamic.append(x)
+          dynamic.sort(key=lambda x:(GROUP_ORDER_MAP.get(norm_group(x["group"]),9999),x["when"] is None,x["when"] or dt.datetime.max.replace(tzinfo=VN),x["name"],x["url"]))
+          merged=[x["block"] for x in dynamic]
           for block in static_blocks:
               if block not in seen:
                   seen.add(block); merged.append(block)
-          for k,x in fallback_by_key.items():
-              if k not in selected_by_key and x["block"] not in seen:
-                  seen.add(x["block"]); merged.append(x["block"])
-          for x in selected:
-              if x["block"] not in seen:
-                  seen.add(x["block"]); merged.append(x["block"])
 
           print("=== SOURCE STATUS ===")
           for label in ("A","B","C","D"):
