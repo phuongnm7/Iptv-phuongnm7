@@ -16,11 +16,12 @@ permissions:
 
 concurrency:
   group: update-sports-auto
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   update:
     runs-on: ubuntu-24.04
+    timeout-minutes: 4
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -169,25 +170,10 @@ jobs:
           add("sources/golden-tv-selected.m3u","C")
           add("sources/sport-selected.m3u","D")
 
-          def health(x):
-              try:
-                  if urlparse(x["url"]).scheme not in ("http","https"): return x,False,"scheme"
-                  ref=next((l.split("=",1)[1].strip() for l in x["block"].splitlines() if l.lower().startswith("#extvlcopt:http-referrer=")),None)
-                  cmd=["curl","-L","--globoff","--silent","--show-error","--connect-timeout","3","--max-time",str(TIMEOUT),"--retry","0","-r","0-4095","-A","Mozilla/5.0 NM7-IPTV-Sports/2.0","-o","/dev/null","-w","%{http_code}",x["url"]]
-                  if ref: cmd += ["-e",ref]
-                  p=subprocess.run(cmd,capture_output=True,text=True,timeout=TIMEOUT+2)
-                  code=p.stdout.strip()[-3:] if p.stdout else "000"
-                  return x,code.isdigit() and 200<=int(code)<400,code
-              except Exception as e: return x,False,type(e).__name__
-
-          allc=[x for xs in candidates.values() for x in xs]
-          with concurrent.futures.ThreadPoolExecutor(max_workers=WORKERS) as ex:
-              results=list(ex.map(health,allc))
-          healthy=[x for x,ok,_ in results if ok]
-          bykey={}
-          for x,ok,code in results:
-              if ok: bykey.setdefault(x["key"],[]).append(x)
-
+          # Do not probe every stream here. The probe results were diagnostic-only
+          # and could make a 5-minute scheduled run overlap/queue. The playlist
+          # is built from source data and validated by the 180-minute rule.
+          healthy=[]
           priority={"A":0,"B":1,"C":2,"D":3}
           # Health checks are diagnostic only. They must NEVER remove a
           # source/group from the playlist: a stream can be temporarily
