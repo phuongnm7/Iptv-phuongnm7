@@ -188,15 +188,13 @@ jobs:
               if ok: bykey.setdefault(x["key"],[]).append(x)
 
           priority={"A":0,"B":1,"C":2,"D":3}
+          # Health checks are diagnostic only. They must NEVER remove a
+          # source/group from the playlist: a stream can be temporarily
+          # unreachable while still being a valid playlist entry.
           selected=[]
-          unhealthy_fallback=0
           for k,xs in candidates.items():
-              healthy_xs=bykey.get(k,[])
-              pool=healthy_xs if healthy_xs else xs
-              if not healthy_xs:
-                  unhealthy_fallback += 1
-              best=min(priority.get(x["source"],99) for x in pool)
-              selected += [x for x in pool if priority.get(x["source"],99)==best]
+              best=min(priority.get(x["source"],99) for x in xs)
+              selected += [x for x in xs if priority.get(x["source"],99)==best]
 
           selected.sort(key=lambda x:(x["when"] is None,x["when"] or dt.datetime.max.replace(tzinfo=VN),x["group"],x["name"],x["url"]))
 
@@ -228,7 +226,7 @@ jobs:
               s=stats.get(label,{})
               status=("OK" if (os.getenv(f"SOURCE_{label}")== "1" if label in ("A","B") else s.get("raw",0)>0) else "FAIL")
               print(f"SOURCE_{label}={status} RAW={s.get('raw',0)} DATED={s.get('dated',0)} KEPT={s.get('kept',0)} EXPIRED_GT_{MAX_AGE}M={s.get('expired',0)} UNDATED={s.get('undated',0)} INVALID={s.get('invalid',0)}")
-          print(f"CANDIDATES={len(allc)} HEALTHY={len(healthy)} MATCHES={len(candidates)} SELECTED={len(selected)} UNHEALTHY_FALLBACK={unhealthy_fallback} STATIC_PRESERVED={len(static_blocks)} OUTPUT_BLOCKS={len(merged)} NOW_VN={NOW.isoformat()}")
+          print(f"CANDIDATES={len(allc)} HEALTHY={len(healthy)} MATCHES={len(candidates)} SELECTED={len(selected)} STATIC_PRESERVED={len(static_blocks)} OUTPUT_BLOCKS={len(merged)} NOW_VN={NOW.isoformat()}")
           print(f"FILTER_RULE=remove_only_dated_matches_older_than_{MAX_AGE}_minutes; DEDUPE_SCOPE=GROUP+MATCH")
 
           if not merged:
