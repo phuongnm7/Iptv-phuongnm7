@@ -113,7 +113,7 @@ def live_check(item):
         # A moving media sequence/newest segment is definitive. A changing
         # program-date-time is also sufficient when sequence numbers are absent.
         if sig1 != sig2:
-            return (name, media_url, source)
+            return (name, url, source)
 
         return None
     except Exception as exc:
@@ -121,7 +121,10 @@ def live_check(item):
         return None
 
 def display_url(name, verified_url, source):
-    # If VIPS itself was verified, use exactly that URL.
+    # If VIPS itself was verified, publish the original master URL.
+    # Do NOT publish a selected video rendition here: the master playlist can
+    # reference the separate AAC/audio rendition, and some IPTV players lose
+    # audio when given only the video media playlist.
     if source == "VIPS":
         return verified_url
 
