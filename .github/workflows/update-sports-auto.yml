@@ -1,4 +1,5 @@
 name: Update sports auto playlist (multi-source)
+# Triggered from ChatGPT to verify GitHub Actions auto-refresh path: 2026-09-24T08:19:20.960Z
 # Force a run after the group-scoped dedupe fix.
 
 on:
