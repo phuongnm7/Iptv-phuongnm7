@@ -1,4 +1,5 @@
 name: Update sports auto playlist (multi-source)
+# Force a run after the group-scoped dedupe fix.
 
 on:
   schedule:
