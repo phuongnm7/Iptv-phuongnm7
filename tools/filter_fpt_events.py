@@ -149,9 +149,22 @@ def main():
         print("NO_POSITIVE_DETECTION - PRESERVE EXISTING PLAYLIST")
         return
 
+    # Keep a small set of known FPT Event / 4K endpoints as fallback entries.
+    backups = []
+    for i in range(1, 6):
+        n = f"{i:02d}"
+        backups.append((f"Sự kiện FPT Event {n} - Dự phòng", f"{VIPS}/event-{n}/hls_avc_v6/index.m3u8"))
+    for i in range(1, 11):
+        n = f"{i:02d}"
+        backups.append((f"Sự kiện FPT Event {n} 4K - Dự phòng", f"{VIPS}/event-{n}-4k/hls_avc_v6/index.m3u8"))
+
+    live_urls = {url for _, url in live.values()}
     lines = ["#EXTM3U", ""]
     for name, url in sorted(live.values(), key=lambda x: x[0].lower()):
         lines += [f'#EXTINF:-1 group-title="{GROUP}",{name}', url, ""]
+    for name, url in backups:
+        if url not in live_urls:
+            lines += [f'#EXTINF:-1 group-title="{GROUP}",{name}', url, ""]
 
     with open("fpt-event-live.m3u", "w", encoding="utf-8") as f:
         f.write("\n".join(lines))
