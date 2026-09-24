@@ -2,6 +2,10 @@ name: Update FPT Event Live Playlist
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - "tools/filter_fpt_events.py"
+      - ".github/workflows/update-fpt-event-live.yml"
   schedule:
     - cron: "*/5 * * * *"
 
@@ -15,12 +19,12 @@ concurrency:
 jobs:
   update:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Scan and filter live FPT events
+      - name: Scan FPT public HLS event endpoints
         run: python3 tools/filter_fpt_events.py
 
       - name: Commit changed playlist
