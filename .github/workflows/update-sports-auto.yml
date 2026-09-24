@@ -98,7 +98,7 @@ jobs:
               s=re.sub(r"[^a-z0-9]+"," ",s)
               return re.sub(r"\s+"," ",s).strip()
 
-          def key(name):
+          def key(name, group=""):
               s=re.sub(r"^\s*[🟢🟡🔴⚽🏐🏀🎾]+\s*","",name)
               s=re.sub(r"^\s*\d{1,2}:\d{2}\s+\d{1,2}/\d{1,2}\s*","",s)
               s=re.sub(r"^\s*\d{1,2}:\d{2}\s*","",s)
@@ -106,7 +106,8 @@ jobs:
               s=re.sub(r"\s*\[[^]]+\]\s*$","",s)
               s=re.sub(r"\b18\+\b","",s,flags=re.I)
               m=re.split(r"\s+v(?:s)?\s+",s,maxsplit=1,flags=re.I)
-              return norm(m[0])+" vs "+norm(m[1]) if len(m)==2 else norm(s)
+              match=norm(m[0])+" vs "+norm(m[1]) if len(m)==2 else norm(s)
+              return norm(group)+" :: "+match
 
           def event_dt(name):
               m=re.search(r"(\d{1,2}):(\d{2})\s+(\d{1,2})/(\d{1,2})",name)
@@ -136,7 +137,7 @@ jobs:
                   elif re.match(r"^https?://",line,re.I):
                       kept.append(line)
                       break
-              return {"name":name,"group":group,"url":url,"block":"\n".join(kept),"key":key(name),"when":when}
+              return {"name":name,"group":group,"url":url,"block":"\n".join(kept),"key":key(name,group),"when":when}
 
           candidates={}
           stats={}
@@ -222,7 +223,7 @@ jobs:
               status=("OK" if (os.getenv(f"SOURCE_{label}")== "1" if label in ("A","B") else s.get("raw",0)>0) else "FAIL")
               print(f"SOURCE_{label}={status} RAW={s.get('raw',0)} DATED={s.get('dated',0)} KEPT={s.get('kept',0)} EXPIRED_GT_{MAX_AGE}M={s.get('expired',0)} UNDATED={s.get('undated',0)} INVALID={s.get('invalid',0)}")
           print(f"CANDIDATES={len(allc)} HEALTHY={len(healthy)} MATCHES={len(candidates)} SELECTED={len(selected)} STATIC_PRESERVED={len(static_blocks)} OUTPUT_BLOCKS={len(merged)} NOW_VN={NOW.isoformat()}")
-          print(f"FILTER_RULE=remove_only_dated_matches_older_than_{MAX_AGE}_minutes")
+          print(f"FILTER_RULE=remove_only_dated_matches_older_than_{MAX_AGE}_minutes; DEDUPE_SCOPE=GROUP+MATCH")
 
           if not merged:
               raise SystemExit("Refusing to write empty sports-auto.m3u")
