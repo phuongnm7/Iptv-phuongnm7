@@ -2,7 +2,6 @@ name: Update sports auto playlist (multi-source)
 
 on:
   schedule:
-    # Run every 5 minutes, offset from the top of the hour to reduce GitHub schedule-load drops.
     - cron: '2-59/5 * * * *'
   workflow_dispatch:
   push:
@@ -31,7 +30,7 @@ jobs:
           fetch() {
             name="$1"; url="$2"
             rm -f "/tmp/$name.m3u"
-            curl -L --fail --retry 3 --retry-delay 2 --connect-timeout 10 --max-time 60               -A 'Mozilla/5.0 NM7-IPTV-Sports/2.0' -H 'Cache-Control: no-cache' "$url" -o "/tmp/$name.m3u"
+            curl -L --fail --retry 3 --retry-delay 2 --connect-timeout 10 --max-time 60 -A 'Mozilla/5.0 NM7-IPTV-Sports/2.0' -H 'Cache-Control: no-cache' "$url" -o "/tmp/$name.m3u"
             rc=$?
             if [ "$rc" -eq 0 ] && grep -qi '#EXTINF' "/tmp/$name.m3u"; then
               echo "SOURCE_$name=1" >> "$GITHUB_ENV"; echo "SOURCE_$name=OK"
@@ -53,56 +52,94 @@ jobs:
           from pathlib import Path
           from urllib.parse import urlparse
           from zoneinfo import ZoneInfo
-          VN=ZoneInfo("Asia/Ho_Chi_Minh"); NOW=dt.datetime.now(VN); MAX_AGE=180; TIMEOUT=7; WORKERS=24
+
+          VN=ZoneInfo("Asia/Ho_Chi_Minh")
+          NOW=dt.datetime.now(VN)
+          MAX_AGE=180
+          TIMEOUT=7
+          WORKERS=24
           GROUPS={"Vua Sân Cỏ TV","Khán Đài TV","Cola TV","Gà Vàng TV","Gà Vàng 24h TV","Xôi Lạc Z TV","Gà Vàng 33 TV","S8 TV","Sao Kê TV","Bia Ôm TV","Chuối Chiên TV","Giờ Vàng TV","Socolive TV","Pháo Hoa TV","Nấu Xôi TV","SP TV (China)","Sút Bóng TV","Phá Làng TV"}
+
           def norm_group(s):
-              s=unicodedata.normalize("NFKD",s); s="".join(c for c in s if not unicodedata.combining(c)); s=s.lower().replace("&"," and "); s=re.sub(r"[^a-z0-9]+"," ",s); return re.sub(r"\s+"," ",s).strip()
+              s=unicodedata.normalize("NFKD",s)
+              s="".join(c for c in s if not unicodedata.combining(c))
+              s=s.lower().replace("&"," and ")
+              s=re.sub(r"[^a-z0-9]+"," ",s)
+              return re.sub(r"\s+"," ",s).strip()
+
           GROUP_MAP={norm_group(g):g for g in GROUPS}
-          def blocks(t): return [b for b in re.split(r"(?=#EXTINF\s*:)",t.replace("\r","")) if re.match(r"\s*#EXTINF\s*:",b,re.I)]
+
+          def blocks(t):
+              return [b for b in re.split(r"(?=#EXTINF\s*:)",t.replace("\r","")) if re.match(r"\s*#EXTINF\s*:",b,re.I)]
+
           bp=Path("/tmp/B.m3u")
           if bp.exists():
               for b in blocks(bp.read_text(encoding="utf-8",errors="ignore")):
                   m=re.search(r'group-title="([^"]+)"',b,re.I)
-                  if m and m.group(1).strip(): GROUPS.add(m.group(1).strip())
+                  if m and m.group(1).strip():
+                      GROUPS.add(m.group(1).strip())
               GROUP_MAP={norm_group(g):g for g in GROUPS}
+
           def parse(b):
-              lines=[x.strip() for x in b.splitlines() if x.strip()]; ext=lines[0] if lines else ""; name=ext.rsplit(",",1)[-1].strip() if "," in ext else ext
-              url=next((x for x in lines[1:] if re.match(r"^https?://",x,re.I)),None); gm=re.search(r'group-title="([^"]+)"',ext,re.I); raw=gm.group(1).strip() if gm else ""
+              lines=[x.strip() for x in b.splitlines() if x.strip()]
+              ext=lines[0] if lines else ""
+              name=ext.rsplit(",",1)[-1].strip() if "," in ext else ext
+              url=next((x for x in lines[1:] if re.match(r"^https?://",x,re.I)),None)
+              gm=re.search(r'group-title="([^"]+)"',ext,re.I)
+              raw=gm.group(1).strip() if gm else ""
               return name,GROUP_MAP.get(norm_group(raw),raw),url,lines
+
           def norm(s):
-              s=unicodedata.normalize("NFKD",s); s="".join(c for c in s if not unicodedata.combining(c)); s=s.lower(); s=re.sub(r"\[hls\]|\b18\+\b"," ",s,flags=re.I); s=re.sub(r"\s*\([^)]*\)\s*$"," ",s); s=re.sub(r"[^a-z0-9]+"," ",s); return re.sub(r"\s+"," ",s).strip()
+              s=unicodedata.normalize("NFKD",s)
+              s="".join(c for c in s if not unicodedata.combining(c))
+              s=s.lower()
+              s=re.sub(r"\[hls\]|\b18\+\b"," ",s,flags=re.I)
+              s=re.sub(r"\s*\([^)]*\)\s*$"," ",s)
+              s=re.sub(r"[^a-z0-9]+"," ",s)
+              return re.sub(r"\s+"," ",s).strip()
+
           def key(name):
-              s=re.sub(r"^\s*[🟢🟡🔴⚽🏐🏀🎾]+\s*","",name); s=re.sub(r"^\s*\d{1,2}:\d{2}\s+\d{1,2}/\d{1,2}\s*","",s); s=re.sub(r"^\s*\d{1,2}:\d{2}\s*","",s); s=re.sub(r"\s*\([^)]*\)\s*$","",s); s=re.sub(r"\s*\[[^]]+\]\s*$","",s); s=re.sub(r"\b18\+\b","",s,flags=re.I); m=re.split(r"\s+v(?:s)?\s+",s,maxsplit=1,flags=re.I); return norm(m[0])+" vs "+norm(m[1]) if len(m)==2 else norm(s)
+              s=re.sub(r"^\s*[🟢🟡🔴⚽🏐🏀🎾]+\s*","",name)
+              s=re.sub(r"^\s*\d{1,2}:\d{2}\s+\d{1,2}/\d{1,2}\s*","",s)
+              s=re.sub(r"^\s*\d{1,2}:\d{2}\s*","",s)
+              s=re.sub(r"\s*\([^)]*\)\s*$","",s)
+              s=re.sub(r"\s*\[[^]]+\]\s*$","",s)
+              s=re.sub(r"\b18\+\b","",s,flags=re.I)
+              m=re.split(r"\s+v(?:s)?\s+",s,maxsplit=1,flags=re.I)
+              return norm(m[0])+" vs "+norm(m[1]) if len(m)==2 else norm(s)
+
           def event_dt(name):
               m=re.search(r"(\d{1,2}):(\d{2})\s+(\d{1,2})/(\d{1,2})",name)
               if m:
                   h,mi,d,mo=map(int,m.groups())
                   candidates=[]
-                  for y in (NOW.year-1, NOW.year, NOW.year+1):
-                      try:
-                          candidates.append(dt.datetime(y,mo,d,h,mi,tzinfo=VN))
-                      except ValueError:
-                          pass
-                  if candidates:
-                      return min(candidates, key=lambda x: abs((x-NOW).total_seconds()))
-                  return None
+                  for y in (NOW.year-1,NOW.year,NOW.year+1):
+                      try: candidates.append(dt.datetime(y,mo,d,h,mi,tzinfo=VN))
+                      except ValueError: pass
+                  return min(candidates,key=lambda x:abs((x-NOW).total_seconds())) if candidates else None
               m=re.search(r"(\d{1,2}):(\d{2})",name)
               if m:
-                  h,mi=map(int,m.groups()); x=NOW.replace(hour=h,minute=mi,second=0,microsecond=0)
+                  h,mi=map(int,m.groups())
+                  x=NOW.replace(hour=h,minute=mi,second=0,microsecond=0)
                   if x-NOW<dt.timedelta(hours=-12): x+=dt.timedelta(days=1)
                   return x
               return None
+
           def usable(b):
               name,group,url,lines=parse(b)
               if not group or not url or url.lower()=="none": return None
               when=event_dt(name)
-              if when and (NOW-when).total_seconds()/60>MAX_AGE:return None
+              if when and (NOW-when).total_seconds()/60>MAX_AGE: return None
               kept=[lines[0]]
               for line in lines[1:]:
                   if line.startswith("#EXTVLCOPT:"): kept.append(line)
-                  elif re.match(r"^https?://",line,re.I): kept.append(line); break
+                  elif re.match(r"^https?://",line,re.I):
+                      kept.append(line)
+                      break
               return {"name":name,"group":group,"url":url,"block":"\n".join(kept),"key":key(name),"when":when}
-          candidates={}; counts={}; stats={}
+
+          candidates={}
+          stats={}
           def add(path,label):
               p=Path(path)
               raw=dated=kept=expired=undated=invalid=0
@@ -111,70 +148,103 @@ jobs:
                       raw += 1
                       name,group,url,lines=parse(b)
                       if not group or not url or url.lower()=="none":
-                          invalid += 1
-                          continue
+                          invalid += 1; continue
                       when=event_dt(name)
-                      if when is None:
-                          undated += 1
+                      if when is None: undated += 1
                       else:
                           dated += 1
-                          age_min=(NOW-when).total_seconds()/60
-                          if age_min > MAX_AGE:
-                              expired += 1
-                              continue
+                          if (NOW-when).total_seconds()/60>MAX_AGE:
+                              expired += 1; continue
                       x=usable(b)
                       if x:
                           kept += 1
                           candidates.setdefault(x["key"],[]).append({**x,"source":label})
-              counts[label]=kept
               stats[label]={"raw":raw,"dated":dated,"kept":kept,"expired":expired,"undated":undated,"invalid":invalid}
+
           if os.getenv("SOURCE_A")=="1": add("/tmp/A.m3u","A")
           if os.getenv("SOURCE_B")=="1": add("/tmp/B.m3u","B")
-          add("sources/golden-tv-selected.m3u","C"); add("sources/sport-selected.m3u","D")
+          add("sources/golden-tv-selected.m3u","C")
+          add("sources/sport-selected.m3u","D")
+
           def health(x):
               try:
                   if urlparse(x["url"]).scheme not in ("http","https"): return x,False,"scheme"
                   ref=next((l.split("=",1)[1].strip() for l in x["block"].splitlines() if l.lower().startswith("#extvlcopt:http-referrer=")),None)
                   cmd=["curl","-L","--globoff","--silent","--show-error","--connect-timeout","3","--max-time",str(TIMEOUT),"--retry","0","-r","0-4095","-A","Mozilla/5.0 NM7-IPTV-Sports/2.0","-o","/dev/null","-w","%{http_code}",x["url"]]
                   if ref: cmd += ["-e",ref]
-                  p=subprocess.run(cmd,capture_output=True,text=True,timeout=TIMEOUT+2); code=p.stdout.strip()[-3:] if p.stdout else "000"
+                  p=subprocess.run(cmd,capture_output=True,text=True,timeout=TIMEOUT+2)
+                  code=p.stdout.strip()[-3:] if p.stdout else "000"
                   return x,code.isdigit() and 200<=int(code)<400,code
-              except Exception as e:return x,False,type(e).__name__
+              except Exception as e: return x,False,type(e).__name__
+
           allc=[x for xs in candidates.values() for x in xs]
-          with concurrent.futures.ThreadPoolExecutor(max_workers=WORKERS) as ex: results=list(ex.map(health,allc))
-          healthy=[x for x,ok,_ in results if ok]; bykey={}
+          with concurrent.futures.ThreadPoolExecutor(max_workers=WORKERS) as ex:
+              results=list(ex.map(health,allc))
+          healthy=[x for x,ok,_ in results if ok]
+          bykey={}
           for x,ok,code in results:
               if ok: bykey.setdefault(x["key"],[]).append(x)
-          priority={"A":0,"B":1,"C":2,"D":3}; selected=[]
+
+          priority={"A":0,"B":1,"C":2,"D":3}
+          selected=[]
           for xs in bykey.values():
-              best=min(priority.get(x["source"],99) for x in xs); selected += [x for x in xs if priority.get(x["source"],99)==best]
+              best=min(priority.get(x["source"],99) for x in xs)
+              selected += [x for x in xs if priority.get(x["source"],99)==best]
+
           selected.sort(key=lambda x:(x["when"] is None,x["when"] or dt.datetime.max.replace(tzinfo=VN),x["group"],x["name"],x["url"]))
+
+          # IMPORTANT: preserve every existing static channel/group entry.
+          # Only existing entries with a parseable event time are treated as
+          # dynamic matches and replaced by the newly selected matches.
+          old=Path("sports-auto.m3u")
+          static_blocks=[]
+          if old.exists():
+              for b in blocks(old.read_text(encoding="utf-8",errors="ignore")):
+                  name,group,url,lines=parse(b)
+                  if not group or not url or url.lower()=="none":
+                      continue
+                  if event_dt(name) is None:
+                      x=usable(b)
+                      if x:
+                          static_blocks.append(x["block"])
+
+          # Deduplicate while preserving order.
+          merged=[]
+          seen=set()
+          for block in static_blocks + [x["block"] for x in selected]:
+              if block not in seen:
+                  seen.add(block)
+                  merged.append(block)
+
           print("=== SOURCE STATUS ===")
           for label in ("A","B","C","D"):
               s=stats.get(label,{})
-              status=("OK" if (os.getenv(f"SOURCE_{label}")=="1" if label in ("A","B") else s.get("raw",0)>0) else "FAIL")
+              status=("OK" if (os.getenv(f"SOURCE_{label}")== "1" if label in ("A","B") else s.get("raw",0)>0) else "FAIL")
               print(f"SOURCE_{label}={status} RAW={s.get('raw',0)} DATED={s.get('dated',0)} KEPT={s.get('kept',0)} EXPIRED_GT_{MAX_AGE}M={s.get('expired',0)} UNDATED={s.get('undated',0)} INVALID={s.get('invalid',0)}")
-          print(f"CANDIDATES={len(allc)} HEALTHY={len(healthy)} MATCHES={len(candidates)} SELECTED={len(selected)} NOW_VN={NOW.isoformat()}")
-          print(f"FILTER_RULE=keep_future_and_started_within_{MAX_AGE}_minutes")
-          if not selected:
-              old=Path("sports-auto.m3u")
-              if old.exists():
-                  kept=[usable(b)["block"] for b in blocks(old.read_text(encoding="utf-8",errors="ignore")) if usable(b)]
-                  old.write_text("#EXTM3U\n"+"\n".join(kept)+"\n",encoding="utf-8"); print(f"NO_LIVE_CANDIDATE: scrubbed old playlist, remaining={len(kept)}"); raise SystemExit(0)
-              raise SystemExit("No healthy sports source and no previous playlist")
-          Path("sports-auto.m3u").write_text("#EXTM3U\n"+"\n".join(x["block"] for x in selected)+"\n",encoding="utf-8")
-          # Hard validation: a dated match older than MAX_AGE must never reach the app playlist.
-          output=blocks(Path("sports-auto.m3u").read_text(encoding="utf-8",errors="ignore"))
+          print(f"CANDIDATES={len(allc)} HEALTHY={len(healthy)} MATCHES={len(candidates)} SELECTED={len(selected)} STATIC_PRESERVED={len(static_blocks)} OUTPUT_BLOCKS={len(merged)} NOW_VN={NOW.isoformat()}")
+          print(f"FILTER_RULE=remove_only_dated_matches_older_than_{MAX_AGE}_minutes")
+
+          if not merged:
+              raise SystemExit("Refusing to write empty sports-auto.m3u")
+
+          output_text="#EXTM3U\n"+"\n".join(merged)+"\n"
+          Path("sports-auto.m3u").write_text(output_text,encoding="utf-8")
+
+          # Hard validation: no dated match older than MAX_AGE may remain.
+          output=blocks(output_text)
           stale=[]
           for b in output:
-              name,_,_,_=parse(b); when=event_dt(name)
-              if when is not None and (NOW-when).total_seconds()/60 > MAX_AGE:
+              name,_,_,_=parse(b)
+              when=event_dt(name)
+              if when is not None and (NOW-when).total_seconds()/60>MAX_AGE:
                   stale.append((name,when.isoformat()))
-          print(f"OUTPUT_DATED={sum(event_dt(parse(b)[0]) is not None for b in output)} OUTPUT_STALE={len(stale)}")
           if stale:
               print("STALE_OUTPUT_SAMPLE="+repr(stale[:10]))
               raise SystemExit("Validation failed: stale match remained in sports-auto.m3u")
+          if len(output) < len(static_blocks):
+              raise SystemExit("Validation failed: preserved static channels were lost")
           print("PLAYLIST_UPDATED=1")
+
           PY
 
       - name: Commit updated playlist
@@ -185,9 +255,6 @@ jobs:
           git add sports-auto.m3u
           if git diff --cached --quiet; then echo "Playlist unchanged."; exit 0; fi
           git commit -m 'auto: update resilient sports playlist'
-          # Another workflow in this repository can update a different playlist
-          # at the same time. Rebase before pushing so a successful sports
-          # refresh is not lost to a non-fast-forward race.
           git fetch origin main
           git rebase origin/main
           git push origin main
