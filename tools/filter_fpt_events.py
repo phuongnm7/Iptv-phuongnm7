@@ -7,16 +7,16 @@ from urllib.error import HTTPError, URLError
 BASE = "https://vips-livecdn.fptplay.net/live/media"
 CANDIDATES = []
 
-def add(name, path):
-    CANDIDATES.append((name, f"{BASE}/{path}/hls_avc_v6/index.m3u8"))
+def add(name, path, kind):
+    CANDIDATES.append((name, f"{BASE}/{path}/hls_avc_v6/index.m3u8", kind))
 
-# Broad scan: numbered FPT event and 4K naming patterns.
+# Scan both FPT naming families. "event-XX" is kept as EVENT in the playlist.
 for i in range(1, 51):
     n = f"{i:02d}"
-    add(f"Sự kiện FPT {n}", f"su-kien-{n}")
-    add(f"Sự kiện FPT {n} 4K", f"su-kien-{n}-4k")
-    add(f"FPT Event {n}", f"event-{n}")
-    add(f"FPT Event {n} 4K", f"event-{n}-4k")
+    add(f"Sự kiện FPT {n}", f"su-kien-{n}", "SU_KIEN")
+    add(f"Sự kiện FPT {n} 4K", f"su-kien-{n}-4k", "SU_KIEN_4K")
+    add(f"FPT Event {n}", f"event-{n}", "EVENT")
+    add(f"FPT Event {n} 4K", f"event-{n}-4k", "EVENT_4K")
 
 UA = "Mozilla/5.0 (Android) AppleWebKit/537.36 Chrome/120 Safari/537.36"
 TIMEOUT = 8
@@ -46,12 +46,11 @@ def playlist_info(txt):
     }
 
 def is_live(item):
-    name, url = item
+    name, url, kind = item
     try:
         first = playlist_info(get_playlist(url))
         if not first:
             return None
-        # Wait for a real HLS segment rotation; no fixed 4-second assumption.
         wait = min(max(first["target"] * 1.5, 5.0), 12.0)
         time.sleep(wait)
         second = playlist_info(get_playlist(url))
@@ -62,7 +61,7 @@ def is_live(item):
             or first["last"] != second["last"]
             or first["count"] != second["count"]
         )
-        return (name, url) if moving else None
+        return (name, url, kind) if moving else None
     except (HTTPError, URLError, TimeoutError, OSError, UnicodeError):
         return None
     except Exception:
@@ -79,15 +78,27 @@ def main():
             if result:
                 live.append(result)
 
-    live.sort(key=lambda x: x[0])
+    live.sort(key=lambda x: (x[2], x[0]))
     out = ["#EXTM3U", ""]
-    for name, url in live:
-        out += [f'#EXTINF:-1 group-title="SỰ KIỆN FPT",{name}', url, ""]
+    for name, url, kind in live:
+        if kind.startswith("EVENT"):
+            # Keep the literal keyword EVENT visible in NM7 IPTV.
+            display = name
+            group = "FPT EVENT"
+        elif kind == "SU_KIEN_4K":
+            display = name
+            group = "SỰ KIỆN FPT 4K"
+        else:
+            display = name
+            group = "SỰ KIỆN FPT"
+        out += [f'#EXTINF:-1 group-title="{group}",{display}', url, ""]
+
     with open("fpt-event-live.m3u", "w", encoding="utf-8") as f:
         f.write("\n".join(out))
 
     print(f"Scanned candidates: {len(CANDIDATES)}")
     print(f"Live events: {len(live)}")
+    print(f"EVENT family live: {sum(1 for x in live if x[2].startswith('EVENT'))}")
 
 if __name__ == "__main__":
     main()
