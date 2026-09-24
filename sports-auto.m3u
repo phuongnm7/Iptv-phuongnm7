@@ -195,8 +195,14 @@ http://mag.tivi-one-iptv.net:80/play/live.php?mac=00:1A:79:0E:0F:8E&stream=79496
 http://zazaint.com:80/MAGU52TLAM/SAAk0NZH71/955954
 #EXTINF:-1 group-title="┃UK┃ EPL PREMIER LEAGUE TEAMS" tvg-logo="http://picon.tivi-ott.net:25461/picon/UK/UK EPL Premier League TEAMS/MANCHESTER CITY.png" tvg-id="" tvg-name="┃UK┃ MANCHESTER CITY F.C (MATCH TIME)" tvg-expire="20/06/2027" gau-status="CHƯA TEST" gau-open="" gau-resolution="" gau-bitrate="" gau-subtitle="CHƯA XÁC ĐỊNH" gau-subtitle-lang="" gau-subtitle-type="",┃UK┃ MANCHESTER CITY F.C (MATCH TIME)
 http://mag.tivi-one-iptv.net:80/play/live.php?mac=00:1A:79:0E:0F:8E&stream=794965&extension=ts&play_token=rDPwJmT15O
-#EXTINF:-1 tvg-logo="https://thumb.wikimedia.org/wikipedia/vi/thumb/1/14/2026_Asian_Games_logo.png/250px-2026_Asian_Games_logo.png?utm_source=vi.wikipedia.org&utm_campaign=parser&utm_content=thumbnail" group-title="Giờ Vàng TV" , 🟢 10:00 24/09 ⚽ ASIAD 2026 vs ASIAD 2026 (BLV Túi Mù) [hls]
-https://eqr2hdarxfliv.vcdn.cloud/1789838904_hd/1789838904_hd@720p.m3u8
+#EXTINF:-1 tvg-logo="https://images.fotmob.com/image_resources/logo/teamlogo/8361.png" group-title="Sao Kê TV" , 01:45 25/09 ⚽ Portugal vs Wales (Ricky, Củ Cải) [hls]
+#EXTVLCOPT:http-referrer=https://sk.mediastation.live/
+https://wtyi0525.edgemaxcdn.org/live/x3-hd-1111/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://images.fotmob.com/image_resources/logo/teamlogo/8361.png" group-title="Sao Kê TV" , 01:45 25/09 ⚽ Portugal vs Wales (Ricky, Củ Cải) [hls]
+#EXTVLCOPT:http-referrer=https://sk.mediastation.live/
+https://wtyi0525.edgemaxcdn.org/live/x83-hd-1111/playlist.m3u8
+#EXTINF:-1 tvg-logo="" group-title="Updated: 24/09", No Signal
+https://freem3u.xyz/static/no-signal/low.m3u
 #EXTINF:-1 tvg-logo="https://static.flashscore.com/res/image/data/E9xGHfcM-vehtS5P1.png" group-title="Giờ Vàng TV" , 🟢 12:00 24/09 🏀 KogGas vs Mobis Phoebus (Tôm) [hls]
 https://eqr2hdarxfliv.vcdn.cloud/1790204718_hd/1790204718_hd@720p.m3u8
 #EXTINF:-1 tvg-logo="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS89aV1mbuxvQhVaHfuBSqobyXOzCH2mqlw6A&s" group-title="Giờ Vàng TV" , 🟢 12:00 24/09 🏀 Wonju DB vs Seoul Thunders (Cầy) [hls]
@@ -251,6 +257,10 @@ https://freem3u.xyz/static/no-signal/low.m3u8
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Mobile Safari/537.36
 #EXTVLCOPT:http-referrer=https://xlz.domainkqt.cc/
 https://live2.domaincdn.cc/livecdn/channel-17.flv?auth_key=3000001790229137-0-0-65cb3cd6a7ea43f30b3fa9241d774968
+#EXTINF:-1 tvg-logo="https://imgts.sportpulseapiz.com/football/team/965mkyh7okyr1ge/image/small" group-title="Xôi Lạc Z TV" , 14:00 24/09 ⚽ Papua New Guinea vs New Caledonia (NEMO)
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Mobile Safari/537.36
+#EXTVLCOPT:http-referrer=https://xlz.domainkqt.cc/
+https://live2.zundrixmediapipeline.com/live/channel17.flv
 #EXTINF:-1 tvg-logo="https://imgts.sportpulseapiz.com/lol/team/jw2r08kulo2dqz8/image/small" group-title="Xôi Lạc Z TV" , 14:00 24/09 🎮 Fuego vs EDward Gaming Youth Team (HD MARTY)
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Mobile Safari/537.36
 #EXTVLCOPT:http-referrer=https://xlz.domainkqt.cc/
@@ -263,6 +273,10 @@ https://live2.zundrixmediapipeline.com/live/channel30.flv
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Mobile Safari/537.36
 #EXTVLCOPT:http-referrer=https://xlz.domainkqt.cc/
 https://live2.domaincdn.cc/livecdn/channel-27.flv?auth_key=3000001790229181-0-0-7335b3d40e1fe155a2e0f9f7ef071461
+#EXTINF:-1 tvg-logo="https://imgts.sportpulseapiz.com/basketball/team/d23xmv1tz7pmg8n/image/small" group-title="Xôi Lạc Z TV" , 14:00 24/09 🏀 Nữ Đài Loan vs Nữ Philippines (KOBE)
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Mobile Safari/537.36
+#EXTVLCOPT:http-referrer=https://xlz.domainkqt.cc/
+https://live2.zundrixmediapipeline.com/live/channel27.flv
 #EXTINF:-1 tvg-logo="https://imgts.sportpulseapiz.com/tennis/team/3glrw2fjne9rdyj/image/small" group-title="Xôi Lạc Z TV" , 14:00 24/09 🥎 Jeļena Ostapenko vs Taylah Preston (HD LUCAS)
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Mobile Safari/537.36
 #EXTVLCOPT:http-referrer=https://xlz.domainkqt.cc/
@@ -279,6 +293,10 @@ https://live05.miekgo.app/live/90865415_tsc.m3u8
 https://live05.meung.app/live/90865415_tsc.m3u8
 #EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/en/6/64/Goyang_Sono_Skygunners.png" group-title="Giờ Vàng TV" , 14:30 24/09 🏀 Goyang Sono vs Seoul Knights (blv-cay) [hls]
 https://freem3u.xyz/static/no-signal/low.m3u8
+#EXTINF:-1 tvg-logo="https://imgts.sportpulseapiz.com/basketball/team/56ypq3ktd2wmd7o/image/small" group-title="Xôi Lạc Z TV" , 14:30 24/09 🏀 Rytas Vilnius vs Shanghai Sharks (ALAN)
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Mobile Safari/537.36
+#EXTVLCOPT:http-referrer=https://xlz.domainkqt.cc/
+https://live2.zundrixmediapipeline.com/live/channel25.flv
 #EXTINF:-1 tvg-logo="https://imgts.sportpulseapiz.com/basketball/team/56ypq3ktd2wmd7o/image/small" group-title="Xôi Lạc Z TV" , 14:30 24/09 🏀 Rytas Vilnius vs Shanghai Sharks (HD ALAN)
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Mobile Safari/537.36
 #EXTVLCOPT:http-referrer=https://xlz.domainkqt.cc/
@@ -333,10 +351,18 @@ https://cdn-global.ebaclofen.org/vsc/vsc-thai-tu-lion/index.m3u8
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Mobile Safari/537.36
 #EXTVLCOPT:http-referrer=https://xlz.domainkqt.cc/
 https://live2.domaincdn.cc/livecdn/channel-24.flv?auth_key=3000001790229149-0-0-b9d98e7cc9f6b240db72644046e885a5
+#EXTINF:-1 tvg-logo="https://imgts.sportpulseapiz.com/football/team/gy0or5jh7pnqwzv/image/small" group-title="Xôi Lạc Z TV" , 16:00 24/09 ⚽ Lào vs Brunei (FELIX)
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Mobile Safari/537.36
+#EXTVLCOPT:http-referrer=https://xlz.domainkqt.cc/
+https://live2.zundrixmediapipeline.com/live/channel24.flv
 #EXTINF:-1 tvg-logo="https://imgts.sportpulseapiz.com/football/team/gy0or5jh7pnqwzv/image/small" group-title="Xôi Lạc Z TV" , 16:00 24/09 ⚽ Lào vs Brunei (FULL HD ROY)
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Mobile Safari/537.36
 #EXTVLCOPT:http-referrer=https://xlz.domainkqt.cc/
 https://live2.domaincdn.cc/livecdn/channel-1.flv?auth_key=3000001790229156-0-0-a1d277ec6f6bb0193e3c8af8ecfc69e1
+#EXTINF:-1 tvg-logo="https://imgts.sportpulseapiz.com/football/team/gy0or5jh7pnqwzv/image/small" group-title="Xôi Lạc Z TV" , 16:00 24/09 ⚽ Lào vs Brunei (ROY)
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Mobile Safari/537.36
+#EXTVLCOPT:http-referrer=https://xlz.domainkqt.cc/
+https://live2.zundrixmediapipeline.com/live/channel1.flv
 #EXTINF:-1 tvg-logo="https://imgts.sportpulseapiz.com/lol/team/ednm926hknw6ryo/image/small" group-title="Xôi Lạc Z TV" , 16:00 24/09 🎮 Movistar KOI Fénix vs KT Rolster Challengers (HD MARTY)
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Mobile Safari/537.36
 #EXTVLCOPT:http-referrer=https://xlz.domainkqt.cc/
@@ -386,10 +412,18 @@ https://wtyi0525.edgemaxcdn.org/live/x68-hd-1111/playlist.m3u8
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Mobile Safari/537.36
 #EXTVLCOPT:http-referrer=https://xlz.domainkqt.cc/
 https://live2.domaincdn.cc/livecdn/channel-14.flv?auth_key=3000001790229173-0-0-81ce9d36e62c835999048a084c9bad12
+#EXTINF:-1 tvg-logo="https://imgts.sportpulseapiz.com/football/team/gx7lm7ph463m2wd/image/small" group-title="Xôi Lạc Z TV" , 16:30 24/09 ⚽ Palestine vs New Zealand (HIRO)
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Mobile Safari/537.36
+#EXTVLCOPT:http-referrer=https://xlz.domainkqt.cc/
+https://live2.zundrixmediapipeline.com/live/channel14.flv
 #EXTINF:-1 tvg-logo="https://imgts.sportpulseapiz.com/basketball/team/2y8m4ptj8wgml07/image/small" group-title="Xôi Lạc Z TV" , 16:30 24/09 🏀 SEM Phoenix vs Melbourne United (HD TOMMY)
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Mobile Safari/537.36
 #EXTVLCOPT:http-referrer=https://xlz.domainkqt.cc/
 https://live2.domaincdn.cc/livecdn/channel-29.flv?auth_key=3000001790229211-0-0-dc5029bf6922e1e66cf561882bdb7cda
+#EXTINF:-1 tvg-logo="https://imgts.sportpulseapiz.com/basketball/team/2y8m4ptj8wgml07/image/small" group-title="Xôi Lạc Z TV" , 16:30 24/09 🏀 SEM Phoenix vs Melbourne United (TOMMY)
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Mobile Safari/537.36
+#EXTVLCOPT:http-referrer=https://xlz.domainkqt.cc/
+https://live2.zundrixmediapipeline.com/live/channel29.flv
 #EXTINF:-1 tvg-logo="https://imgts.sportpulseapiz.com/lol/team/jw2r08kulo2dqz8/image/small" group-title="Xôi Lạc Z TV" , 17:00 24/09 🎮 Fuego vs T1 Esports Academy (HD MARTY)
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Mobile Safari/537.36
 #EXTVLCOPT:http-referrer=https://xlz.domainkqt.cc/
@@ -1064,11 +1098,3 @@ https://live2.pro2cdnlive.com/live/channel33.flv
 #EXTINF:-1 tvg-logo="https://sta.vnres.co/file/common/20260922/aa956d426f71b6b79e324b9eefb94286.png" group-title="Phá Làng TV" , 23:00 25/09 ⚽ Georgia vs Northern Ireland (LÝ LÊN LỬA) [geo]
 #EXTVLCOPT:http-referrer=https://phalang.live/
 https://pull1.digitalcdn.net/live/6ec1ce26c2824953acd4479ecb776be0/index.m3u8
-#EXTINF:-1 tvg-logo="https://images.fotmob.com/image_resources/logo/teamlogo/8361.png" group-title="Sao Kê TV" , 01:45 25/09 ⚽ Portugal vs Wales (Ricky, Củ Cải) [hls]
-#EXTVLCOPT:http-referrer=https://sk.mediastation.live/
-https://wtyi0525.edgemaxcdn.org/live/x3-hd-1111/playlist.m3u8
-#EXTINF:-1 tvg-logo="https://images.fotmob.com/image_resources/logo/teamlogo/8361.png" group-title="Sao Kê TV" , 01:45 25/09 ⚽ Portugal vs Wales (Ricky, Củ Cải) [hls]
-#EXTVLCOPT:http-referrer=https://sk.mediastation.live/
-https://wtyi0525.edgemaxcdn.org/live/x83-hd-1111/playlist.m3u8
-#EXTINF:-1 tvg-logo="" group-title="Updated: 24/09", No Signal
-https://freem3u.xyz/static/no-signal/low.m3u
