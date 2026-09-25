@@ -62,38 +62,76 @@ async function probe(candidate) {
   const playerUrl = canonicalPlayerUrl(candidate.url);
 
   try {
-    const response = await fetch(cacheBust(playerUrl), {
-      method: "GET",
-      headers: {
-        "User-Agent": UA,
-        "Accept": "application/vnd.apple.mpegurl,application/x-mpegURL,text/plain,*/*",
-        "Cache-Control": "no-cache",
-        "Pragma": "no-cache",
-        "Referer": "https://fptplay.vn/",
-        "Origin": "https://fptplay.vn/",
-      },
-      redirect: "follow",
-    });
+    const headers = {
+      "User-Agent": UA,
+      "Accept": "application/vnd.apple.mpegurl,application/x-mpegURL,text/plain,*/*",
+      "Cache-Control": "no-cache, no-store",
+      "Pragma": "no-cache",
+      "Referer": "https://fptplay.vn/",
+      "Origin": "https://fptplay.vn/",
+      "Accept-Language": "vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7",
+    };
 
-    if (response.status === 404 || response.status === 410) {
+    // Some FPT CDN paths can reject/cache-bust query strings even though the
+    // exact public URL is playable. Try the exact URL first, then a cache-busted
+    // retry. This prevents a false inactive/error result for a genuinely live event.
+    const urls = [playerUrl, cacheBust(playerUrl)];
+    let response = null;
+    let text = "";
+    let lastError = null;
+
+    for (const requestUrl of urls) {
+      try {
+        const current = await fetch(requestUrl, {
+          method: "GET",
+          headers,
+          redirect: "follow",
+          cf: { cacheTtl: 0, cacheEverything: false },
+        });
+
+        response = current;
+        if (current.ok) {
+          text = await current.text();
+          if (classifyPlaylist(text) === "live") break;
+        } else {
+          lastError = "HTTP " + current.status;
+        }
+      } catch (error) {
+        lastError = error instanceof Error ? error.message : String(error);
+      }
+    }
+
+    if (response && response.ok && classifyPlaylist(text) === "live") {
+      return { ...candidate, status: "live", url: playerUrl };
+    }
+
+    if (response && (response.status === 404 || response.status === 410)) {
       return { ...candidate, status: "inactive", url: playerUrl };
     }
 
-    if (!response.ok) {
+    if (response && !response.ok) {
       return {
         ...candidate,
         status: "error",
         url: playerUrl,
-        error: "HTTP " + response.status,
+        error: lastError || "HTTP " + response.status,
       };
     }
 
-    const text = await response.text();
+    if (response && response.ok) {
+      return { ...candidate, status: "inactive", url: playerUrl };
+    }
+
+    return {
+      ...candidate,
+      status: "error",
+      url: playerUrl,
+      error: lastError || "No response",
+    };
+
     const status = classifyPlaylist(text);
 
     if (status === "live") {
-      // FPT VIPS always publishes the MASTER index.m3u8.
-      // Never publish a child AVC rendition, because that can drop audio.
       return { ...candidate, status: "live", url: playerUrl };
     }
 
