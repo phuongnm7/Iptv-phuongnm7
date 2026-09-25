@@ -25,13 +25,12 @@ const UA =
   "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 " +
   "(KHTML, like Gecko) Chrome/128.0 Mobile Safari/537.36";
 
-const CRON_TO_BATCH = {
-  "0-59/5 * * * *": 0,
-  "1-59/5 * * * *": 1,
-  "2-59/5 * * * *": 2,
-  "3-59/5 * * * *": 3,
-  "4-59/5 * * * *": 4,
-};
+function parseBatchId(value) {
+  const batchId = Number(value);
+  return Number.isInteger(batchId) && batchId >= 0 && batchId < BATCH_COUNT
+    ? batchId
+    : null;
+}
 
 function cacheBust(rawUrl) {
   const url = new URL(rawUrl);
@@ -153,11 +152,14 @@ function chooseEntries(batchResults) {
         continue;
       }
 
+      // Prefer the VIPS master URL. The LIVECDN child rendition can be
+      // video-only and may reproduce the historical "picture without audio"
+      // problem. Keep VIPS when both sources report the same event as live.
       if (
         current.status === "live" &&
         item.status === "live" &&
-        current.source !== "LIVECDN" &&
-        item.source === "LIVECDN"
+        current.source === "LIVECDN" &&
+        item.source === "VIPS"
       ) {
         byName.set(item.name, item);
       }
@@ -189,12 +191,13 @@ function buildM3U(entries) {
 }
 
 async function readAllBatches(env) {
-  const values = await env.FPT_EVENT_KV.get(BATCH_KEYS, {
-    type: "json",
-    cacheTtl: 30,
-  });
+  const values = await Promise.all(
+    BATCH_KEYS.map((key) =>
+      env.FPT_EVENT_KV.get(key, { type: "json", cacheTtl: 30 })
+    )
+  );
 
-  return BATCH_KEYS.map((key) => values.get(key) || null);
+  return values.map((value) => value || null);
 }
 
 async function buildPlaylist(env) {
@@ -210,14 +213,7 @@ async function buildPlaylist(env) {
   };
 }
 
-async function handleCron(controller, env) {
-  const batchId = CRON_TO_BATCH[controller.cron];
-
-  if (batchId === undefined) {
-    console.log("Unknown cron trigger:", controller.cron);
-    return;
-  }
-
+async function runBatch(batchId, env) {
   const result = await scanBatch(batchId);
 
   await env.FPT_EVENT_KV.put(
@@ -225,24 +221,35 @@ async function handleCron(controller, env) {
     JSON.stringify(result)
   );
 
-  console.log(JSON.stringify({
-    event: "fpt_scan",
-    batch: batchId,
-    scanned: result.scanned,
-    live: result.liveCount,
-    inactive: result.inactiveCount,
-    errors: result.errorCount,
-    generatedAt: result.generatedAt,
-  }));
+  return result;
 }
 
 export default {
-  async scheduled(controller, env) {
-    await handleCron(controller, env);
-  },
-
   async fetch(request, env) {
     const url = new URL(request.url);
+
+    if (url.pathname === "/scan") {
+      const batchId = parseBatchId(url.searchParams.get("batch"));
+
+      if (batchId === null) {
+        return Response.json(
+          { ok: false, error: "batch must be 0, 1, 2, 3 or 4" },
+          { status: 400 }
+        );
+      }
+
+      const result = await runBatch(batchId, env);
+
+      return Response.json({
+        ok: true,
+        batch: result.batch,
+        scanned: result.scanned,
+        live: result.liveCount,
+        inactive: result.inactiveCount,
+        errors: result.errorCount,
+        generatedAt: result.generatedAt,
+      });
+    }
 
     if (url.pathname === "/fpt-event-live.m3u") {
       const state = await buildPlaylist(env);
@@ -289,7 +296,7 @@ export default {
     }
 
     return new Response(
-      "NM7 FPT Event Live Worker\n\n/fpt-event-live.m3u\n/status\n",
+      "NM7 FPT Event Live Worker\n\n/fpt-event-live.m3u\n/status\n/scan?batch=0..4\n",
       { headers: { "Content-Type": "text/plain; charset=utf-8" } }
     );
   },
