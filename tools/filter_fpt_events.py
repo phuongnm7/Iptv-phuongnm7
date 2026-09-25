@@ -227,8 +227,18 @@ def main():
     for name, url in combined:
         by_url[url] = (name, url)
 
-    count = write_playlist(list(by_url.values()))
     total_errors = candidate_errors + existing_errors
+
+    # If the repository has no prior playlist and the scanner is experiencing
+    # transient failures, do not publish an empty playlist. A real successful
+    # scan with no live events is allowed to publish an empty playlist.
+    if not discovered and not existing and total_errors:
+        raise SystemExit(
+            f"FPT scan incomplete: {total_errors} probe errors and no existing "
+            "playlist to validate; refusing to publish an empty playlist."
+        )
+
+    count = write_playlist(list(by_url.values()))
 
     print(
         f"Scanned {len(CANDIDATES)} candidate endpoints; "
