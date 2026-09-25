@@ -1,0 +1,48 @@
+# NM7 FPT Event Live — Progress
+
+## 2026-09-26
+
+### Baseline problem
+- GitHub Actions workflow `.github/workflows/update-fpt-event-live.yml` used `*/5 * * * *`.
+- Historical runs showed long gaps, so the 5-minute schedule was not dependable.
+- A successful GitHub run only proved that `curl` received HTTP success; the Worker could still report probe errors.
+- The existing Worker source already had the correct 250-candidate / 5-batch architecture, but it did not define a real Cloudflare Cron Trigger.
+- The Worker performed an exact fetch and then a cache-busted retry, which could create unnecessary subrequests.
+
+### Implemented
+1. Cloudflare Worker now has `scheduled()` and owns the automatic scan schedule.
+2. `wrangler.jsonc` now defines `* * * * *`.
+3. One batch is scanned per minute using `scheduledTime minute % 5`.
+4. Full 250-candidate coverage is therefore completed every ~5 minutes.
+5. Each candidate uses one no-store/cache-bypass HLS request.
+6. Only confirmed HLS playlists are published.
+7. 404/410, ended playlists, VOD playlists, invalid playlists, and probe errors are excluded from the published batch.
+8. Each batch KV record expires after 10 minutes.
+9. Playlist generation requires all 5 batches to be fresh within 8 minutes; otherwise the playlist endpoint returns HTTP 503 rather than serving an incomplete/stale playlist.
+10. `/status` now exposes batch freshness, live count, inactive count, and error count.
+11. GitHub Actions was changed from scheduled execution to manual fallback and now validates the Worker JSON instead of treating HTTP 200 alone as success.
+12. FPT Worker README was updated with the new automatic architecture.
+
+### Commits
+- Worker logic: `f23b85b6ee174b080e99de817ee4992d3b3f6494`
+- Cron configuration: `5877dbdbf97df538a174bfbd2e9e45dd73d053f8`
+- Manual GitHub fallback: `a9b631b15ef2c999a59df7b712829586cdbb27ee`
+- Documentation: `e6070c93515f3918959ebc213047d3e074234dde`
+
+### Verification still required after Cloudflare deploy
+Open:
+
+- `https://nm7-fpt-event-live.phuongnm7-iptv.workers.dev/status`
+- `https://nm7-fpt-event-live.phuongnm7-iptv.workers.dev/fpt-event-live.m3u`
+
+Expected after the first complete cycle:
+- `ready: true`
+- `batchesReady: 5`
+- `candidates: 250`
+- `batchErrors: [0,0,0,0,0]` ideally
+- `liveEntries` = current confirmed FPT events
+
+Cloudflare Cron Trigger changes can take several minutes to propagate after deployment.
+
+### Important
+The authoritative automatic playlist is the Cloudflare Worker URL above. The repository file `fpt-event-live.m3u` remains a static GitHub snapshot and is not the source of truth for the automatic runtime playlist.
