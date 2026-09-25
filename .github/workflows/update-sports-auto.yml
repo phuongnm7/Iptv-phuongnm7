@@ -185,40 +185,11 @@ jobs:
           GROUP_ORDER=["Vua Sân Cỏ TV","Khán Đài TV","Cola TV","Gà Vàng TV","Gà Vàng 24h TV","Xôi Lạc Z TV","Gà Vàng 33 TV","S8 TV","Sao Kê TV","Bia Ôm TV","Chuối Chiên TV","Giờ Vàng TV","Socolive TV","Pháo Hoa TV","Nấu Xôi TV","SP TV (China)","Sút Bóng TV","Phá Làng TV"]
           GROUP_ORDER_MAP={norm_group(g):i for i,g in enumerate(GROUP_ORDER)}
           selected.sort(key=lambda x:(GROUP_ORDER_MAP.get(norm_group(x["group"]),9999),x["when"] is None,x["when"] or dt.datetime.max.replace(tzinfo=VN),x["name"],x["url"]))
-
-          # Preserve the previous playlist as a short-term fallback.
-          # This prevents a temporary source A/B failure from wiping current
-          # matches/groups. Stale dated matches are still removed after 180m.
-          old=Path("sports-auto.m3u")
-          fallback_by_key={}
-          static_blocks=[]
-          if old.exists():
-              for b in blocks(old.read_text(encoding="utf-8",errors="ignore")):
-                  name,group,url,lines=parse(b)
-                  if not group or not url or url.lower()=="none":
-                      continue
-                  x=usable(b)
-                  if not x:
-                      continue
-                  if x["when"] is None:
-                      static_blocks.append(x["block"])
-                  else:
-                      fallback_by_key[x["key"]]=x
-
-          # New source data replaces the same Group+Match fallback; otherwise
-          # the still-fresh previous entry remains. Dynamic groups ALWAYS come
-          # first; static/undated channels ALWAYS come last.
-          selected_by_key={x["key"]:x for x in selected}
-          dynamic=[]
+          merged=[]
           seen=set()
-          for k,x in fallback_by_key.items():
-              if k not in selected_by_key and x["block"] not in seen:
-                  seen.add(x["block"]); dynamic.append(x)
           for x in selected:
               if x["block"] not in seen:
-                  seen.add(x["block"]); dynamic.append(x)
-          dynamic.sort(key=lambda x:(GROUP_ORDER_MAP.get(norm_group(x["group"]),9999),x["when"] is None,x["when"] or dt.datetime.max.replace(tzinfo=VN),x["name"],x["url"]))
-          merged=[x["block"] for x in dynamic]
+                  seen.add(x["block"]); merged.append(x["block"])
           for block in static_blocks:
               if block not in seen:
                   seen.add(block); merged.append(block)
