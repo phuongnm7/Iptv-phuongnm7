@@ -128,14 +128,6 @@ async function probe(candidate) {
       url: playerUrl,
       error: lastError || "No response",
     };
-
-    const status = classifyPlaylist(text);
-
-    if (status === "live") {
-      return { ...candidate, status: "live", url: playerUrl };
-    }
-
-    return { ...candidate, status: "inactive", url: playerUrl };
   } catch (error) {
     return {
       ...candidate,
