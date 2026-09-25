@@ -11,6 +11,11 @@
       "id": "4cfdab00c15241ea84239b5910e1bb12"
     }
   ],
+  "triggers": {
+    "crons": [
+      "* * * * *"
+    ]
+  },
   "workers_dev": true,
   "preview_urls": false
 }
