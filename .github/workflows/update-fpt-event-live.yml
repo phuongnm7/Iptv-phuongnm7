@@ -24,6 +24,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Sync with latest main before scan
+        run: git pull --rebase origin main
+
       - name: Scan FPT public HLS event endpoints
         run: python3 tools/filter_fpt_events.py
 
@@ -36,5 +39,6 @@ jobs:
             echo "No playlist change"
           else
             git commit -m "auto: update live FPT event playlist"
+            git pull --rebase origin main
             git push
           fi
