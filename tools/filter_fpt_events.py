@@ -48,32 +48,86 @@ def get_text(url):
         return r.read().decode("utf-8", "ignore")
 
 
+def _master_variants(url, txt):
+    lines = [x.strip() for x in txt.splitlines() if x.strip()]
+    audio_groups = set()
+    for line in lines:
+        if line.startswith("#EXT-X-MEDIA:") and "TYPE=AUDIO" in line:
+            m = re.search(r'GROUP-ID="([^"]+)"', line)
+            if m:
+                audio_groups.add(m.group(1))
+
+    variants = []
+    for i, line in enumerate(lines[:-1]):
+        if not line.startswith("#EXT-X-STREAM-INF:"):
+            continue
+        if lines[i + 1].startswith("#"):
+            continue
+        bw = re.search(r"BANDWIDTH=(\d+)", line)
+        codecs = re.search(r'CODECS="([^"]+)"', line)
+        audio = re.search(r'AUDIO="([^"]+)"', line)
+        variants.append({
+            "bandwidth": int(bw.group(1)) if bw else 0,
+            "codecs": codecs.group(1).lower() if codecs else "",
+            "audio_group": audio.group(1) if audio else "",
+            "url": urljoin(url, lines[i + 1]),
+        })
+    return variants, audio_groups
+
+
 def resolve_media(url):
+    """
+    Return (playlist_url_for_player, media_url_for_probe, media_text).
+
+    The previous implementation selected the highest-bandwidth video rendition
+    from a master playlist and published that rendition directly. FPT's HLS
+    masters can expose video-only AVC renditions, which produces picture with
+    no sound. When an audio group is present, publish the master URL so the
+    player can combine video + audio. When a rendition itself contains AAC,
+    publishing that rendition is safe.
+    """
     txt = get_text(url)
     if "#EXT-X-ENDLIST" in txt:
         return None
 
     if "#EXTINF:" in txt:
-        return url, txt
+        return url, url, txt
 
     if "#EXT-X-STREAM-INF:" not in txt:
         return None
 
-    lines = [x.strip() for x in txt.splitlines() if x.strip()]
-    variants = []
-    for i, line in enumerate(lines[:-1]):
-        if line.startswith("#EXT-X-STREAM-INF:") and not lines[i + 1].startswith("#"):
-            bw = re.search(r"BANDWIDTH=(\d+)", line)
-            variants.append((int(bw.group(1)) if bw else 0,
-                             urljoin(url, lines[i + 1])))
-
+    variants, audio_groups = _master_variants(url, txt)
     if not variants:
         return None
 
-    variant = max(variants, key=lambda x: x[0])[1]
-    media = get_text(variant)
+    # Prefer a muxed rendition that explicitly contains an AAC codec.
+    muxed = [
+        v for v in variants
+        if "mp4a." in v["codecs"] or "ac-3" in v["codecs"] or "ec-3" in v["codecs"]
+    ]
+    if muxed:
+        chosen = max(muxed, key=lambda x: x["bandwidth"])
+        media = get_text(chosen["url"])
+        if "#EXTINF:" in media and "#EXT-X-ENDLIST" not in media:
+            return chosen["url"], chosen["url"], media
+
+    # If the master declares an audio group and the selected video rendition
+    # references it, publish the MASTER URL, not the video-only child URL.
+    with_audio_group = [
+        v for v in variants
+        if v["audio_group"] and v["audio_group"] in audio_groups
+    ]
+    if with_audio_group:
+        chosen = max(with_audio_group, key=lambda x: x["bandwidth"])
+        media = get_text(chosen["url"])
+        if "#EXTINF:" in media and "#EXT-X-ENDLIST" not in media:
+            return url, chosen["url"], media
+
+    # Fallback for masters without explicit audio metadata.
+    chosen = max(variants, key=lambda x: x["bandwidth"])
+    media = get_text(chosen["url"])
     if "#EXTINF:" in media and "#EXT-X-ENDLIST" not in media:
-        return variant, media
+        return chosen["url"], chosen["url"], media
     return None
 
 
@@ -89,13 +143,13 @@ def signature(txt):
 
 
 def probe_url(name, url, source="existing"):
-    """Return ('live'|'inactive'|'error', optional resolved URL)."""
+    """Return ('live'|'inactive'|'error', optional player URL)."""
     try:
         first = resolve_media(url)
         if not first:
             return "inactive", None
 
-        resolved, txt1 = first
+        player_url, _, txt1 = first
         sig1 = signature(txt1)
         if not sig1:
             return "inactive", None
@@ -108,18 +162,17 @@ def probe_url(name, url, source="existing"):
         if not second:
             return "inactive", None
 
-        resolved2, txt2 = second
+        player_url2, _, txt2 = second
         sig2 = signature(txt2)
         if not sig2:
             return "inactive", None
 
         if sig1 != sig2:
-            return "live", resolved2 or resolved
+            return "live", player_url2 or player_url
 
         # A static/ended playlist is not a currently live event.
         return "inactive", None
     except HTTPError as exc:
-        # 404/410 are authoritative "not available" responses.
         if exc.code in (404, 410):
             return "inactive", None
         print(f"PROBE_ERROR {source} {name}: HTTP {exc.code}")
@@ -185,12 +238,9 @@ def validate_existing(entries):
             status, resolved = future.result()
             if status == "error":
                 errors += 1
-                # Never delete a previously published event because of a
-                # temporary network/CDN failure.
                 kept.append((name, url))
             elif status == "live" and resolved:
                 kept.append((name, resolved))
-            # inactive => event has ended; intentionally omit it.
     return kept, errors
 
 
@@ -216,29 +266,24 @@ def main():
     discovered, candidate_errors = scan_candidates()
     kept_existing, existing_errors = validate_existing(existing)
 
-    # New live events are authoritative additions. Previously published
-    # events survive only when they still probe as live, or when their probe
-    # failed transiently. This makes event removal automatic without allowing
-    # a temporary CDN/network problem to erase the playlist.
-    combined = kept_existing + list(discovered.values())
-
-    # De-duplicate by URL and prefer discovered URLs when available.
-    by_url = {}
-    for name, url in combined:
-        by_url[url] = (name, url)
+    # A newly discovered stream for the same event name must replace an old
+    # published rendition. This is important when an older playlist contains
+    # a video-only child URL: the newly discovered master URL must win.
+    by_name = {}
+    for name, url in kept_existing:
+        by_name[name] = (name, url)
+    for name, url in discovered.values():
+        by_name[name] = (name, url)
 
     total_errors = candidate_errors + existing_errors
 
-    # If the repository has no prior playlist and the scanner is experiencing
-    # transient failures, do not publish an empty playlist. A real successful
-    # scan with no live events is allowed to publish an empty playlist.
     if not discovered and not existing and total_errors:
         raise SystemExit(
             f"FPT scan incomplete: {total_errors} probe errors and no existing "
             "playlist to validate; refusing to publish an empty playlist."
         )
 
-    count = write_playlist(list(by_url.values()))
+    count = write_playlist(list(by_name.values()))
 
     print(
         f"Scanned {len(CANDIDATES)} candidate endpoints; "
