@@ -1,8 +1,11 @@
-
 const GROUP = "SỰ KIỆN FPT";
 const BATCH_SIZE = 50;
 const BATCH_COUNT = 5;
 const BATCH_KEYS = Array.from({ length: BATCH_COUNT }, (_, i) => "fpt:batch:" + i);
+
+const SCAN_CRON = "* * * * *";
+const BATCH_MAX_AGE_MS = 8 * 60 * 1000;
+const BATCH_EXPIRATION_TTL = 10 * 60;
 
 const VIPS = "https://vips-livecdn.fptplay.net/live/media";
 const LIVECDN = "https://livecdn.fptplay.net/schedule";
@@ -32,10 +35,9 @@ function parseBatchId(value) {
     : null;
 }
 
-function cacheBust(rawUrl) {
-  const url = new URL(rawUrl);
-  url.searchParams.set("_nm7_probe", String(Date.now()));
-  return url.toString();
+function scheduledBatchId(scheduledTime) {
+  const minute = Math.floor(scheduledTime / 60000);
+  return ((minute % BATCH_COUNT) + BATCH_COUNT) % BATCH_COUNT;
 }
 
 function canonicalPlayerUrl(rawUrl) {
@@ -54,6 +56,7 @@ function isPlaylist(text) {
 function classifyPlaylist(text) {
   if (!text || !text.includes("#EXTM3U")) return "inactive";
   if (text.includes("#EXT-X-ENDLIST")) return "inactive";
+  if (text.includes("#EXT-X-PLAYLIST-TYPE:VOD")) return "inactive";
   if (!isPlaylist(text)) return "inactive";
   return "live";
 }
@@ -62,72 +65,46 @@ async function probe(candidate) {
   const playerUrl = canonicalPlayerUrl(candidate.url);
 
   try {
-    const headers = {
-      "User-Agent": UA,
-      "Accept": "application/vnd.apple.mpegurl,application/x-mpegURL,text/plain,*/*",
-      "Cache-Control": "no-cache, no-store",
-      "Pragma": "no-cache",
-      "Referer": "https://fptplay.vn/",
-      "Origin": "https://fptplay.vn/",
-      "Accept-Language": "vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7",
-    };
+    const response = await fetch(playerUrl, {
+      method: "GET",
+      headers: {
+        "User-Agent": UA,
+        "Accept": "application/vnd.apple.mpegurl,application/x-mpegURL,text/plain,*/*",
+        "Cache-Control": "no-cache, no-store",
+        "Pragma": "no-cache",
+        "Referer": "https://fptplay.vn/",
+        "Origin": "https://fptplay.vn",
+        "Accept-Language": "vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7",
+      },
+      cache: "no-store",
+      cf: {
+        cacheTtl: 0,
+        cacheEverything: false,
+      },
+      redirect: "follow",
+    });
 
-    // Some FPT CDN paths can reject/cache-bust query strings even though the
-    // exact public URL is playable. Try the exact URL first, then a cache-busted
-    // retry. This prevents a false inactive/error result for a genuinely live event.
-    const urls = [playerUrl, cacheBust(playerUrl)];
-    let response = null;
-    let text = "";
-    let lastError = null;
-
-    for (const requestUrl of urls) {
-      try {
-        const current = await fetch(requestUrl, {
-          method: "GET",
-          headers,
-          redirect: "follow",
-          cf: { cacheTtl: 0, cacheEverything: false },
-        });
-
-        response = current;
-        if (current.ok) {
-          text = await current.text();
-          if (classifyPlaylist(text) === "live") break;
-        } else {
-          lastError = "HTTP " + current.status;
-        }
-      } catch (error) {
-        lastError = error instanceof Error ? error.message : String(error);
-      }
-    }
-
-    if (response && response.ok && classifyPlaylist(text) === "live") {
-      return { ...candidate, status: "live", url: playerUrl };
-    }
-
-    if (response && (response.status === 404 || response.status === 410)) {
+    if (response.status === 404 || response.status === 410) {
       return { ...candidate, status: "inactive", url: playerUrl };
     }
 
-    if (response && !response.ok) {
+    if (!response.ok) {
       return {
         ...candidate,
         status: "error",
         url: playerUrl,
-        error: lastError || "HTTP " + response.status,
+        error: "HTTP " + response.status,
       };
     }
 
-    if (response && response.ok) {
-      return { ...candidate, status: "inactive", url: playerUrl };
+    const text = await response.text();
+    const status = classifyPlaylist(text);
+
+    if (status === "live") {
+      return { ...candidate, status: "live", url: playerUrl };
     }
 
-    return {
-      ...candidate,
-      status: "error",
-      url: playerUrl,
-      error: lastError || "No response",
-    };
+    return { ...candidate, status: "inactive", url: playerUrl };
   } catch (error) {
     return {
       ...candidate,
@@ -143,15 +120,13 @@ async function scanBatch(batchId) {
   const candidates = CANDIDATES.slice(start, start + BATCH_SIZE);
   const results = await Promise.all(candidates.map(probe));
 
-  // STRICT MODE: publish ONLY confirmed live entries.
-  // HTTP/network errors are diagnostic only and must NEVER enter the playlist/KV entries.
   const entries = results
     .filter((item) => item.status === "live")
     .map((item) => ({
       name: item.name,
       url: item.url,
       source: item.source,
-      status: item.status,
+      status: "live",
     }));
 
   return {
@@ -174,11 +149,6 @@ function chooseEntries(batchResults) {
     for (const item of batch.entries) {
       const current = byName.get(item.name);
       if (!current) {
-        byName.set(item.name, item);
-        continue;
-      }
-
-      if (current.status === "error" && item.status === "live") {
         byName.set(item.name, item);
         continue;
       }
@@ -221,26 +191,33 @@ function buildM3U(entries) {
   return lines.join("\n");
 }
 
-async function readAllBatches(env) {
-  const values = await Promise.all(
-    BATCH_KEYS.map((key) =>
-      env.FPT_EVENT_KV.get(key, { type: "json", cacheTtl: 30 })
-    )
-  );
+function isFreshBatch(batch, now = Date.now()) {
+  if (!batch || !batch.generatedAt) return false;
+  const generatedAt = Date.parse(batch.generatedAt);
+  if (!Number.isFinite(generatedAt)) return false;
+  return now - generatedAt >= 0 && now - generatedAt <= BATCH_MAX_AGE_MS;
+}
 
-  return values.map((value) => value || null);
+async function readAllBatches(env) {
+  const values = await env.FPT_EVENT_KV.get(BATCH_KEYS, {
+    type: "json",
+    cacheTtl: 30,
+  });
+
+  return BATCH_KEYS.map((key) => values.get(key) || null);
 }
 
 async function buildPlaylist(env) {
   const batches = await readAllBatches(env);
-  const ready = batches.filter(Boolean).length;
-  const entries = chooseEntries(batches);
+  const freshBatches = batches.map((batch) => (isFreshBatch(batch) ? batch : null));
+  const ready = freshBatches.filter(Boolean).length;
+  const entries = chooseEntries(freshBatches);
 
   return {
     ready,
     entries,
     m3u: buildM3U(entries),
-    batches,
+    batches: freshBatches,
   };
 }
 
@@ -249,13 +226,35 @@ async function runBatch(batchId, env) {
 
   await env.FPT_EVENT_KV.put(
     BATCH_KEYS[batchId],
-    JSON.stringify(result)
+    JSON.stringify(result),
+    { expirationTtl: BATCH_EXPIRATION_TTL }
   );
+
+  console.log(JSON.stringify({
+    type: "fpt_scan",
+    batch: result.batch,
+    scanned: result.scanned,
+    live: result.liveCount,
+    inactive: result.inactiveCount,
+    errors: result.errorCount,
+    generatedAt: result.generatedAt,
+  }));
 
   return result;
 }
 
 export default {
+  async scheduled(controller, env) {
+    const batchId = scheduledBatchId(controller.scheduledTime);
+    const result = await runBatch(batchId, env);
+
+    if (result.errorCount > 0) {
+      console.warn(
+        "FPT batch " + batchId + " completed with " + result.errorCount + " probe errors"
+      );
+    }
+  },
+
   async fetch(request, env) {
     const url = new URL(request.url);
 
@@ -299,29 +298,47 @@ export default {
       return new Response(state.m3u, {
         headers: {
           "Content-Type": "application/x-mpegURL; charset=utf-8",
-          "Cache-Control": "public, max-age=30",
+          "Cache-Control": "public, max-age=15, must-revalidate",
           "Access-Control-Allow-Origin": "*",
           "X-NM7-FPT-Events": String(state.entries.length),
+          "X-NM7-Scanner-State": state.ready + "/" + BATCH_COUNT,
         },
       });
     }
 
     if (url.pathname === "/status") {
+      const batches = await readAllBatches(env);
+      const now = Date.now();
+      const fresh = batches.map((batch) => isFreshBatch(batch, now));
       const state = await buildPlaylist(env);
 
       return Response.json({
         service: "NM7 FPT Event Live",
+        scheduler: {
+          cron: SCAN_CRON,
+          strategy: "one batch per minute; 5 batches per 5-minute cycle",
+        },
         ready: state.ready === BATCH_COUNT,
         batchesReady: state.ready,
         batchCount: BATCH_COUNT,
         candidates: CANDIDATES.length,
-        liveEntries: state.entries.filter((x) => x.status === "live").length,
-        staleEntries: state.entries.filter((x) => x.status === "error").length,
-        generatedAt: state.batches
+        liveEntries: state.entries.length,
+        staleBatches: fresh.filter((value) => !value).length,
+        batchErrors: batches.map((batch) => (batch ? batch.errorCount || 0 : null)),
+        latestBatchAt: batches
           .filter(Boolean)
-          .map((x) => x.generatedAt)
+          .map((batch) => batch.generatedAt)
           .sort()
           .at(-1) || null,
+        batches: batches.map((batch, index) => ({
+          batch: index,
+          ready: fresh[index],
+          generatedAt: batch?.generatedAt || null,
+          scanned: batch?.scanned || 0,
+          live: batch?.liveCount || 0,
+          inactive: batch?.inactiveCount || 0,
+          errors: batch?.errorCount || 0,
+        })),
         entries: state.entries,
       });
     }
