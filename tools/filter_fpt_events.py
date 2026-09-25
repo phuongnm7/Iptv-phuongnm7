@@ -75,17 +75,24 @@ def _master_variants(url, txt):
     return variants, audio_groups
 
 
+def canonical_player_url(url):
+    """Return the safe player entrypoint for an FPT VIPS HLS stream."""
+    marker = "/hls_avc_v6/"
+    if marker in url:
+        base = url.split(marker, 1)[0] + marker
+        return base + "index.m3u8"
+    return url
+
+
 def resolve_media(url):
     """
     Return (playlist_url_for_player, media_url_for_probe, media_text).
 
-    The previous implementation selected the highest-bandwidth video rendition
-    from a master playlist and published that rendition directly. FPT's HLS
-    masters can expose video-only AVC renditions, which produces picture with
-    no sound. When an audio group is present, publish the master URL so the
-    player can combine video + audio. When a rendition itself contains AAC,
-    publishing that rendition is safe.
+    For FPT VIPS HLS, the master index.m3u8 is always the player URL.
+    Child AVC renditions are used only for probing. This prevents an
+    audio-less video rendition from ever being published to the playlist.
     """
+    url = canonical_player_url(url)
     txt = get_text(url)
     if "#EXT-X-ENDLIST" in txt:
         return None
@@ -100,37 +107,14 @@ def resolve_media(url):
     if not variants:
         return None
 
-    # IMPORTANT: FPT masters may advertise mp4a in CODECS even when the
-    # audio is delivered as a separate EXT-X-MEDIA rendition. In that case,
-    # publishing the child AVC URL causes video-only playback. Audio-group
-    # linkage therefore takes precedence over CODECS-based muxed detection.
-    with_audio_group = [
-        v for v in variants
-        if v["audio_group"] and v["audio_group"] in audio_groups
-    ]
-    if with_audio_group:
-        chosen = max(with_audio_group, key=lambda x: x["bandwidth"])
-        media = get_text(chosen["url"])
-        if "#EXTINF:" in media and "#EXT-X-ENDLIST" not in media:
-            return url, chosen["url"], media
-
-    # Only use a child rendition when the master has no separate audio group
-    # and the rendition explicitly declares an audio codec.
-    muxed = [
-        v for v in variants
-        if "mp4a." in v["codecs"] or "ac-3" in v["codecs"] or "ec-3" in v["codecs"]
-    ]
-    if muxed:
-        chosen = max(muxed, key=lambda x: x["bandwidth"])
-        media = get_text(chosen["url"])
-        if "#EXTINF:" in media and "#EXT-X-ENDLIST" not in media:
-            return chosen["url"], chosen["url"], media
-
-    # Fallback for masters without explicit audio metadata.
+    # FPT VIPS must publish the MASTER URL, never a child AVC URL.
+    # The master is responsible for selecting/combining the audio rendition.
+    # CODECS=mp4a alone is not sufficient evidence that the child playlist is
+    # muxed; some FPT masters advertise audio while serving separate audio.
     chosen = max(variants, key=lambda x: x["bandwidth"])
     media = get_text(chosen["url"])
     if "#EXTINF:" in media and "#EXT-X-ENDLIST" not in media:
-        return chosen["url"], chosen["url"], media
+        return url, chosen["url"], media
     return None
 
 
@@ -243,7 +227,9 @@ def validate_existing(entries):
                 errors += 1
                 kept.append((name, url))
             elif status == "live" and resolved:
-                kept.append((name, resolved))
+                # Never carry forward a legacy child AVC URL. Re-probing through
+                # resolve_media() canonicalizes VIPS streams to index.m3u8.
+                kept.append((name, canonical_player_url(resolved)))
     return kept, errors
 
 
