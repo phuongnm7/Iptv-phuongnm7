@@ -2,19 +2,17 @@ name: Update FPT Event Live Scanner
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "*/5 * * * *"
 
 permissions:
   contents: read
 
 concurrency:
-  group: fpt-event-live
+  group: fpt-event-live-manual
   cancel-in-progress: false
 
 jobs:
   scan:
-    name: Scan FPT batch ${{ matrix.batch }}
+    name: Manual FPT batch ${{ matrix.batch }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     strategy:
@@ -23,10 +21,36 @@ jobs:
         batch: [0, 1, 2, 3, 4]
 
     steps:
-      - name: Scan Worker batch
+      - name: Scan Worker batch and validate result
         env:
           WORKER_URL: https://nm7-fpt-event-live.phuongnm7-iptv.workers.dev
         run: |
-          set -e
-          curl --fail --show-error --silent --retry 3 --retry-delay 2 \
-            "${WORKER_URL}/scan?batch=${{ matrix.batch }}"
+          set -euo pipefail
+
+          response="$(curl --fail --show-error --silent --retry 3 --retry-delay 2 \
+            "${WORKER_URL}/scan?batch=${{ matrix.batch }}")"
+
+          printf '%s\n' "$response"
+
+          python3 - "$response" <<'PY'
+          import json
+          import sys
+
+          data = json.loads(sys.argv[1])
+
+          if data.get("ok") is not True:
+              raise SystemExit(f"Worker returned ok={data.get('ok')!r}")
+
+          if data.get("scanned") != 50:
+              raise SystemExit(f"Expected 50 scanned candidates, got {data.get('scanned')!r}")
+
+          errors = int(data.get("errors") or 0)
+          if errors:
+              raise SystemExit(f"FPT batch reported {errors} probe errors")
+
+          print(
+              "Validated batch "
+              f"{data.get('batch')}: scanned={data.get('scanned')}, "
+              f"live={data.get('live')}, inactive={data.get('inactive')}, errors={errors}"
+          )
+          PY
