@@ -16,7 +16,7 @@ permissions:
 
 concurrency:
   group: update-sports-auto
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   update:
@@ -24,7 +24,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Fetch sources A/B
         shell: bash
@@ -235,6 +235,22 @@ jobs:
           git add sports-auto.m3u
           if git diff --cached --quiet; then echo "Playlist unchanged."; exit 0; fi
           git commit -m 'auto: update resilient sports playlist'
-          git fetch origin main
-          git rebase origin/main
-          git push origin main
+
+          # Other repository workflows can write to main at the same time.
+          # Rebase and retry so a harmless race does not fail this refresh.
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            if ! git rebase origin/main; then
+              git rebase --abort || true
+              echo "::error::Could not rebase sports playlist commit onto latest main."
+              exit 1
+            fi
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            echo "Push race detected (attempt $attempt/5); retrying..."
+            sleep $((attempt * 2))
+          done
+
+          echo "::error::Failed to push sports playlist after 5 attempts."
+          exit 1
