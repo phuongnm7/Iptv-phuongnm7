@@ -113,14 +113,15 @@ async function scanBatch(batchId) {
   const candidates = CANDIDATES.slice(start, start + BATCH_SIZE);
   const results = await Promise.all(candidates.map(probe));
 
+  // STRICT MODE: publish ONLY confirmed live entries.
+  // HTTP/network errors are diagnostic only and must NEVER enter the playlist/KV entries.
   const entries = results
-    .filter((item) => item.status === "live" || item.status === "error")
+    .filter((item) => item.status === "live")
     .map((item) => ({
       name: item.name,
       url: item.url,
       source: item.source,
       status: item.status,
-      error: item.error || null,
     }));
 
   return {
