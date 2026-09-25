@@ -100,19 +100,10 @@ def resolve_media(url):
     if not variants:
         return None
 
-    # Prefer a muxed rendition that explicitly contains an AAC codec.
-    muxed = [
-        v for v in variants
-        if "mp4a." in v["codecs"] or "ac-3" in v["codecs"] or "ec-3" in v["codecs"]
-    ]
-    if muxed:
-        chosen = max(muxed, key=lambda x: x["bandwidth"])
-        media = get_text(chosen["url"])
-        if "#EXTINF:" in media and "#EXT-X-ENDLIST" not in media:
-            return chosen["url"], chosen["url"], media
-
-    # If the master declares an audio group and the selected video rendition
-    # references it, publish the MASTER URL, not the video-only child URL.
+    # IMPORTANT: FPT masters may advertise mp4a in CODECS even when the
+    # audio is delivered as a separate EXT-X-MEDIA rendition. In that case,
+    # publishing the child AVC URL causes video-only playback. Audio-group
+    # linkage therefore takes precedence over CODECS-based muxed detection.
     with_audio_group = [
         v for v in variants
         if v["audio_group"] and v["audio_group"] in audio_groups
@@ -122,6 +113,18 @@ def resolve_media(url):
         media = get_text(chosen["url"])
         if "#EXTINF:" in media and "#EXT-X-ENDLIST" not in media:
             return url, chosen["url"], media
+
+    # Only use a child rendition when the master has no separate audio group
+    # and the rendition explicitly declares an audio codec.
+    muxed = [
+        v for v in variants
+        if "mp4a." in v["codecs"] or "ac-3" in v["codecs"] or "ec-3" in v["codecs"]
+    ]
+    if muxed:
+        chosen = max(muxed, key=lambda x: x["bandwidth"])
+        media = get_text(chosen["url"])
+        if "#EXTINF:" in media and "#EXT-X-ENDLIST" not in media:
+            return chosen["url"], chosen["url"], media
 
     # Fallback for masters without explicit audio metadata.
     chosen = max(variants, key=lambda x: x["bandwidth"])
