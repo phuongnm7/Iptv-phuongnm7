@@ -1,67 +1,32 @@
-name: Update FPT Event Live Playlist
+name: Update FPT Event Live Scanner
 
 on:
   workflow_dispatch:
-  push:
-    paths:
-      - "tools/filter_fpt_events.py"
-      - ".github/workflows/update-fpt-event-live.yml"
   schedule:
     - cron: "*/5 * * * *"
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: fpt-event-live
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
-  update:
+  scan:
+    name: Scan FPT batch ${{ matrix.batch }}
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        batch: [0, 1, 2, 3, 4]
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Sync with latest main before scan
-        run: git pull --rebase origin main
-
-      - name: Scan and validate FPT live events
-        run: python3 tools/filter_fpt_events.py
-
-      - name: Commit and push playlist update
+      - name: Scan Worker batch
+        env:
+          WORKER_URL: https://nm7-fpt-event-live.phuongnm7-iptv.workers.dev
         run: |
           set -e
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-          git add fpt-event-live.m3u
-
-          if git diff --cached --quiet; then
-            echo "No playlist change"
-            exit 0
-          fi
-
-          git commit -m "auto: update live FPT event playlist"
-
-          # Another workflow/manual commit can land while the FPT scan runs.
-          # Rebase and retry the push so a harmless race does not fail the job.
-          for attempt in 1 2 3; do
-            git fetch origin main
-            if git rebase origin/main; then
-              if git push origin HEAD:main; then
-                echo "Playlist update pushed successfully on attempt $attempt"
-                exit 0
-              fi
-            else
-              git rebase --abort || true
-            fi
-            echo "Push race detected; retrying in 2 seconds..."
-            sleep 2
-          done
-
-          echo "Unable to push playlist update after 3 attempts."
-          exit 1
+          curl --fail --show-error --silent --retry 3 --retry-delay 2 \
+            "${WORKER_URL}/scan?batch=${{ matrix.batch }}"
