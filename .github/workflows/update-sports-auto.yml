@@ -21,7 +21,7 @@ concurrency:
 jobs:
   update:
     runs-on: ubuntu-24.04
-    timeout-minutes: 4
+    timeout-minutes: 10
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -185,6 +185,9 @@ jobs:
           GROUP_ORDER=["Vua Sân Cỏ TV","Khán Đài TV","Cola TV","Gà Vàng TV","Gà Vàng 24h TV","Xôi Lạc Z TV","Gà Vàng 33 TV","S8 TV","Sao Kê TV","Bia Ôm TV","Chuối Chiên TV","Giờ Vàng TV","Socolive TV","Pháo Hoa TV","Nấu Xôi TV","SP TV (China)","Sút Bóng TV","Phá Làng TV"]
           GROUP_ORDER_MAP={norm_group(g):i for i,g in enumerate(GROUP_ORDER)}
           selected.sort(key=lambda x:(GROUP_ORDER_MAP.get(norm_group(x["group"]),9999),x["when"] is None,x["when"] or dt.datetime.max.replace(tzinfo=VN),x["name"],x["url"]))
+          # No previous-playlist fallback. Only entries rebuilt from the current sources are emitted.
+          # Undated/static channels from the current sources are already in `selected` and sort last.
+          static_blocks=[]
           merged=[]
           seen=set()
           for x in selected:
@@ -220,8 +223,6 @@ jobs:
           if stale:
               print("STALE_OUTPUT_SAMPLE="+repr(stale[:10]))
               raise SystemExit("Validation failed: stale match remained in sports-auto.m3u")
-          if len(output) < len(static_blocks):
-              raise SystemExit("Validation failed: preserved static channels were lost")
           print("PLAYLIST_UPDATED=1")
 
           PY
