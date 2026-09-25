@@ -48,3 +48,19 @@ Commit mới nhất: `b8b6c9fef0ce90ffe7d119464bf8238d5a3b3a0`.
 - Đối chiếu số trận từng group giữa nguồn gốc và `sports-auto.m3u`.
 - Kiểm tra riêng Gà Vàng 33 TV, Vua Sân Cỏ TV, Khán Đài TV và các group có nhiều BLV.
 - Xác nhận workflow định kỳ vẫn cập nhật đúng sau các lần chạy tiếp theo.
+
+
+## Watchdog dự phòng — 25/09/2026
+
+Đã bổ sung mã nguồn Cloudflare Worker tại `tools/cloudflare-sports-watchdog/`.
+
+- Cron watchdog: mỗi 5 phút.
+- Ngưỡng coi workflow bị bỏ/trễ: 8 phút.
+- Nếu có run gần đây hoặc run đang queued/in_progress: không dispatch trùng.
+- Nếu run mới nhất đã quá 8 phút: gọi `workflow_dispatch` cho `.github/workflows/update-sports-auto.yml` trên `main`.
+- Không thay đổi logic playlist hiện tại, đặc biệt quy tắc loại các trận đã có thời gian và cũ hơn 180 phút.
+- Worker yêu cầu Secret Cloudflare `GITHUB_TOKEN`, với GitHub fine-grained permission **Actions: Read and write** cho riêng repository.
+
+### Trạng thái triển khai
+
+Mã nguồn đã được chuẩn bị và commit vào repo. Phần duy nhất cần thao tác trên tài khoản Cloudflare là tạo Worker từ thư mục trên và thêm Secret `GITHUB_TOKEN`; ChatGPT không có quyền truy cập tài khoản Cloudflare của người dùng để tự nhập Secret.
