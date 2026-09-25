@@ -22,6 +22,11 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v5
 
+      - name: Sync with latest main before merge
+        run: |
+          git fetch origin main
+          git reset --hard origin/main
+
       - name: Fetch, filter, and merge playlists
         env:
           UPSTREAM_URL: https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/main/vmttv
