@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Fetch, filter, and merge playlists
         env:
@@ -200,4 +200,22 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add IPTV_Gop_VMTTV_vAppTV.m3u sources/golden-tv-selected.m3u sources/uk-football-selected.m3u
           git commit -m "Update IPTV playlists"
-          git push
+
+          # Another workflow may update main while this job is running.
+          # Rebase and retry instead of failing with "fetch first".
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            if ! git rebase origin/main; then
+              git rebase --abort || true
+              echo "::error::Could not rebase generated playlist commit onto latest main."
+              exit 1
+            fi
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            echo "Push race detected (attempt $attempt/5); retrying..."
+            sleep $((attempt * 2))
+          done
+
+          echo "::error::Failed to push generated playlist after 5 attempts."
+          exit 1
