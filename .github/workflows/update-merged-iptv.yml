@@ -5,7 +5,7 @@ on:
     branches:
       - main
   schedule:
-    - cron: "*/5 * * * *"
+    - cron: "0 * * * *"
   workflow_dispatch:
 
 permissions:
@@ -38,7 +38,6 @@ jobs:
           VTVCAP_FALLBACK: sources/vtvcab-on-sports.m3u
           GOLDEN_TV_FALLBACK: sources/golden-tv-selected.m3u
           UK_FOOTBALL_FALLBACK: sources/uk-football-selected.m3u
-          FPT_EVENT_URL: https://nm7-fpt-event-live.phuongnm7-iptv.workers.dev/fpt-event-live.m3u
           EXCLUDED_GROUPS: sources/excluded-groups.txt
           OUTPUT_PLAYLIST: IPTV_Gop_VMTTV_vAppTV.m3u
         run: |
@@ -57,12 +56,6 @@ jobs:
           else
             export UK_FOOTBALL_SOURCE_READY=0
           fi
-          if curl --fail --location --retry 3 --retry-delay 2 "$FPT_EVENT_URL" --output fpt-event-source.m3u; then
-            export FPT_EVENT_SOURCE_READY=1
-          else
-            export FPT_EVENT_SOURCE_READY=0
-            rm -f fpt-event-source.m3u
-          fi
           python3 - <<'PY'
           import os
           import re
@@ -78,8 +71,6 @@ jobs:
           def normalize(value):
               decomposed = unicodedata.normalize("NFD", value)
               return "".join(char for char in decomposed if unicodedata.category(char) != "Mn").casefold().replace("đ", "d").strip()
-
-          FPT_EVENT_GROUP = normalize("SỰ KIỆN FPT")
 
           def extract_vtvcab_entries(lines):
               entries = {}
@@ -165,7 +156,7 @@ jobs:
               if line.startswith("#EXTINF:"):
                   match = re.search(r'''group-title=(?:"([^"]*)"|'([^']*)')''', line, flags=re.I)
                   group = normalize((match.group(1) or match.group(2)) if match else "")
-                  skipping_entry = any(keyword in group for keyword in excluded) or group == FPT_EVENT_GROUP
+                  skipping_entry = any(keyword in group for keyword in excluded)
               if not skipping_entry:
                   filtered_lines.append(line)
 
@@ -192,38 +183,6 @@ jobs:
               if uk_football_entries:
                   Path(os.environ["UK_FOOTBALL_FALLBACK"]).write_text("#EXTM3U\n" + "\n\n".join(uk_football_entries) + "\n", encoding="utf-8")
 
-          def extract_group_entries(lines, target_group):
-              entries = []
-              current = []
-
-              def consider():
-                  if not current:
-                      return
-                  extinf = current[0]
-                  group_match = re.search(r'group-title="([^"]*)"', extinf, flags=re.I)
-                  group = normalize(group_match.group(1) if group_match else "")
-                  if group == target_group:
-                      entries.append("\n".join(current).strip())
-
-              for line in lines:
-                  if line.startswith("#EXTINF:"):
-                      consider()
-                      current = [line]
-                  elif current:
-                      current.append(line)
-              consider()
-              return entries
-
-          fpt_lines = []
-          if os.environ.get("FPT_EVENT_SOURCE_READY") == "1":
-              source_lines = Path("fpt-event-source.m3u").read_text(encoding="utf-8-sig").splitlines()
-              if source_lines and source_lines[0].startswith("#EXTM3U"):
-                  source_lines = source_lines[1:]
-              fpt_lines = source_lines
-          else:
-              existing_lines = Path(os.environ["OUTPUT_PLAYLIST"]).read_text(encoding="utf-8-sig").splitlines()
-              fpt_lines = [line for entry in extract_group_entries(existing_lines, FPT_EVENT_GROUP) for line in entry.splitlines()]
-
           uk_football_lines = []
           uk_football_path = Path(os.environ["UK_FOOTBALL_FALLBACK"])
           if uk_football_path.exists():
@@ -231,7 +190,7 @@ jobs:
               if uk_football_lines and uk_football_lines[0].startswith("#EXTM3U"):
                   uk_football_lines = uk_football_lines[1:]
 
-          merged_sections = ["\n".join(filtered_lines).rstrip(), "\n".join(extra_lines).strip(), "\n\n".join(vtvcab_entries), "\n".join(sport_lines).strip(), "\n".join(uk_football_lines).strip(), "\n".join(fpt_lines).strip()]
+          merged_sections = ["\n".join(filtered_lines).rstrip(), "\n".join(extra_lines).strip(), "\n\n".join(vtvcab_entries), "\n".join(sport_lines).strip(), "\n".join(uk_football_lines).strip()]
           Path(os.environ["OUTPUT_PLAYLIST"]).write_text("\n\n".join(section for section in merged_sections if section) + "\n", encoding="utf-8")
           PY
 
