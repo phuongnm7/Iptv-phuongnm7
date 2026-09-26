@@ -40,5 +40,5 @@ jobs:
           URL="https://nm7-fpt-event-live.phuongnm7-iptv.workers.dev/scan"
           BODY="$(curl -fsSL --retry 3 --retry-delay 2 --max-time 90 "$URL")"
           echo "$BODY"
-          echo "$BODY" | jq -e '.ok == true and .candidates == 37' >/dev/null
-          echo "Verified: deployed Worker scanned all 37 exact FPT source entries."
+          echo "$BODY" | jq -e '.ok == true and .candidates == 37 and .probeErrors == 0 and .inactiveEntries == (.candidates - .liveEntries) and .workerVersion == "fpt-event-404-inactive-v2"' >/dev/null
+          echo "Verified: 37 exact FPT sources scanned; 404 inactive slots are not counted as probe errors; deployed version marker is correct."
