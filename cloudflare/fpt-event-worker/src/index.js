@@ -6,9 +6,7 @@ const STATUS_KEY = "fpt:live:status";
 const CRON = "*/5 * * * *";
 const PLAYLIST_TTL = 7 * 60;
 
-const UA =
-  "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 " +
-  "(KHTML, like Gecko) Chrome/128.0 Mobile Safari/537.36";
+const UAS = ["VThanhTivi", "KhoaTivi", "BearTV"];
 
 function parseSource(text) {
   const lines = text.split(/\r?\n/);
@@ -54,36 +52,38 @@ function isLiveHls(text) {
 }
 
 async function probe(item) {
-  try {
-    const response = await fetch(item.url, {
-      method: "GET",
-      headers: {
-        "User-Agent": UA,
-        "Accept":
-          "application/vnd.apple.mpegurl,application/x-mpegURL,text/plain,*/*",
-        "Cache-Control": "no-cache, no-store",
-        "Pragma": "no-cache",
-        "Referer": "https://fptplay.vn/",
-        "Origin": "https://fptplay.vn/",
-        "Accept-Language": "vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7",
-      },
-      cache: "no-store",
-      redirect: "follow",
-    });
+  let lastError = null;
 
-    if (!response.ok) {
-      return { ...item, live: false, error: "HTTP " + response.status };
+  for (const ua of UAS) {
+    try {
+      const response = await fetch(item.url, {
+        method: "GET",
+        headers: {
+          "User-Agent": ua,
+          "Accept":
+            "application/vnd.apple.mpegurl,application/x-mpegURL,text/plain,*/*",
+          "Cache-Control": "no-cache, no-store",
+          "Pragma": "no-cache",
+          "Referer": "https://fptplay.vn/",
+          "Accept-Language": "vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7",
+        },
+        cache: "no-store",
+        redirect: "follow",
+      });
+
+      if (response.ok) {
+        const body = await response.text();
+        return { ...item, live: isLiveHls(body), error: null, userAgent: ua };
+      }
+
+      lastError = "HTTP " + response.status;
+      if (response.status !== 401 && response.status !== 403) break;
+    } catch (error) {
+      lastError = error instanceof Error ? error.message : String(error);
     }
-
-    const body = await response.text();
-    return { ...item, live: isLiveHls(body), error: null };
-  } catch (error) {
-    return {
-      ...item,
-      live: false,
-      error: error instanceof Error ? error.message : String(error),
-    };
   }
+
+  return { ...item, live: false, error: lastError };
 }
 
 function buildM3U(entries) {
