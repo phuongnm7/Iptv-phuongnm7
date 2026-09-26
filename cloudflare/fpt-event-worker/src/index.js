@@ -20,9 +20,22 @@ function parseSource(text) {
 
     const comma = line.indexOf(",");
     const name = comma >= 0 ? line.slice(comma + 1).trim() : "Sự kiện FPT";
-    const url = (lines[i + 1] || "").trim();
 
-    if (!/^https?:\/\//i.test(url)) continue;
+    // M3U may contain #EXTVLCOPT/#EXTHTTP and other metadata between
+    // #EXTINF and the actual stream URL. Skip metadata until a URL is found.
+    let url = "";
+    for (let j = i + 1; j < lines.length; j++) {
+      const candidate = lines[j].trim();
+      if (!candidate) continue;
+      if (candidate.startsWith("#")) continue;
+      if (/^https?:\/\//i.test(candidate)) {
+        url = candidate;
+        i = j;
+      }
+      break;
+    }
+
+    if (!url) continue;
     result.push({ name, url });
   }
 
@@ -77,7 +90,7 @@ function buildM3U(entries) {
   const lines = ["#EXTM3U", ""];
   for (const entry of entries) {
     lines.push(
-      '#EXTINF:-1 group-title="' + GROUP + '",' + entry.name,
+      "#EXTINF:-1 group-title=\"" + GROUP + "\"," + entry.name,
       entry.url,
       ""
     );
@@ -212,7 +225,7 @@ export default {
 
     return new Response(
       "NM7 FPT Event Live\n\n/fpt-event-live.m3u\n/status\n/scan\n",
-      { headers: { "Content-Type": "text/plain; charset=utf-8" } }
+      { headers: { "Content-Type": "text/plain" } }
     );
   },
 };
