@@ -1,11 +1,11 @@
 const GROUP = "SỰ KIỆN FPT";
-const BATCH_SIZE = 50;
-const BATCH_COUNT = 5;
+const BATCH_SIZE = 32;
+const BATCH_COUNT = 8;
 const BATCH_KEYS = Array.from({ length: BATCH_COUNT }, (_, i) => "fpt:batch:" + i);
 
 const SCAN_CRON = "* * * * *";
-const BATCH_MAX_AGE_MS = 8 * 60 * 1000;
-const BATCH_EXPIRATION_TTL = 10 * 60;
+const BATCH_MAX_AGE_MS = 11 * 60 * 1000;
+const BATCH_EXPIRATION_TTL = 15 * 60;
 
 const VIPS = "https://vips-livecdn.fptplay.net/live/media";
 const LIVECDN = "https://livecdn.fptplay.net/schedule";
@@ -137,6 +137,15 @@ async function scanBatch(batchId) {
     inactiveCount: results.filter((item) => item.status === "inactive").length,
     generatedAt: new Date().toISOString(),
     entries,
+    errors: results
+      .filter((item) => item.status === "error")
+      .slice(0, 12)
+      .map((item) => ({
+        name: item.name,
+        source: item.source,
+        url: item.url,
+        error: item.error || "unknown probe error",
+      })),
   };
 }
 
@@ -263,7 +272,7 @@ export default {
 
       if (batchId === null) {
         return Response.json(
-          { ok: false, error: "batch must be 0, 1, 2, 3 or 4" },
+          { ok: false, error: "batch must be an integer from 0 to 7" },
           { status: 400 }
         );
       }
@@ -316,7 +325,7 @@ export default {
         service: "NM7 FPT Event Live",
         scheduler: {
           cron: SCAN_CRON,
-          strategy: "one batch per minute; 5 batches per 5-minute cycle",
+          strategy: "one batch per minute; 8 batches per 8-minute cycle",
         },
         ready: state.ready === BATCH_COUNT,
         batchesReady: state.ready,
@@ -338,8 +347,10 @@ export default {
           live: batch?.liveCount || 0,
           inactive: batch?.inactiveCount || 0,
           errors: batch?.errorCount || 0,
+          errorDetails: batch?.errors || [],
         })),
         entries: state.entries,
+        errorDetails: batches.flatMap((batch) => batch?.errors || []),
       });
     }
 
