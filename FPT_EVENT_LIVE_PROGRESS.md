@@ -12,12 +12,12 @@
 ### Implemented
 1. Cloudflare Worker now has `scheduled()` and owns the automatic scan schedule.
 2. `wrangler.jsonc` now defines `* * * * *`.
-3. One batch is scanned per minute using `scheduledTime minute % 5`.
-4. Full 250-candidate coverage is therefore completed every ~5 minutes.
+3. One batch is scanned per minute using `scheduledTime minute % 8`.
+4. Full 250-candidate coverage is therefore completed every ~8 minutes.
 5. Each candidate uses one no-store/cache-bypass HLS request.
 6. Only confirmed HLS playlists are published.
 7. 404/410, ended playlists, VOD playlists, invalid playlists, and probe errors are excluded from the published batch.
-8. Each batch KV record expires after 10 minutes.
+8. Each batch KV record expires after 15 minutes.
 9. Playlist generation requires all 8 batches to be fresh within 11 minutes; otherwise the playlist endpoint returns HTTP 503 rather than serving an incomplete/stale playlist.
 10. `/status` now exposes batch freshness, live count, inactive count, and error count.
 11. GitHub Actions was changed from scheduled execution to manual fallback and now validates the Worker JSON instead of treating HTTP 200 alone as success.
@@ -44,9 +44,9 @@ Open:
 
 Expected after the first complete cycle:
 - `ready: true`
-- `batchesReady: 5`
+- `batchesReady: 8`
 - `candidates: 250`
-- `batchErrors: [0,0,0,0,0]` ideally
+- `batchErrors` should be all zero; if not, inspect `errorDetails`
 - `liveEntries` = current confirmed FPT events
 
 Cloudflare Cron Trigger changes can take several minutes to propagate after deployment.
