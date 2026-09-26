@@ -24,7 +24,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Trigger a fresh deployment after Cloudflare credentials were added.
       - name: Deploy Worker
         uses: cloudflare/wrangler-action@v4
         with:
@@ -33,3 +32,13 @@ jobs:
           workingDirectory: cloudflare/fpt-event-worker
           wranglerVersion: "4"
           command: deploy src/index.js --config wrangler.jsonc
+
+      - name: Verify deployed Worker and source scan
+        shell: bash
+        run: |
+          set -euo pipefail
+          URL="https://nm7-fpt-event-live.phuongnm7-iptv.workers.dev/scan"
+          BODY="$(curl -fsSL --retry 3 --retry-delay 2 --max-time 90 "$URL")"
+          echo "$BODY"
+          echo "$BODY" | jq -e '.ok == true and .candidates == 37' >/dev/null
+          echo "Verified: deployed Worker scanned all 37 exact FPT source entries."
