@@ -51,11 +51,10 @@ async function probe(item) {
         "Cache-Control": "no-cache, no-store",
         "Pragma": "no-cache",
         "Referer": "https://fptplay.vn/",
-        "Origin": "https://fptplay.vn",
+        "Origin": "https://fptplay.vn/",
         "Accept-Language": "vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7",
       },
       cache: "no-store",
-      cf: { cacheTtl: 0, cacheEverything: false },
       redirect: "follow",
     });
 
