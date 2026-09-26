@@ -19,8 +19,6 @@ function parseSource(text) {
     const comma = line.indexOf(",");
     const name = comma >= 0 ? line.slice(comma + 1).trim() : "Sự kiện FPT";
 
-    // M3U may contain #EXTVLCOPT/#EXTHTTP and other metadata between
-    // #EXTINF and the actual stream URL. Skip metadata until a URL is found.
     let url = "";
     for (let j = i + 1; j < lines.length; j++) {
       const candidate = lines[j].trim();
@@ -101,7 +99,7 @@ function buildM3U(entries) {
 async function scan(env) {
   const sourceResponse = await fetch(SOURCE_URL + "?_=" + Date.now(), {
     headers: {
-      "User-Agent": UA,
+      "User-Agent": UAS[0],
       "Cache-Control": "no-cache, no-store",
       "Pragma": "no-cache",
     },
