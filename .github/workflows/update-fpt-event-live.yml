@@ -18,7 +18,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        batch: [0, 1, 2, 3, 4]
+        batch: [0, 1, 2, 3, 4, 5, 6, 7]
 
     steps:
       - name: Scan Worker batch and validate result
@@ -41,8 +41,11 @@ jobs:
           if data.get("ok") is not True:
               raise SystemExit(f"Worker returned ok={data.get('ok')!r}")
 
-          if data.get("scanned") != 50:
-              raise SystemExit(f"Expected 50 scanned candidates, got {data.get('scanned')!r}")
+          expected = 26 if data.get("batch") == 7 else 32
+          if data.get("scanned") != expected:
+              raise SystemExit(
+                  f"Expected {expected} scanned candidates, got {data.get('scanned')!r}"
+              )
 
           errors = int(data.get("errors") or 0)
           if errors:
