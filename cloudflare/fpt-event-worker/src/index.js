@@ -355,7 +355,7 @@ export default {
     }
 
     return new Response(
-      "NM7 FPT Event Live Worker\n\n/fpt-event-live.m3u\n/status\n/scan?batch=0..4\n",
+      "NM7 FPT Event Live Worker\n\n/fpt-event-live.m3u\n/status\n/scan?batch=0..7\n",
       { headers: { "Content-Type": "text/plain; charset=utf-8" } }
     );
   },
