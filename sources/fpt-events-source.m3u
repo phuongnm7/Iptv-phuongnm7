@@ -1,112 +1,81 @@
 #EXTM3U
 
-#EXTINF:-1 group-title="SỰ KIỆN FPT",Sự kiện FPT 01
-https://vips-livecdn.fptplay.net/live/media/su-kien-01/hls_avc_v6/index.m3u8
+#EXTINF:-1 group-title="SỰ KIỆN FPT",FPT Play Event 01
+#EXTVLCOPT:http-user-agent=KhoaTivi
+https://livecdn.fptplay.net/schedule/sukien01_vhls.smil/chunklist_b5000000.m3u8
 
-#EXTINF:-1 group-title="SỰ KIỆN FPT",Sự kiện FPT 02
-https://vips-livecdn.fptplay.net/live/media/su-kien-02/hls_avc_v6/index.m3u8
+#EXTINF:-1 group-title="SỰ KIỆN FPT",FPT Play Event 02
+#EXTVLCOPT:http-user-agent=KhoaTivi
+https://livecdn.fptplay.net/schedule/sukien02_vhls.smil/chunklist_b5000000.m3u8
 
-#EXTINF:-1 group-title="SỰ KIỆN FPT",Sự kiện FPT 03
-https://vips-livecdn.fptplay.net/live/media/su-kien-03/hls_avc_v6/index.m3u8
+#EXTINF:-1 group-title="SỰ KIỆN FPT",FPT Play Event 03
+#EXTVLCOPT:http-user-agent=KhoaTivi
+https://livecdn.fptplay.net/schedule/sukien03_vhls.smil/chunklist_b5000000.m3u8
 
-#EXTINF:-1 group-title="SỰ KIỆN FPT",Sự kiện FPT 04
-https://vips-livecdn.fptplay.net/live/media/su-kien-04/hls_avc_v6/index.m3u8
+#EXTINF:-1 group-title="SỰ KIỆN FPT",FPT Play Event 04
+#EXTVLCOPT:http-user-agent=KhoaTivi
+https://livecdn.fptplay.net/schedule/sukien04_vhls.smil/chunklist_b5000000.m3u8
 
-#EXTINF:-1 group-title="SỰ KIỆN FPT",Sự kiện FPT 05
-https://vips-livecdn.fptplay.net/live/media/su-kien-05/hls_avc_v6/index.m3u8
+#EXTINF:-1 group-title="SỰ KIỆN FPT",FPT Play Event 05
+#EXTVLCOPT:http-user-agent=KhoaTivi
+https://livecdn.fptplay.net/schedule/sukien05_vhls.smil/chunklist_b5000000.m3u8
 
-#EXTINF:-1 group-title="SỰ KIỆN FPT",Sự kiện FPT 06
-https://vips-livecdn.fptplay.net/live/media/su-kien-06/hls_avc_v6/index.m3u8
+#EXTINF:-1 group-title="SỰ KIỆN FPT",FPT Play Event 06
+#EXTVLCOPT:http-user-agent=KhoaTivi
+https://livecdn.fptplay.net/schedule/sukien06_vhls.smil/chunklist_b5000000.m3u8
 
-#EXTINF:-1 group-title="SỰ KIỆN FPT",Sự kiện FPT 07
-https://vips-livecdn.fptplay.net/live/media/su-kien-07/hls_avc_v6/index.m3u8
+#EXTINF:-1 group-title="SỰ KIỆN FPT",FPT Play Event 07
+#EXTVLCOPT:http-user-agent=KhoaTivi
+https://livecdn.fptplay.net/schedule/sukien07_vhls.smil/chunklist_b5000000.m3u8
 
-#EXTINF:-1 group-title="SỰ KIỆN FPT",Sự kiện FPT 08
-https://vips-livecdn.fptplay.net/live/media/su-kien-08/hls_avc_v6/index.m3u8
+#EXTINF:-1 group-title="SỰ KIỆN FPT",FPT Play Event 08
+#EXTVLCOPT:http-user-agent=KhoaTivi
+https://livecdn.fptplay.net/schedule/sukien08_vhls.smil/chunklist_b5000000.m3u8
 
-#EXTINF:-1 group-title="SỰ KIỆN FPT",Sự kiện FPT 09
-https://vips-livecdn.fptplay.net/live/media/su-kien-09/hls_avc_v6/index.m3u8
+#EXTINF:-1 group-title="SỰ KIỆN FPT",FPT Play Event 09
+#EXTVLCOPT:http-user-agent=KhoaTivi
+https://livecdn.fptplay.net/schedule/sukien09_vhls.smil/chunklist_b5000000.m3u8
 
-#EXTINF:-1 group-title="SỰ KIỆN FPT",Sự kiện FPT 10
-https://vips-livecdn.fptplay.net/live/media/su-kien-10/hls_avc_v6/index.m3u8
+#EXTINF:-1 group-title="SỰ KIỆN FPT",FPT Play Event 10
+#EXTVLCOPT:http-user-agent=KhoaTivi
+https://livecdn.fptplay.net/schedule/sukien10_vhls.smil/chunklist_b5000000.m3u8
 
-#EXTINF:-1 group-title="SỰ KIỆN FPT",Sự kiện FPT 11
-https://vips-livecdn.fptplay.net/live/media/su-kien-11/hls_avc_v6/index.m3u8
+#EXTINF:-1 group-title="SỰ KIỆN FPT",FPT Play Event 11
+#EXTVLCOPT:http-user-agent=KhoaTivi
+https://livecdn.fptplay.net/schedule/sukien11_vhls.smil/chunklist_b5000000.m3u8
 
-#EXTINF:-1 group-title="SỰ KIỆN FPT",Sự kiện FPT 12
-https://vips-livecdn.fptplay.net/live/media/su-kien-12/hls_avc_v6/index.m3u8
+#EXTINF:-1 group-title="SỰ KIỆN FPT",FPT Play Event 12
+#EXTVLCOPT:http-user-agent=KhoaTivi
+https://livecdn.fptplay.net/schedule/sukien12_vhls.smil/chunklist_b5000000.m3u8
 
-#EXTINF:-1 group-title="SỰ KIỆN FPT",Sự kiện FPT 13
-https://vips-livecdn.fptplay.net/live/media/su-kien-13/hls_avc_v6/index.m3u8
+#EXTINF:-1 group-title="SỰ KIỆN FPT",FPT Play Event 13
+#EXTVLCOPT:http-user-agent=KhoaTivi
+https://livecdn.fptplay.net/schedule/sukien13_vhls.smil/chunklist_b5000000.m3u8
 
-#EXTINF:-1 group-title="SỰ KIỆN FPT",Sự kiện FPT 14
-https://vips-livecdn.fptplay.net/live/media/su-kien-14/hls_avc_v6/index.m3u8
+#EXTINF:-1 group-title="SỰ KIỆN FPT",FPT Play Event 14
+#EXTVLCOPT:http-user-agent=KhoaTivi
+https://livecdn.fptplay.net/schedule/sukien14_vhls.smil/chunklist_b5000000.m3u8
 
-#EXTINF:-1 group-title="SỰ KIỆN FPT",Sự kiện FPT 15
-https://vips-livecdn.fptplay.net/live/media/su-kien-15/hls_avc_v6/index.m3u8
+#EXTINF:-1 group-title="SỰ KIỆN FPT",FPT Play Event 15
+#EXTVLCOPT:http-user-agent=KhoaTivi
+https://livecdn.fptplay.net/schedule/sukien15_vhls.smil/chunklist_b5000000.m3u8
 
-#EXTINF:-1 group-title="SỰ KIỆN FPT",Sự kiện FPT 4K 01
-https://vips-livecdn.fptplay.net/live/media/su-kien-01-4k/hls_avc_v6/index.m3u8
+#EXTINF:-1 group-title="SỰ KIỆN FPT",FPT Play Event 16
+#EXTVLCOPT:http-user-agent=KhoaTivi
+https://livecdn.fptplay.net/schedule/sukien16_vhls.smil/chunklist_b5000000.m3u8
 
-#EXTINF:-1 group-title="SỰ KIỆN FPT",Sự kiện FPT 4K 02
-https://vips-livecdn.fptplay.net/live/media/su-kien-02-4k/hls_avc_v6/index.m3u8
+#EXTINF:-1 group-title="SỰ KIỆN FPT",FPT Play Event 17
+#EXTVLCOPT:http-user-agent=KhoaTivi
+https://livecdn.fptplay.net/schedule/sukien17_vhls.smil/chunklist_b5000000.m3u8
 
-#EXTINF:-1 group-title="SỰ KIỆN FPT",Sự kiện FPT 4K 04
-https://vips-livecdn.fptplay.net/live/media/event-04-4k/hls_avc_v6/index.m3u8
+#EXTINF:-1 group-title="SỰ KIỆN FPT",FPT Play Event 18
+#EXTVLCOPT:http-user-agent=KhoaTivi
+https://livecdn.fptplay.net/schedule/sukien18_vhls.smil/chunklist_b5000000.m3u8
 
-#EXTINF:-1 group-title="SỰ KIỆN FPT",Sự kiện FPT Event 01
-https://vips-livecdn.fptplay.net/live/media/event-01/hls_avc_v6/index.m3u8
+#EXTINF:-1 group-title="SỰ KIỆN FPT",FPT Play Event 19
+#EXTVLCOPT:http-user-agent=KhoaTivi
+https://livecdn.fptplay.net/schedule/sukien19_vhls.smil/chunklist_b5000000.m3u8
 
-#EXTINF:-1 group-title="SỰ KIỆN FPT",Sự kiện FPT Event 01 4K
-https://vips-livecdn.fptplay.net/live/media/event-01-4k/hls_avc_v6/index.m3u8
-
-#EXTINF:-1 group-title="SỰ KIỆN FPT",Sự kiện FPT Event 02
-https://vips-livecdn.fptplay.net/live/media/event-02/hls_avc_v6/index.m3u8
-
-#EXTINF:-1 group-title="SỰ KIỆN FPT",Sự kiện FPT Event 02 4K
-https://vips-livecdn.fptplay.net/live/media/event-02-4k/hls_avc_v6/index.m3u8
-
-#EXTINF:-1 group-title="SỰ KIỆN FPT",Sự kiện FPT Event 03
-https://vips-livecdn.fptplay.net/live/media/event-03/hls_avc_v6/index.m3u8
-
-#EXTINF:-1 group-title="SỰ KIỆN FPT",Sự kiện FPT Event 03 4K
-https://vips-livecdn.fptplay.net/live/media/event-03-4k/hls_avc_v6/index.m3u8
-
-#EXTINF:-1 group-title="SỰ KIỆN FPT",Sự kiện FPT Event 04
-https://vips-livecdn.fptplay.net/live/media/event-04/hls_avc_v6/index.m3u8
-
-#EXTINF:-1 group-title="SỰ KIỆN FPT",Sự kiện FPT Event 05
-https://vips-livecdn.fptplay.net/live/media/event-05/hls_avc_v6/index.m3u8
-
-#EXTINF:-1 group-title="SỰ KIỆN FPT",Sự kiện FPT Event 05 4K
-https://vips-livecdn.fptplay.net/live/media/event-05-4k/hls_avc_v6/index.m3u8
-
-#EXTINF:-1 group-title="SỰ KIỆN FPT",Sự kiện FPT Event 06
-https://vips-livecdn.fptplay.net/live/media/event-06/hls_avc_v6/index.m3u8
-
-#EXTINF:-1 group-title="SỰ KIỆN FPT",Sự kiện FPT Event 06 4K
-https://vips-livecdn.fptplay.net/live/media/event-06-4k/hls_avc_v6/index.m3u8
-
-#EXTINF:-1 group-title="SỰ KIỆN FPT",Sự kiện FPT Event 07
-https://vips-livecdn.fptplay.net/live/media/event-07/hls_avc_v6/index.m3u8
-
-#EXTINF:-1 group-title="SỰ KIỆN FPT",Sự kiện FPT Event 07 4K
-https://vips-livecdn.fptplay.net/live/media/event-07-4k/hls_avc_v6/index.m3u8
-
-#EXTINF:-1 group-title="SỰ KIỆN FPT",Sự kiện FPT Event 08
-https://vips-livecdn.fptplay.net/live/media/event-08/hls_avc_v6/index.m3u8
-
-#EXTINF:-1 group-title="SỰ KIỆN FPT",Sự kiện FPT Event 08 4K
-https://vips-livecdn.fptplay.net/live/media/event-08-4k/hls_avc_v6/index.m3u8
-
-#EXTINF:-1 group-title="SỰ KIỆN FPT",Sự kiện FPT Event 09
-https://vips-livecdn.fptplay.net/live/media/event-09/hls_avc_v6/index.m3u8
-
-#EXTINF:-1 group-title="SỰ KIỆN FPT",Sự kiện FPT Event 09 4K
-https://vips-livecdn.fptplay.net/live/media/event-09-4k/hls_avc_v6/index.m3u8
-
-#EXTINF:-1 group-title="SỰ KIỆN FPT",Sự kiện FPT Event 10
-https://vips-livecdn.fptplay.net/live/media/event-10/hls_avc_v6/index.m3u8
-
-#EXTINF:-1 group-title="SỰ KIỆN FPT",Sự kiện FPT Event 10 4K
-https://vips-livecdn.fptplay.net/live/media/event-10-4k/hls_avc_v6/index.m3u8
+#EXTINF:-1 group-title="SỰ KIỆN FPT",FPT Play Event 20
+#EXTVLCOPT:http-user-agent=KhoaTivi
+https://livecdn.fptplay.net/schedule/sukien20_vhls.smil/chunklist_b5000000.m3u8
