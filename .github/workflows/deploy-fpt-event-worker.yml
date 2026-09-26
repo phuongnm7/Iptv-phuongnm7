@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - "cloudflare/fpt-event-worker/**"
+      - "sources/fpt-events-source.m3u"
       - ".github/workflows/deploy-fpt-event-worker.yml"
   workflow_dispatch:
 
