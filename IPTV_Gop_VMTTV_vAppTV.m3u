@@ -1,6 +1,12 @@
 #EXTM3U url-tvg="https://lichphatsong.io.vn/epg.xml"
 #EXTINF:-1 group-title="FIFA ASEAN CUP 2026" tvg-logo="https://hongkongfp.com/wp-content/uploads/2026/09/brave_bJwrT9j1Op-1050x589.jpg", ViuTV Six
 https://cdn.qd.je/163189/viu6
+#EXTINF:-1 group-title="FIFA ASEAN CUP 2026" tvg-logo="https://hongkongfp.com/wp-content/uploads/2026/09/brave_bJwrT9j1Op-1050x589.jpg", Mewatch Live 5
+#EXTVLCOPT:http-user-agent=Dalvik/2.1.0
+#KODIPROP:inputstream.adaptive.manifest_type=mpd
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=91b9592c819246c68b3b08a1fe08ba22:fa0d80dfd865b34077bae44cd4a0c5e6
+https://tglmp04.akamaized.net/out/v1/400fc0702dee453bb33ebcc29466e58a/manifest.mpd
 #EXTINF:-1 group-title="Asian Games Aichi-Nagoya 2026" tvg-logo="https://raw.githubusercontent.com/vuminhthanh12/Logo/refs/heads/main/AsianGamesCh01.jpg", Asian Games CH01
 #EXTVLCOPT:http-user-agent=Dalvik/2.1.0
 #KODIPROP:inputstream.adaptive.manifest_type=mpd
@@ -457,7 +463,7 @@ https://live.fptplay53.net/fnxhd1/vtv5tnb_vhls.smil/chunklist.m3u8
 #KODIPROP:inputstream.adaptive.manifest_type=dash 
 #KODIPROP:inputstream.adaptive.license_type=clearkey 
 #KODIPROP:inputstream.adaptive.license_key=https://tv.vietanhtv.top/sex/cleankey.php?id=tv360173&token=aa0e395c623a8812a6ed0d3cd549b0bf
-https://tv.vietanhtv.top/tv360/tv360.php?id=173&expires=1790488285&token=a6d4078f94d56c85bc43450df896269e
+https://tv.vietanhtv.top/tv360/tv360.php?id=173&expires=1790500836&token=6599e6e6f5c7c081f5aefbb5abb49cce
 
 #EXTINF:-1 tvg-id="onsportsplus" group-title="VTVcab" tvg-logo="https://assets-vtvcab.gviet.vn/images/hq/posters/onsportscongmoi1.jpg", ON SPORTS+ 
 #EXTVLCOPT:http-user-agent=Dalvik/2.1.0
@@ -465,7 +471,7 @@ https://tv.vietanhtv.top/tv360/tv360.php?id=173&expires=1790488285&token=a6d4078
 #KODIPROP:inputstream.adaptive.manifest_type=dash 
 #KODIPROP:inputstream.adaptive.license_type=clearkey 
 #KODIPROP:inputstream.adaptive.license_key=https://tv.vietanhtv.top/sex/cleankey.php?id=tv360183&token=aa0e395c623a8812a6ed0d3cd549b0bf
-https://tv.vietanhtv.top/tv360/tv360.php?id=183&expires=1790488285&token=8e39c1a08e59d70cb3e71e9b3d7ea4e5
+https://tv.vietanhtv.top/tv360/tv360.php?id=183&expires=1790500836&token=acd2052b33c3fb68593ccfb3a1d678fa
 
 #EXTINF:-1 tvg-id="onfootball" group-title="VTVcab" tvg-logo="https://assets-vtvcab.gviet.vn/images/hq/posters/_ootball_-_opyright_by_cab_logo_202212.jpg", ON FOOTBALL
 #EXTVLCOPT:http-user-agent=Dalvik/2.1.0
@@ -473,7 +479,7 @@ https://tv.vietanhtv.top/tv360/tv360.php?id=183&expires=1790488285&token=8e39c1a
 #KODIPROP:inputstream.adaptive.manifest_type=dash 
 #KODIPROP:inputstream.adaptive.license_type=clearkey 
 #KODIPROP:inputstream.adaptive.license_key=https://tv.vietanhtv.top/sex/cleankey.php?id=tv360174&token=aa0e395c623a8812a6ed0d3cd549b0bf
-https://tv.vietanhtv.top/tv360/tv360.php?id=174&expires=1790488285&token=3b9379c89cc1f645e78f8a10e7e966ae
+https://tv.vietanhtv.top/tv360/tv360.php?id=174&expires=1790500836&token=47b07e5624a5ab9b553e1781b6404188
 
 #EXTINF:-1 tvg-id="onsportsnews" group-title="VTVcab" tvg-logo="https://assets-vtvcab.gviet.vn/images/v2/channel/20220613/2022061306/Logo_ONSPORTSNEWS_150x904_1675158858.webp", ON SPORTS NEWS 
 #EXTVLCOPT:http-user-agent=Dalvik/2.1.0
@@ -481,7 +487,7 @@ https://tv.vietanhtv.top/tv360/tv360.php?id=174&expires=1790488285&token=3b9379c
 #KODIPROP:inputstream.adaptive.manifest_type=dash 
 #KODIPROP:inputstream.adaptive.license_type=clearkey 
 #KODIPROP:inputstream.adaptive.license_key=https://tv.vietanhtv.top/sex/cleankey.php?id=tv360170&token=aa0e395c623a8812a6ed0d3cd549b0bf
-https://tv.vietanhtv.top/tv360/tv360.php?id=170&expires=1790488285&token=7fdf80c166801b470f9063465b07c580
+https://tv.vietanhtv.top/tv360/tv360.php?id=170&expires=1790500836&token=a6c693ef2d6eb51e5b4278d6e269dbd9
 
 #EXTINF:-1 group-title="┃UK┃ EPL PREMIER LEAGUE TEAMS" tvg-logo="http://picon.tivi-ott.net:25461/picon/UK/UK EPL Premier League TEAMS/MANCHESTER UNITED.png" tvg-id="" tvg-name="┃UK┃ MANCHESTER UNITED F.C (MATCH TIME)" tvg-expire="20/06/2027" gau-status="CHƯA TEST" gau-open="" gau-resolution="" gau-bitrate="" gau-subtitle="CHƯA XÁC ĐỊNH" gau-subtitle-lang="" gau-subtitle-type="",┃UK┃ MANCHESTER UNITED F.C (MATCH TIME)
 http://mag.tivi-one-iptv.net:80/play/live.php?mac=00:1A:79:0E:0F:8E&stream=794966&extension=ts&play_token=QDuVFvG1IG
