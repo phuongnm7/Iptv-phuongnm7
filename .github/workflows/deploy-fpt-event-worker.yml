@@ -20,9 +20,6 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    defaults:
-      run:
-        working-directory: cloudflare/fpt-event-worker
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -33,4 +30,4 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: cloudflare/fpt-event-worker
-          command: deploy
+          command: deploy src/index.js --config wrangler.jsonc
