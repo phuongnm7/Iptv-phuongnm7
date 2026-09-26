@@ -5,6 +5,7 @@ const PLAYLIST_KEY = "fpt:live:playlist";
 const STATUS_KEY = "fpt:live:status";
 const CRON = "*/5 * * * *";
 const PLAYLIST_TTL = 7 * 60;
+const WORKER_VERSION = "fpt-event-404-inactive-v2";
 
 const UAS = ["VThanhTivi", "KhoaTivi", "BearTV"];
 
@@ -134,6 +135,7 @@ async function scan(env) {
 
   const status = {
     ok: true,
+    workerVersion: WORKER_VERSION,
     generatedAt: new Date().toISOString(),
     candidates: candidates.length,
     liveEntries: live.length,
