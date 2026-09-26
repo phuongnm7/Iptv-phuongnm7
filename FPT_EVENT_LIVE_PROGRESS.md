@@ -51,5 +51,11 @@ Expected after the first complete cycle:
 
 Cloudflare Cron Trigger changes can take several minutes to propagate after deployment.
 
+### 2026-09-26 — Integrate into main IPTV playlist
+- The main `IPTV_Gop_VMTTV_vAppTV.m3u` previously had no `SỰ KIỆN FPT` section.
+- `.github/workflows/update-merged-iptv.yml` now fetches the authoritative Worker playlist and appends its current FPT events to the main playlist.
+- The merged playlist workflow now runs every 5 minutes as a secondary static mirror. If the Worker temporarily returns 503, the existing FPT section is preserved rather than being erased. When the Worker returns an empty but valid playlist, the FPT section is removed automatically.
+- The Cloudflare Worker remains the primary real-time source; the GitHub merged playlist is a static mirror and can be delayed if GitHub scheduled workflows are delayed.
+
 ### Important
 The authoritative automatic playlist is the Cloudflare Worker URL above. The repository file `fpt-event-live.m3u` remains a static GitHub snapshot and is not the source of truth for the automatic runtime playlist.
