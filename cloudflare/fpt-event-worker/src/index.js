@@ -74,6 +74,10 @@ async function probe(item) {
         return { ...item, live: isLiveHls(body), error: null, userAgent: ua };
       }
 
+      if (response.status === 404) {
+        return { ...item, live: false, error: null, inactiveReason: "HTTP 404" };
+      }
+
       lastError = "HTTP " + response.status;
       if (response.status !== 401 && response.status !== 403) break;
     } catch (error) {
@@ -135,6 +139,7 @@ async function scan(env) {
     liveEntries: live.length,
     inactiveEntries: results.filter((x) => !x.live && !x.error).length,
     probeErrors: results.filter((x) => x.error).length,
+    liveChannels: live,
     errors: results
       .filter((x) => x.error)
       .slice(0, 12)
