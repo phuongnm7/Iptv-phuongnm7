@@ -59,3 +59,11 @@ Cloudflare Cron Trigger changes can take several minutes to propagate after depl
 
 ### Important
 The authoritative automatic playlist is the Cloudflare Worker URL above. The repository file `fpt-event-live.m3u` remains a static GitHub snapshot and is not the source of truth for the automatic runtime playlist.
+
+
+### 2026-09-26 — Rollback after regression
+- The 8-batch scanner and automatic merge integration introduced a regression after deployment/testing.
+- The Worker source has been restored to the previously known 5-batch baseline (f23b85b6ee174b080e99de817ee4992d3b3f6494).
+- The merged IPTV workflow has been restored to its pre-FPT-integration version.
+- The manual FPT fallback workflow has also been restored to 5 batches.
+- No further FPT architecture changes should be deployed until the original 10-probe-error cause is isolated and tested independently.
