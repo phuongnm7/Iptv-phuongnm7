@@ -1,75 +1,53 @@
 const GROUP = "SỰ KIỆN FPT";
-const BATCH_SIZE = 50;
-const BATCH_COUNT = 5;
-const BATCH_KEYS = Array.from({ length: BATCH_COUNT }, (_, i) => "fpt:batch:" + i);
-
-const SCAN_CRON = "* * * * *";
-const BATCH_MAX_AGE_MS = 8 * 60 * 1000;
-const BATCH_EXPIRATION_TTL = 10 * 60;
-
-const VIPS = "https://vips-livecdn.fptplay.net/live/media";
-const LIVECDN = "https://livecdn.fptplay.net/schedule";
-
-const CANDIDATES = [];
-function add(name, url, source) {
-  CANDIDATES.push({ name, url, source });
-}
-
-for (let i = 1; i <= 50; i++) {
-  const n = String(i).padStart(2, "0");
-  add("Sự kiện FPT " + n, VIPS + "/su-kien-" + n + "/hls_avc_v6/index.m3u8", "VIPS");
-  add("Sự kiện FPT " + n, LIVECDN + "/sukien" + n + "_vhls.smil/chunklist_b5000000.m3u8", "LIVECDN");
-  add("Sự kiện FPT " + n + " 4K", VIPS + "/su-kien-" + n + "-4k/hls_avc_v6/index.m3u8", "VIPS");
-  add("Sự kiện FPT Event " + n, VIPS + "/event-" + n + "/hls_avc_v6/index.m3u8", "VIPS");
-  add("Sự kiện FPT Event " + n + " 4K", VIPS + "/event-" + n + "-4k/hls_avc_v6/index.m3u8", "VIPS");
-}
+const SOURCE_URL =
+  "https://raw.githubusercontent.com/phuongnm7/Iptv-phuongnm7/main/sources/fpt-events-source.m3u";
+const PLAYLIST_KEY = "fpt:live:playlist";
+const STATUS_KEY = "fpt:live:status";
+const CRON = "*/5 * * * *";
+const PLAYLIST_TTL = 7 * 60;
 
 const UA =
   "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 " +
   "(KHTML, like Gecko) Chrome/128.0 Mobile Safari/537.36";
 
-function parseBatchId(value) {
-  const batchId = Number(value);
-  return Number.isInteger(batchId) && batchId >= 0 && batchId < BATCH_COUNT
-    ? batchId
-    : null;
+function parseSource(text) {
+  const lines = text.split(/\r?\n/);
+  const result = [];
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (!line.startsWith("#EXTINF")) continue;
+
+    const comma = line.indexOf(",");
+    const name = comma >= 0 ? line.slice(comma + 1).trim() : "Sự kiện FPT";
+    const url = (lines[i + 1] || "").trim();
+
+    if (!/^https?:\/\//i.test(url)) continue;
+    result.push({ name, url });
+  }
+
+  return result;
 }
 
-function scheduledBatchId(scheduledTime) {
-  const minute = Math.floor(scheduledTime / 60000);
-  return ((minute % BATCH_COUNT) + BATCH_COUNT) % BATCH_COUNT;
+function isLiveHls(text) {
+  if (!text || !text.includes("#EXTM3U")) return false;
+  if (text.includes("#EXT-X-ENDLIST")) return false;
+  if (/^#EXT-X-PLAYLIST-TYPE:VOD\s*$/mi.test(text)) return false;
+
+  const hasSegments = text.includes("#EXTINF:");
+  const hasVariant = text.includes("#EXT-X-STREAM-INF:");
+  const hasMediaSequence = text.includes("#EXT-X-MEDIA-SEQUENCE:");
+  return hasSegments || hasVariant || hasMediaSequence;
 }
 
-function canonicalPlayerUrl(rawUrl) {
-  const marker = "/hls_avc_v6/";
-  if (!rawUrl.includes(marker)) return rawUrl;
-  return rawUrl.split(marker)[0] + marker + "index.m3u8";
-}
-
-function isPlaylist(text) {
-  return (
-    text.includes("#EXTINF:") ||
-    text.includes("#EXT-X-STREAM-INF:")
-  );
-}
-
-function classifyPlaylist(text) {
-  if (!text || !text.includes("#EXTM3U")) return "inactive";
-  if (text.includes("#EXT-X-ENDLIST")) return "inactive";
-  if (text.includes("#EXT-X-PLAYLIST-TYPE:VOD")) return "inactive";
-  if (!isPlaylist(text)) return "inactive";
-  return "live";
-}
-
-async function probe(candidate) {
-  const playerUrl = canonicalPlayerUrl(candidate.url);
-
+async function probe(item) {
   try {
-    const response = await fetch(playerUrl, {
+    const response = await fetch(item.url, {
       method: "GET",
       headers: {
         "User-Agent": UA,
-        "Accept": "application/vnd.apple.mpegurl,application/x-mpegURL,text/plain,*/*",
+        "Accept":
+          "application/vnd.apple.mpegurl,application/x-mpegURL,text/plain,*/*",
         "Cache-Control": "no-cache, no-store",
         "Pragma": "no-cache",
         "Referer": "https://fptplay.vn/",
@@ -77,109 +55,27 @@ async function probe(candidate) {
         "Accept-Language": "vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7",
       },
       cache: "no-store",
-      cf: {
-        cacheTtl: 0,
-        cacheEverything: false,
-      },
+      cf: { cacheTtl: 0, cacheEverything: false },
       redirect: "follow",
     });
 
-    if (response.status === 404 || response.status === 410) {
-      return { ...candidate, status: "inactive", url: playerUrl };
-    }
-
     if (!response.ok) {
-      return {
-        ...candidate,
-        status: "error",
-        url: playerUrl,
-        error: "HTTP " + response.status,
-      };
+      return { ...item, live: false, error: "HTTP " + response.status };
     }
 
-    const text = await response.text();
-    const status = classifyPlaylist(text);
-
-    if (status === "live") {
-      return { ...candidate, status: "live", url: playerUrl };
-    }
-
-    return { ...candidate, status: "inactive", url: playerUrl };
+    const body = await response.text();
+    return { ...item, live: isLiveHls(body), error: null };
   } catch (error) {
     return {
-      ...candidate,
-      status: "error",
-      url: playerUrl,
+      ...item,
+      live: false,
       error: error instanceof Error ? error.message : String(error),
     };
   }
 }
 
-async function scanBatch(batchId) {
-  const start = batchId * BATCH_SIZE;
-  const candidates = CANDIDATES.slice(start, start + BATCH_SIZE);
-  const results = await Promise.all(candidates.map(probe));
-
-  const entries = results
-    .filter((item) => item.status === "live")
-    .map((item) => ({
-      name: item.name,
-      url: item.url,
-      source: item.source,
-      status: "live",
-    }));
-
-  return {
-    batch: batchId,
-    scanned: candidates.length,
-    liveCount: results.filter((item) => item.status === "live").length,
-    errorCount: results.filter((item) => item.status === "error").length,
-    inactiveCount: results.filter((item) => item.status === "inactive").length,
-    generatedAt: new Date().toISOString(),
-    entries,
-  };
-}
-
-function chooseEntries(batchResults) {
-  const byName = new Map();
-
-  for (const batch of batchResults) {
-    if (!batch || !Array.isArray(batch.entries)) continue;
-
-    for (const item of batch.entries) {
-      const current = byName.get(item.name);
-      if (!current) {
-        byName.set(item.name, item);
-        continue;
-      }
-
-      // Prefer the VIPS master URL. The LIVECDN child rendition can be
-      // video-only and may reproduce the historical "picture without audio"
-      // problem. Keep VIPS when both sources report the same event as live.
-      if (
-        current.status === "live" &&
-        item.status === "live" &&
-        current.source === "LIVECDN" &&
-        item.source === "VIPS"
-      ) {
-        byName.set(item.name, item);
-      }
-    }
-  }
-
-  return [...byName.values()]
-    .sort((a, b) => a.name.localeCompare(b.name, "vi"))
-    .map((item) => ({
-      name: item.name,
-      url: item.url,
-      status: item.status,
-      source: item.source,
-    }));
-}
-
 function buildM3U(entries) {
   const lines = ["#EXTM3U", ""];
-
   for (const entry of entries) {
     lines.push(
       '#EXTINF:-1 group-title="' + GROUP + '",' + entry.name,
@@ -187,164 +83,136 @@ function buildM3U(entries) {
       ""
     );
   }
-
   return lines.join("\n");
 }
 
-function isFreshBatch(batch, now = Date.now()) {
-  if (!batch || !batch.generatedAt) return false;
-  const generatedAt = Date.parse(batch.generatedAt);
-  if (!Number.isFinite(generatedAt)) return false;
-  return now - generatedAt >= 0 && now - generatedAt <= BATCH_MAX_AGE_MS;
-}
-
-async function readAllBatches(env) {
-  const values = await env.FPT_EVENT_KV.get(BATCH_KEYS, {
-    type: "json",
-    cacheTtl: 30,
+async function scan(env) {
+  const sourceResponse = await fetch(SOURCE_URL + "?_=" + Date.now(), {
+    headers: {
+      "User-Agent": UA,
+      "Cache-Control": "no-cache, no-store",
+      "Pragma": "no-cache",
+    },
+    cache: "no-store",
   });
 
-  return BATCH_KEYS.map((key) => values.get(key) || null);
+  if (!sourceResponse.ok) {
+    throw new Error("Source HTTP " + sourceResponse.status);
+  }
+
+  const sourceText = await sourceResponse.text();
+  const candidates = parseSource(sourceText);
+
+  if (!candidates.length) {
+    throw new Error("Source M3U contains no valid entries");
+  }
+
+  const results = await Promise.all(candidates.map(probe));
+  const live = results
+    .filter((item) => item.live)
+    .map(({ name, url }) => ({ name, url }));
+
+  const playlist = buildM3U(live);
+
+  await env.FPT_EVENT_KV.put(PLAYLIST_KEY, playlist, {
+    expirationTtl: PLAYLIST_TTL,
+  });
+
+  const status = {
+    ok: true,
+    generatedAt: new Date().toISOString(),
+    candidates: candidates.length,
+    liveEntries: live.length,
+    inactiveEntries: results.filter((x) => !x.live && !x.error).length,
+    probeErrors: results.filter((x) => x.error).length,
+    errors: results
+      .filter((x) => x.error)
+      .slice(0, 12)
+      .map((x) => ({ name: x.name, url: x.url, error: x.error })),
+  };
+
+  await env.FPT_EVENT_KV.put(STATUS_KEY, JSON.stringify(status), {
+    expirationTtl: PLAYLIST_TTL,
+  });
+
+  console.log(JSON.stringify(status));
+  return { playlist, status };
 }
 
-async function buildPlaylist(env) {
-  const batches = await readAllBatches(env);
-  const freshBatches = batches.map((batch) => (isFreshBatch(batch) ? batch : null));
-  const ready = freshBatches.filter(Boolean).length;
-  const entries = chooseEntries(freshBatches);
+async function getStored(env) {
+  const [playlist, statusText] = await Promise.all([
+    env.FPT_EVENT_KV.get(PLAYLIST_KEY),
+    env.FPT_EVENT_KV.get(STATUS_KEY),
+  ]);
 
   return {
-    ready,
-    entries,
-    m3u: buildM3U(entries),
-    batches: freshBatches,
+    playlist: playlist || "#EXTM3U\n",
+    status: statusText ? JSON.parse(statusText) : null,
   };
 }
 
-async function runBatch(batchId, env) {
-  const result = await scanBatch(batchId);
-
-  await env.FPT_EVENT_KV.put(
-    BATCH_KEYS[batchId],
-    JSON.stringify(result),
-    { expirationTtl: BATCH_EXPIRATION_TTL }
-  );
-
-  console.log(JSON.stringify({
-    type: "fpt_scan",
-    batch: result.batch,
-    scanned: result.scanned,
-    live: result.liveCount,
-    inactive: result.inactiveCount,
-    errors: result.errorCount,
-    generatedAt: result.generatedAt,
-  }));
-
-  return result;
-}
-
 export default {
-  async scheduled(controller, env) {
-    const batchId = scheduledBatchId(controller.scheduledTime);
-    const result = await runBatch(batchId, env);
-
-    if (result.errorCount > 0) {
-      console.warn(
-        "FPT batch " + batchId + " completed with " + result.errorCount + " probe errors"
-      );
-    }
+  async scheduled(controller, env, ctx) {
+    ctx.waitUntil(
+      scan(env).catch(async (error) => {
+        const status = {
+          ok: false,
+          generatedAt: new Date().toISOString(),
+          error: error instanceof Error ? error.message : String(error),
+        };
+        await env.FPT_EVENT_KV.put(STATUS_KEY, JSON.stringify(status), {
+          expirationTtl: PLAYLIST_TTL,
+        });
+        console.error(JSON.stringify(status));
+      })
+    );
   },
 
   async fetch(request, env) {
     const url = new URL(request.url);
 
-    if (url.pathname === "/scan") {
-      const batchId = parseBatchId(url.searchParams.get("batch"));
-
-      if (batchId === null) {
-        return Response.json(
-          { ok: false, error: "batch must be 0, 1, 2, 3 or 4" },
-          { status: 400 }
-        );
-      }
-
-      const result = await runBatch(batchId, env);
-
-      return Response.json({
-        ok: true,
-        batch: result.batch,
-        scanned: result.scanned,
-        live: result.liveCount,
-        inactive: result.inactiveCount,
-        errors: result.errorCount,
-        generatedAt: result.generatedAt,
-      });
-    }
-
     if (url.pathname === "/fpt-event-live.m3u") {
-      const state = await buildPlaylist(env);
-
-      if (state.ready < BATCH_COUNT) {
-        return new Response("#EXTM3U\n", {
-          status: 503,
-          headers: {
-            "Content-Type": "application/x-mpegURL; charset=utf-8",
-            "Cache-Control": "no-store",
-            "X-NM7-Scanner-State": state.ready + "/" + BATCH_COUNT,
-          },
-        });
-      }
-
-      return new Response(state.m3u, {
+      const state = await getStored(env);
+      return new Response(state.playlist, {
         headers: {
           "Content-Type": "application/x-mpegURL; charset=utf-8",
-          "Cache-Control": "public, max-age=15, must-revalidate",
+          "Cache-Control": "no-store",
           "Access-Control-Allow-Origin": "*",
-          "X-NM7-FPT-Events": String(state.entries.length),
-          "X-NM7-Scanner-State": state.ready + "/" + BATCH_COUNT,
+          "X-NM7-FPT-Events":
+            state.status && state.status.ok ? String(state.status.liveEntries) : "0",
         },
       });
     }
 
     if (url.pathname === "/status") {
-      const batches = await readAllBatches(env);
-      const now = Date.now();
-      const fresh = batches.map((batch) => isFreshBatch(batch, now));
-      const state = await buildPlaylist(env);
-
+      const state = await getStored(env);
       return Response.json({
         service: "NM7 FPT Event Live",
-        scheduler: {
-          cron: SCAN_CRON,
-          strategy: "one batch per minute; 5 batches per 5-minute cycle",
-        },
-        ready: state.ready === BATCH_COUNT,
-        batchesReady: state.ready,
-        batchCount: BATCH_COUNT,
-        candidates: CANDIDATES.length,
-        liveEntries: state.entries.length,
-        staleBatches: fresh.filter((value) => !value).length,
-        batchErrors: batches.map((batch) => (batch ? batch.errorCount || 0 : null)),
-        latestBatchAt: batches
-          .filter(Boolean)
-          .map((batch) => batch.generatedAt)
-          .sort()
-          .at(-1) || null,
-        batches: batches.map((batch, index) => ({
-          batch: index,
-          ready: fresh[index],
-          generatedAt: batch?.generatedAt || null,
-          scanned: batch?.scanned || 0,
-          live: batch?.liveCount || 0,
-          inactive: batch?.inactiveCount || 0,
-          errors: batch?.errorCount || 0,
-        })),
-        entries: state.entries,
+        scheduler: { cron: CRON, strategy: "full source scan every 5 minutes" },
+        ...(state.status || {
+          ok: false,
+          message: "Waiting for first scheduled scan",
+        }),
       });
     }
 
+    if (url.pathname === "/scan") {
+      try {
+        const state = await scan(env);
+        return Response.json(state.status);
+      } catch (error) {
+        return Response.json(
+          {
+            ok: false,
+            error: error instanceof Error ? error.message : String(error),
+          },
+          { status: 502 }
+        );
+      }
+    }
+
     return new Response(
-      "NM7 FPT Event Live Worker\n\n/fpt-event-live.m3u\n/status\n/scan?batch=0..4\n",
+      "NM7 FPT Event Live\n\n/fpt-event-live.m3u\n/status\n/scan\n",
       { headers: { "Content-Type": "text/plain; charset=utf-8" } }
     );
   },
