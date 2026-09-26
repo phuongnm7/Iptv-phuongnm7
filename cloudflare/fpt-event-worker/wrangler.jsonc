@@ -13,7 +13,7 @@
   ],
   "triggers": {
     "crons": [
-      "* * * * *"
+      "*/5 * * * *"
     ]
   },
   "workers_dev": true,
