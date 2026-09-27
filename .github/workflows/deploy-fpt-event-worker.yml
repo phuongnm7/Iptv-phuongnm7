@@ -40,5 +40,5 @@ jobs:
           URL="https://nm7-fpt-event-live.phuongnm7-iptv.workers.dev/scan"
           BODY="$(curl -fsSL --retry 3 --retry-delay 2 --max-time 90 "$URL")"
           echo "$BODY"
-          echo "$BODY" | jq -e '.ok == true and .candidates > 0 and (.liveEntries + .inactiveEntries + .probeErrors == .candidates) and .workerVersion == "fpt-event-resilient-v4-dash"' >/dev/null
+          echo "$BODY" | jq -e '.ok == true and .candidates > 0 and (.liveEntries + .inactiveEntries + .probeErrors == .candidates) and .workerVersion == "fpt-event-resilient-v5-dash"' >/dev/null
           echo "Verified: FPT source totals and resilient Worker version; probe errors, if any, are reported without discarding the last good playlist."
