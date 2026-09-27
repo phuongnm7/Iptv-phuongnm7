@@ -6,7 +6,7 @@ const STATUS_KEY = "fpt:live:status";
 const CRON = "*/5 * * * *";
 const PLAYLIST_TTL = 60 * 60;
 const STATUS_TTL = 60 * 60;
-const WORKER_VERSION = "fpt-event-resilient-v4-dash";
+const WORKER_VERSION = "fpt-event-resilient-v5-dash";
 
 const UAS = ["VThanhTivi", "KhoaTivi", "BearTV"];
 
@@ -57,22 +57,22 @@ function isLiveDash(text) {
   const xml = text.replace(/^\uFEFF/, "").trim();
   if (!/<MPD(?:\s|>)/i.test(xml)) return false;
 
-  // DASH live streams normally use a dynamic MPD. Static MPDs are VOD/on-demand.
+  // Explicit static MPD = VOD/on-demand.
   const typeMatch = xml.match(/<MPD\b[^>]*\btype\s*=\s*["']([^"']+)["']/i);
-  if (typeMatch && typeMatch[1].toLowerCase() !== "dynamic") return false;
+  if (typeMatch && typeMatch[1].toLowerCase() === "static") return false;
 
-  // If type is omitted, require a live-oriented MPD signal rather than accepting
-  // arbitrary/static XML as a live stream.
-  if (!typeMatch) {
-    const hasLiveSignal =
-      /\bminimumUpdatePeriod\s*=\s*["'][^"']+["']/i.test(xml) ||
-      /\btimeShiftBufferDepth\s*=\s*["'][^"']+["']/i.test(xml) ||
-      /\bavailabilityStartTime\s*=\s*["'][^"']+["']/i.test(xml);
-    if (!hasLiveSignal) return false;
-  }
+  // Live-oriented DASH signals. FPT may omit type="dynamic", so do not require it.
+  const hasLiveSignal =
+    (typeMatch && typeMatch[1].toLowerCase() === "dynamic") ||
+    /\bminimumUpdatePeriod\s*=\s*["'][^"']+["']/i.test(xml) ||
+    /\btimeShiftBufferDepth\s*=\s*["'][^"']+["']/i.test(xml) ||
+    /\bavailabilityStartTime\s*=\s*["'][^"']+["']/i.test(xml) ||
+    /\bsuggestedPresentationDelay\s*=\s*["'][^"']+["']/i.test(xml);
 
-  // A usable MPD must contain at least one AdaptationSet/Representation.
-  return /<AdaptationSet\b/i.test(xml) && /<Representation\b/i.test(xml);
+  if (!hasLiveSignal) return false;
+
+  return /<AdaptationSet\b/i.test(xml) || /<Representation\b/i.test(xml) ||
+    /<SegmentTemplate\b/i.test(xml) || /<SegmentTimeline\b/i.test(xml);
 }
 
 async function probe(item) {
@@ -99,13 +99,17 @@ async function probe(item) {
 
       if (response.ok) {
         const body = await response.text();
-        const isDash = /\.mpd(?:[?#]|$)/i.test(item.url);
+        const contentType = response.headers.get("content-type") || "";
+        const isDash =
+          /\.mpd(?:[?#]|$)/i.test(item.url) ||
+          /application\/dash\+xml/i.test(contentType);
         const live = isDash ? isLiveDash(body) : isLiveHls(body);
         return {
           ...item,
           protocol: isDash ? "DASH" : "HLS",
           live,
           error: null,
+          inactiveReason: live ? null : (isDash ? "DASH MPD is not live" : "HLS playlist is not live"),
           userAgent: ua,
         };
       }
@@ -163,6 +167,8 @@ async function scan(env) {
     .map(({ name, url }) => ({ name, url }));
 
   const probeErrors = results.filter((x) => x.error).length;
+  const dashResults = results.filter((x) => x.protocol === "DASH" || /\.mpd(?:[?#]|$)/i.test(x.url));
+  const hlsResults = results.filter((x) => x.protocol === "HLS" || !/\.mpd(?:[?#]|$)/i.test(x.url));
   const previous = await getStored(env);
   // Preserve the last good playlist if a partial probe failure could remove live channels.
   // An empty playlist is valid only after a clean scan of every source.
@@ -186,14 +192,24 @@ async function scan(env) {
     stalePlaylist: keepPrevious,
     playlistEntries: keepPrevious ? (previous.playlist.match(/^#EXTINF:/gm) || []).length : live.length,
     liveChannels: live,
-    liveProtocols: {
-      HLS: live.filter((x) => !/\.mpd(?:[?#]|$)/i.test(x.url)).length,
-      DASH: live.filter((x) => /\.mpd(?:[?#]|$)/i.test(x.url)).length,
+    protocolStats: {
+      HLS: {
+        candidates: hlsResults.length,
+        live: hlsResults.filter((x) => x.live).length,
+        inactive: hlsResults.filter((x) => !x.live && !x.error).length,
+        errors: hlsResults.filter((x) => x.error).length,
+      },
+      DASH: {
+        candidates: dashResults.length,
+        live: dashResults.filter((x) => x.live).length,
+        inactive: dashResults.filter((x) => !x.live && !x.error).length,
+        errors: dashResults.filter((x) => x.error).length,
+      },
     },
     errors: results
       .filter((x) => x.error)
       .slice(0, 12)
-      .map((x) => ({ name: x.name, url: x.url, error: x.error })),
+      .map((x) => ({ name: x.name, url: x.url, protocol: x.protocol || (/\.mpd(?:[?#]|$)/i.test(x.url) ? "DASH" : "HLS"), error: x.error })),
   };
 
   await env.FPT_EVENT_KV.put(STATUS_KEY, JSON.stringify(status), {
