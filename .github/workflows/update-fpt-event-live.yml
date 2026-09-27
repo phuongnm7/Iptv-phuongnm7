@@ -29,7 +29,7 @@ jobs:
           assert data.get("ok") is True, f"Scan failed: {data}"
           assert isinstance(data.get("candidates"), int) and data["candidates"] > 0, "No candidates"
           assert data.get("liveEntries", 0) + data.get("inactiveEntries", 0) + data.get("probeErrors", 0) == data["candidates"], "Scan totals do not match"
-          assert data.get("workerVersion") == "fpt-event-resilient-v3", "Unexpected Worker version"
+          assert data.get("workerVersion") == "fpt-event-resilient-v4-dash", "Unexpected Worker version"
           assert data.get("probeErrors") == 0, "Probe errors: " + str(data.get("probeErrors"))
           print("Validated", data["candidates"], "candidates;", data["liveEntries"], "live")
           '
