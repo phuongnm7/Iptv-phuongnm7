@@ -6,7 +6,7 @@ const STATUS_KEY = "fpt:live:status";
 const CRON = "*/5 * * * *";
 const PLAYLIST_TTL = 60 * 60;
 const STATUS_TTL = 60 * 60;
-const WORKER_VERSION = "fpt-event-resilient-v5-dash";
+const WORKER_VERSION = "fpt-event-resilient-v6-dash-diagnostics";
 
 const UAS = ["VThanhTivi", "KhoaTivi", "BearTV"];
 
@@ -91,18 +91,20 @@ async function probe(item) {
           "Cache-Control": "no-cache, no-store",
           "Pragma": "no-cache",
           "Referer": "https://fptplay.vn/",
+          "Origin": "https://fptplay.vn",
           "Accept-Language": "vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7",
         },
         cache: "no-store",
         redirect: "follow",
       });
 
+      const contentType = response.headers.get("content-type") || "";
+      const isDash =
+        /\.mpd(?:[?#]|$)/i.test(item.url) ||
+        /application\/dash\+xml/i.test(contentType);
+
       if (response.ok) {
         const body = await response.text();
-        const contentType = response.headers.get("content-type") || "";
-        const isDash =
-          /\.mpd(?:[?#]|$)/i.test(item.url) ||
-          /application\/dash\+xml/i.test(contentType);
         const live = isDash ? isLiveDash(body) : isLiveHls(body);
         return {
           ...item,
@@ -110,6 +112,8 @@ async function probe(item) {
           live,
           error: null,
           inactiveReason: live ? null : (isDash ? "DASH MPD is not live" : "HLS playlist is not live"),
+          httpStatus: response.status,
+          contentType,
           userAgent: ua,
         };
       }
@@ -118,7 +122,7 @@ async function probe(item) {
         return { ...item, live: false, error: null, inactiveReason: "HTTP 404" };
       }
 
-      lastError = "HTTP " + response.status;
+      lastError = "HTTP " + response.status + (contentType ? " (" + contentType + ")" : "");
       if (response.status !== 401 && response.status !== 403) break;
     } catch (error) {
       lastError = error instanceof Error ? error.message : String(error);
@@ -192,6 +196,16 @@ async function scan(env) {
     stalePlaylist: keepPrevious,
     playlistEntries: keepPrevious ? (previous.playlist.match(/^#EXTINF:/gm) || []).length : live.length,
     liveChannels: live,
+    dashDiagnostics: dashResults.map((x) => ({
+      name: x.name,
+      url: x.url,
+      live: x.live,
+      error: x.error || null,
+      inactiveReason: x.inactiveReason || null,
+      httpStatus: x.httpStatus || null,
+      contentType: x.contentType || null,
+      userAgent: x.userAgent || null,
+    })),
     protocolStats: {
       HLS: {
         candidates: hlsResults.length,
