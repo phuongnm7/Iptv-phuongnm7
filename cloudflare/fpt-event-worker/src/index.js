@@ -6,7 +6,7 @@ const STATUS_KEY = "fpt:live:status";
 const CRON = "*/5 * * * *";
 const PLAYLIST_TTL = 60 * 60;
 const STATUS_TTL = 60 * 60;
-const WORKER_VERSION = "fpt-event-resilient-v3";
+const WORKER_VERSION = "fpt-event-resilient-v4-dash";
 
 const UAS = ["VThanhTivi", "KhoaTivi", "BearTV"];
 
@@ -51,6 +51,30 @@ function isLiveHls(text) {
   return hasSegments || hasVariant || hasMediaSequence;
 }
 
+function isLiveDash(text) {
+  if (!text) return false;
+
+  const xml = text.replace(/^\uFEFF/, "").trim();
+  if (!/<MPD(?:\s|>)/i.test(xml)) return false;
+
+  // DASH live streams normally use a dynamic MPD. Static MPDs are VOD/on-demand.
+  const typeMatch = xml.match(/<MPD\b[^>]*\btype\s*=\s*["']([^"']+)["']/i);
+  if (typeMatch && typeMatch[1].toLowerCase() !== "dynamic") return false;
+
+  // If type is omitted, require a live-oriented MPD signal rather than accepting
+  // arbitrary/static XML as a live stream.
+  if (!typeMatch) {
+    const hasLiveSignal =
+      /\bminimumUpdatePeriod\s*=\s*["'][^"']+["']/i.test(xml) ||
+      /\btimeShiftBufferDepth\s*=\s*["'][^"']+["']/i.test(xml) ||
+      /\bavailabilityStartTime\s*=\s*["'][^"']+["']/i.test(xml);
+    if (!hasLiveSignal) return false;
+  }
+
+  // A usable MPD must contain at least one AdaptationSet/Representation.
+  return /<AdaptationSet\b/i.test(xml) && /<Representation\b/i.test(xml);
+}
+
 async function probe(item) {
   let lastError = null;
 
@@ -61,7 +85,9 @@ async function probe(item) {
         headers: {
           "User-Agent": ua,
           "Accept":
-            "application/vnd.apple.mpegurl,application/x-mpegURL,text/plain,*/*",
+            item.url.toLowerCase().includes(".mpd")
+              ? "application/dash+xml,application/xml,text/xml,*/*"
+              : "application/vnd.apple.mpegurl,application/x-mpegURL,text/plain,*/*",
           "Cache-Control": "no-cache, no-store",
           "Pragma": "no-cache",
           "Referer": "https://fptplay.vn/",
@@ -73,7 +99,15 @@ async function probe(item) {
 
       if (response.ok) {
         const body = await response.text();
-        return { ...item, live: isLiveHls(body), error: null, userAgent: ua };
+        const isDash = /\.mpd(?:[?#]|$)/i.test(item.url);
+        const live = isDash ? isLiveDash(body) : isLiveHls(body);
+        return {
+          ...item,
+          protocol: isDash ? "DASH" : "HLS",
+          live,
+          error: null,
+          userAgent: ua,
+        };
       }
 
       if (response.status === 404) {
@@ -152,6 +186,10 @@ async function scan(env) {
     stalePlaylist: keepPrevious,
     playlistEntries: keepPrevious ? (previous.playlist.match(/^#EXTINF:/gm) || []).length : live.length,
     liveChannels: live,
+    liveProtocols: {
+      HLS: live.filter((x) => !/\.mpd(?:[?#]|$)/i.test(x.url)).length,
+      DASH: live.filter((x) => /\.mpd(?:[?#]|$)/i.test(x.url)).length,
+    },
     errors: results
       .filter((x) => x.error)
       .slice(0, 12)
