@@ -4,8 +4,9 @@ const SOURCE_URL =
 const PLAYLIST_KEY = "fpt:live:playlist";
 const STATUS_KEY = "fpt:live:status";
 const CRON = "*/5 * * * *";
-const PLAYLIST_TTL = 7 * 60;
-const WORKER_VERSION = "fpt-event-404-inactive-v2";
+const PLAYLIST_TTL = 60 * 60;
+const STATUS_TTL = 60 * 60;
+const WORKER_VERSION = "fpt-event-resilient-v3";
 
 const UAS = ["VThanhTivi", "KhoaTivi", "BearTV"];
 
@@ -127,11 +128,18 @@ async function scan(env) {
     .filter((item) => item.live)
     .map(({ name, url }) => ({ name, url }));
 
-  const playlist = buildM3U(live);
+  const probeErrors = results.filter((x) => x.error).length;
+  const previous = await getStored(env);
+  // Preserve the last good playlist if a partial probe failure could remove live channels.
+  // An empty playlist is valid only after a clean scan of every source.
+  const keepPrevious = probeErrors > 0 && previous.playlist !== "#EXTM3U\n";
+  const playlist = keepPrevious ? previous.playlist : buildM3U(live);
 
-  await env.FPT_EVENT_KV.put(PLAYLIST_KEY, playlist, {
-    expirationTtl: PLAYLIST_TTL,
-  });
+  if (!keepPrevious) {
+    await env.FPT_EVENT_KV.put(PLAYLIST_KEY, playlist, {
+      expirationTtl: PLAYLIST_TTL,
+    });
+  }
 
   const status = {
     ok: true,
@@ -140,7 +148,9 @@ async function scan(env) {
     candidates: candidates.length,
     liveEntries: live.length,
     inactiveEntries: results.filter((x) => !x.live && !x.error).length,
-    probeErrors: results.filter((x) => x.error).length,
+    probeErrors,
+    stalePlaylist: keepPrevious,
+    playlistEntries: keepPrevious ? (previous.playlist.match(/^#EXTINF:/gm) || []).length : live.length,
     liveChannels: live,
     errors: results
       .filter((x) => x.error)
@@ -149,7 +159,7 @@ async function scan(env) {
   };
 
   await env.FPT_EVENT_KV.put(STATUS_KEY, JSON.stringify(status), {
-    expirationTtl: PLAYLIST_TTL,
+    expirationTtl: STATUS_TTL,
   });
 
   console.log(JSON.stringify(status));
@@ -178,7 +188,7 @@ export default {
           error: error instanceof Error ? error.message : String(error),
         };
         await env.FPT_EVENT_KV.put(STATUS_KEY, JSON.stringify(status), {
-          expirationTtl: PLAYLIST_TTL,
+          expirationTtl: STATUS_TTL,
         });
         console.error(JSON.stringify(status));
       })
