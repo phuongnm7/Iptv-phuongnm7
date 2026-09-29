@@ -1,10 +1,4 @@
 #EXTM3U
-#EXTINF:-1 tvg-logo="https://global-cdn.cdnx.tech/football/team/4186b8943907012bd947930996fe9051.png" group-title="Vua Sân Cỏ TV" , 20:00 29/09 ⚽ Burundi vs Algeria (Nguyễn Ánh)
-https://cdn-global.ebaclofen.org/vsc/vsc-thai-tu-lion/index.m3u8
-#EXTINF:-1 tvg-logo="https://global-cdn.cdnx.tech/football/team/fac20ee3c5bc1659bc8e6ba2771c5b31.png" group-title="Vua Sân Cỏ TV" , 20:00 29/09 ⚽ Ethiopia vs Senegal (Lê Hoàn)
-https://cdn-global.ebaclofen.org/vsc/vsc-vuong-tu-neil/index.m3u8
-#EXTINF:-1 tvg-logo="https://global-cdn.cdnx.tech/football/team/2c677b17efb13fe6ec91b3c0bb38934d.png" group-title="Vua Sân Cỏ TV" , 20:00 29/09 ⚽ Lesotho vs Morocco (Doanh Chính)
-https://cdn-global.ebaclofen.org/vsc/vsc-te-tuong-alien/index.m3u8
 #EXTINF:-1 tvg-logo="https://global-cdn.cdnx.tech/football/team/77772713a7d7e02b10ca9bd90e4f6a31.png" group-title="Vua Sân Cỏ TV" , 22:00 29/09 ⚽ Iceland U21 vs Switzerland U21 (Huyền Diệp)
 https://cdn1-global.ebaclofen.org/live/pro2/index.m3u8
 #EXTINF:-1 tvg-logo="https://global-cdn.cdnx.tech/football/team/3c0b84f6c8ee0d929021de10cbb8cc69.png" group-title="Vua Sân Cỏ TV" , 23:00 29/09 ⚽ Finland vs Belarus (Trần Cảnh)
@@ -17,9 +11,6 @@ https://cdn-global.ebaclofen.org/vsc/jonhny6/index.m3u8
 https://cdn-global.ebaclofen.org/vsc/vsc-hiep-si-tan/index.m3u8
 #EXTINF:-1 tvg-logo="https://global-cdn.cdnx.tech/football/team/ca3445d71de0ef386033037868c58d92.png" group-title="Vua Sân Cỏ TV" , 23:00 29/09 ⚽ Russia vs IR Iran (Tào Duệ)
 https://cdn1-global.ebaclofen.org/live/pro4/index.m3u8
-#EXTINF:-1 tvg-logo="https://khandai1.link/media/teams/logos/team_610.jpg" group-title="Khán Đài TV" , 20:00 29/09 ⚽ Ethiopia vs Senegal (Enzo) [hls]
-#EXTVLCOPT:http-referrer=https://khandai1.link/
-https://luong.phaohoa.live/live/phaohoa2/index.m3u8?expire=1815505159&sign=d3bfcbaa36f949863f22cc89e1cc1afa
 #EXTINF:-1 tvg-logo="https://khandai1.link/media/teams/logos/team_8.jpg" group-title="Khán Đài TV" , 23:00 29/09 ⚽ Finland vs Belarus (Kền Kền) [hls]
 #EXTVLCOPT:http-referrer=https://khandai1.link/
 https://luong.phaohoa.live/live/phaohoa6/index.m3u8?expire=1815505159&sign=16059952b038cc8982ab6d1980711dc9
@@ -113,24 +104,6 @@ https://luong.phaohoa.live/live/phaohoa4/index.m3u8?expire=1815505159&sign=faaa2
 #EXTINF:-1 tvg-logo="https://khandai1.link/media/teams/logos/team_26.jpg" group-title="Khán Đài TV" , 02:00 02/10 ⚽ Manchester City W vs Real Madrid W (Kền Kền) [hls]
 #EXTVLCOPT:http-referrer=https://khandai1.link/
 https://luong.phaohoa.live/live/phaohoa6/index.m3u8?expire=1815505159&sign=16059952b038cc8982ab6d1980711dc9
-#EXTINF:-1 tvg-logo="https://img.gvapi.cc/football/team/fac20ee3c5bc1659bc8e6ba2771c5b31.png!w80" group-title="Cola TV" , 20:00 29/09 ⚽ Ethiopia vs Senegal (BLV AQUA) [flv]
-https://live05.meung.app/live/18812304_tsc.flv
-#EXTINF:-1 tvg-logo="https://img.gvapi.cc/football/team/fac20ee3c5bc1659bc8e6ba2771c5b31.png!w80" group-title="Cola TV" , 20:00 29/09 ⚽ Ethiopia vs Senegal (BLV AQUA) [hls 2]
-https://live05.miekgo.app/live/18812304_tsc.m3u8
-#EXTINF:-1 tvg-logo="https://img.gvapi.cc/football/team/fac20ee3c5bc1659bc8e6ba2771c5b31.png!w80" group-title="Cola TV" , 20:00 29/09 ⚽ Ethiopia vs Senegal (BLV AQUA) [hls]
-https://live05.meung.app/live/18812304_tsc.m3u8
-#EXTINF:-1 tvg-logo="https://img.gvapi.cc/football/team/2c677b17efb13fe6ec91b3c0bb38934d.png!w80" group-title="Cola TV" , 20:00 29/09 ⚽ Lesotho vs Ma Rốc (BLV SPRITE) [flv]
-https://live05.meung.app/live/75748097_tsc.flv
-#EXTINF:-1 tvg-logo="https://img.gvapi.cc/football/team/2c677b17efb13fe6ec91b3c0bb38934d.png!w80" group-title="Cola TV" , 20:00 29/09 ⚽ Lesotho vs Ma Rốc (BLV SPRITE) [hls 2]
-https://live05.miekgo.app/live/75748097_tsc.m3u8
-#EXTINF:-1 tvg-logo="https://img.gvapi.cc/football/team/2c677b17efb13fe6ec91b3c0bb38934d.png!w80" group-title="Cola TV" , 20:00 29/09 ⚽ Lesotho vs Ma Rốc (BLV SPRITE) [hls]
-https://live05.meung.app/live/75748097_tsc.m3u8
-#EXTINF:-1 tvg-logo="https://img.gvapi.cc/football/team/70d5c573c693c4053f908d9d9314ce87.png!w80" group-title="Cola TV" , 20:00 29/09 ⚽ Nam Sudan vs Ai Cập (BLV MONSTER) [flv]
-https://live05.meung.app/live/75915087_tsc.flv
-#EXTINF:-1 tvg-logo="https://img.gvapi.cc/football/team/70d5c573c693c4053f908d9d9314ce87.png!w80" group-title="Cola TV" , 20:00 29/09 ⚽ Nam Sudan vs Ai Cập (BLV MONSTER) [hls 2]
-https://live05.miekgo.app/live/75915087_tsc.m3u8
-#EXTINF:-1 tvg-logo="https://img.gvapi.cc/football/team/70d5c573c693c4053f908d9d9314ce87.png!w80" group-title="Cola TV" , 20:00 29/09 ⚽ Nam Sudan vs Ai Cập (BLV MONSTER) [hls]
-https://live05.meung.app/live/75915087_tsc.m3u8
 #EXTINF:-1 tvg-logo="https://img.gvapi.cc/football/team/5c608ae76638c5ab49847ab5947b12a5.png!w80" group-title="Cola TV" , 22:00 29/09 ⚽ Al Khor vs Umm-Salal (BLV WARRIOR) [flv]
 https://live05.meung.app/live/97885009_tsc.flv
 #EXTINF:-1 tvg-logo="https://img.gvapi.cc/football/team/5c608ae76638c5ab49847ab5947b12a5.png!w80" group-title="Cola TV" , 22:00 29/09 ⚽ Al Khor vs Umm-Salal (BLV WARRIOR) [hls 2]
@@ -179,18 +152,6 @@ https://live05.meung.app/live/18812304_tsc.flv
 https://live05.miekgo.app/live/18812304_tsc.m3u8
 #EXTINF:-1 tvg-logo="https://img.gvapi.cc/football/team/cf372cbe6eae54c6a6dfb3ebbcdc3404.png!w80" group-title="Cola TV" , 00:30 30/09 ⚽ Ả Rập Saudi vs Iraq (BLV AQUA) [hls]
 https://live05.meung.app/live/18812304_tsc.m3u8
-#EXTINF:-1 tvg-logo="https://img.thesports.com/football/team/fac20ee3c5bc1659bc8e6ba2771c5b31.png" group-title="Gà Vàng 24h TV" , 20:00 29/09 ⚽ Ethiopia vs Senegal (Đoàn Dự) [flv]
-https://playback.livetl002.com/live/6a5df755b89dded67b39b8bc.flv
-#EXTINF:-1 tvg-logo="https://img.thesports.com/football/team/fac20ee3c5bc1659bc8e6ba2771c5b31.png" group-title="Gà Vàng 24h TV" , 20:00 29/09 ⚽ Ethiopia vs Senegal (Đoàn Dự) [hls]
-https://playback.livetl002.com/live/6a5df755b89dded67b39b8bc.m3u8
-#EXTINF:-1 tvg-logo="https://img.thesports.com/football/team/2c677b17efb13fe6ec91b3c0bb38934d.png" group-title="Gà Vàng 24h TV" , 20:00 29/09 ⚽ Lesotho vs Morocco (Kayti) [flv]
-https://playback.livetl002.com/live/69b8e6f43bcf2231c35d5144.flv
-#EXTINF:-1 tvg-logo="https://img.thesports.com/football/team/2c677b17efb13fe6ec91b3c0bb38934d.png" group-title="Gà Vàng 24h TV" , 20:00 29/09 ⚽ Lesotho vs Morocco (Kayti) [hls]
-https://playback.livetl002.com/live/69b8e6f43bcf2231c35d5144.m3u8
-#EXTINF:-1 tvg-logo="https://img.thesports.com/football/team/70d5c573c693c4053f908d9d9314ce87.png" group-title="Gà Vàng 24h TV" , 20:00 29/09 ⚽ South Sudan vs Egypt (Lữ Bố.Vip) [flv]
-https://playback.livetl002.com/live/6a9776215126529dede9bf51.flv
-#EXTINF:-1 tvg-logo="https://img.thesports.com/football/team/70d5c573c693c4053f908d9d9314ce87.png" group-title="Gà Vàng 24h TV" , 20:00 29/09 ⚽ South Sudan vs Egypt (Lữ Bố.Vip) [hls]
-https://playback.livetl002.com/live/6a9776215126529dede9bf51.m3u8
 #EXTINF:-1 tvg-logo="https://img.thesports.com/football/team/3c0b84f6c8ee0d929021de10cbb8cc69.png" group-title="Gà Vàng 24h TV" , 23:00 29/09 ⚽ Finland vs Belarus (Súp Lơ ) [flv]
 https://playback.livetl002.com/live/6a9a5525864ea536c2577392.flv
 #EXTINF:-1 tvg-logo="https://img.thesports.com/football/team/3c0b84f6c8ee0d929021de10cbb8cc69.png" group-title="Gà Vàng 24h TV" , 23:00 29/09 ⚽ Finland vs Belarus (Súp Lơ ) [hls]
@@ -267,14 +228,6 @@ https://live2.pro2cdnlive.com/live/channel-30.flv
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Mobile Safari/537.36
 #EXTVLCOPT:http-referrer=https://xlz.domainkqt.cc/
 https://live2.pro2cdnlive.com/live/channel30.flv
-#EXTINF:-1 tvg-logo="https://img.gvapi.cc/football/team/fac20ee3c5bc1659bc8e6ba2771c5b31.png" group-title="Gà Vàng 33 TV" , 20:00 29/09 ⚽ Ethiopia vs Senegal (Gà Siêu Kiêu) [flv]
-https://live2.zktsva.app/live/741294.flv
-#EXTINF:-1 tvg-logo="https://img.gvapi.cc/football/team/fac20ee3c5bc1659bc8e6ba2771c5b31.png" group-title="Gà Vàng 33 TV" , 20:00 29/09 ⚽ Ethiopia vs Senegal (Gà Siêu Kiêu) [hls]
-https://live2.zktsva.app/live/741294.m3u8
-#EXTINF:-1 tvg-logo="https://img.gvapi.cc/football/team/2c677b17efb13fe6ec91b3c0bb38934d.png" group-title="Gà Vàng 33 TV" , 20:00 29/09 ⚽ Lesotho vs Morocco (Gà Siêu Péo) [flv]
-https://live2.zktsva.app/live/303098.flv
-#EXTINF:-1 tvg-logo="https://img.gvapi.cc/football/team/2c677b17efb13fe6ec91b3c0bb38934d.png" group-title="Gà Vàng 33 TV" , 20:00 29/09 ⚽ Lesotho vs Morocco (Gà Siêu Péo) [hls]
-https://live2.zktsva.app/live/303098.m3u8
 #EXTINF:-1 tvg-logo="https://img.gvapi.cc/football/team/5c608ae76638c5ab49847ab5947b12a5.png" group-title="Gà Vàng 33 TV" , 22:00 29/09 ⚽ Al Khor SC vs Umm Salal (Gà Siêu Tồ) [flv]
 https://live2.zktsva.app/live/796315.flv
 #EXTINF:-1 tvg-logo="https://img.gvapi.cc/football/team/5c608ae76638c5ab49847ab5947b12a5.png" group-title="Gà Vàng 33 TV" , 22:00 29/09 ⚽ Al Khor SC vs Umm Salal (Gà Siêu Tồ) [hls]
@@ -303,14 +256,6 @@ https://live2.zktsva.app/live/796315.m3u8
 https://live2.zktsva.app/live/741294.flv
 #EXTINF:-1 tvg-logo="https://img.gvapi.cc/football/team/344c0d0b85274807ba668a603ef5a05e.png" group-title="Gà Vàng 33 TV" , 00:30 30/09 ⚽ Saudi Arabia vs Iraq (Gà Siêu Kiêu) [hls]
 https://live2.zktsva.app/live/741294.m3u8
-#EXTINF:-1 tvg-logo="https://s8tvkc.top/wp-json/s8-image/2af33cba-1023-4185-8748-b275ea7ccd0f" group-title="S8 TV" , 20:00 29/09 ⚽ Ethiopia vs Senegal (NGƯỜI THỎ) [flv]
-https://flv.lauthaitv.cc/live/eth-sen-cafnc.flv
-#EXTINF:-1 tvg-logo="https://s8tvkc.top/wp-json/s8-image/2af33cba-1023-4185-8748-b275ea7ccd0f" group-title="S8 TV" , 20:00 29/09 ⚽ Ethiopia vs Senegal (NGƯỜI THỎ) [hls]
-https://hls.lauthaitv.cc/live/eth-sen-cafnc/index.m3u8
-#EXTINF:-1 tvg-logo="https://s8tvkc.top/wp-json/s8-image/a2f9a055-9767-4915-98d4-e1fca1c9e9a7" group-title="S8 TV" , 20:00 29/09 ⚽ Lesotho vs Morocco (NGƯỜI PHÁO) [flv]
-https://flv.lauthaitv.cc/live/les-mor-cafnc.flv
-#EXTINF:-1 tvg-logo="https://s8tvkc.top/wp-json/s8-image/a2f9a055-9767-4915-98d4-e1fca1c9e9a7" group-title="S8 TV" , 20:00 29/09 ⚽ Lesotho vs Morocco (NGƯỜI PHÁO) [hls]
-https://hls.lauthaitv.cc/live/les-mor-cafnc/index.m3u8
 #EXTINF:-1 tvg-logo="https://s8tvkc.top/wp-json/s8-image/dfe1cde4-1074-4be3-b0f7-2c081931596f" group-title="S8 TV" , 22:30 29/09 ⚽ Germany U20 vs Italy U20 (NGƯỜI CHÈ) [flv]
 https://flv.lauthaitv.cc/live/ger-ita-u20el.flv
 #EXTINF:-1 tvg-logo="https://s8tvkc.top/wp-json/s8-image/dfe1cde4-1074-4be3-b0f7-2c081931596f" group-title="S8 TV" , 22:30 29/09 ⚽ Germany U20 vs Italy U20 (NGƯỜI CHÈ) [hls]
@@ -435,67 +380,9 @@ https://stm9ee346727718.stream.hdplaylink.com/cctvlive/troctruhd/playlist.m3u8
 #EXTINF:-1 tvg-logo="https://media.chuoichientv.net/media/uploads/20250623_132739_e67768f5.png" group-title="Chuối Chiên TV" , 07:00 30/09 ⚽ USA vs Chile (Chuối Ngao) [FHD] [hls]
 #EXTVLCOPT:http-referrer=https://live.chuoichien.tv/
 https://gckc0525.edgemaxcdn.org/live/chuoingaohd/playlist.m3u8
-#EXTINF:-1 tvg-logo="https://images.keovip88.net/images/teams/burundi.png" group-title="Giờ Vàng TV" , 20:00 29/09 ⚽ Burundi vs Algeria (blv-bon) [hls]
-https://freem3u.xyz/static/no-signal/low.m3u8
-#EXTINF:-1 tvg-logo="https://images.keovip88.net/images/teams/ethiopia.png" group-title="Giờ Vàng TV" , 20:00 29/09 ⚽ Ethiopia vs Senegal (blv-sup) [hls]
-https://freem3u.xyz/static/no-signal/low.m3u8
 #EXTINF:-1 tvg-logo="https://images.keovip88.net/images/teams/slovenia-u21.png" group-title="Giờ Vàng TV" , 21:00 29/09 ⚽ U21 Slovenia vs U21 Israel (blv-mason) [hls]
 https://freem3u.xyz/static/no-signal/low.m3u8
 #EXTINF:-1 tvg-logo="https://images.keovip88.net/images/teams/iceland-u21.png" group-title="Giờ Vàng TV" , 22:00 29/09 ⚽ U21 Iceland vs Thụy Sĩ U21 (blv-tri) [hls]
-https://freem3u.xyz/static/no-signal/low.m3u8
-#EXTINF:-1 tvg-logo="https://sta.vnres.co/file/common/20260926/75dfba455ef6d1f02f03b6b00f61e3dd.png" group-title="Sút Bóng TV" , 20:00 29/09 ⚽ Burundi vs Algeria (BLV WUKONG)
-#EXTVLCOPT:http-referrer=https://sutbong.net/
-https://freem3u.xyz/static/no-signal/low.m3u8
-#EXTINF:-1 tvg-logo="https://sta.vnres.co/file/common/20260926/75dfba455ef6d1f02f03b6b00f61e3dd.png" group-title="Sút Bóng TV" , 20:00 29/09 ⚽ Burundi vs Algeria (MP3)
-#EXTVLCOPT:http-referrer=https://sutbong.net/
-https://freem3u.xyz/static/no-signal/low.m3u8
-#EXTINF:-1 tvg-logo="https://sta.vnres.co/file/common/20260926/6c2c3607589829cb8bc5b10150015b69.png" group-title="Sút Bóng TV" , 20:00 29/09 ⚽ Ethiopia vs Senegal (A PÁO)
-#EXTVLCOPT:http-referrer=https://sutbong.net/
-https://freem3u.xyz/static/no-signal/low.m3u8
-#EXTINF:-1 tvg-logo="https://sta.vnres.co/file/common/20260926/6c2c3607589829cb8bc5b10150015b69.png" group-title="Sút Bóng TV" , 20:00 29/09 ⚽ Ethiopia vs Senegal (BLV A TÚ)
-#EXTVLCOPT:http-referrer=https://sutbong.net/
-https://freem3u.xyz/static/no-signal/low.m3u8
-#EXTINF:-1 tvg-logo="https://sta.vnres.co/file/common/20260926/6c2c3607589829cb8bc5b10150015b69.png" group-title="Sút Bóng TV" , 20:00 29/09 ⚽ Ethiopia vs Senegal (BLV BÉO)
-#EXTVLCOPT:http-referrer=https://sutbong.net/
-https://freem3u.xyz/static/no-signal/low.m3u8
-#EXTINF:-1 tvg-logo="https://sta.vnres.co/file/common/20260926/6c2c3607589829cb8bc5b10150015b69.png" group-title="Sút Bóng TV" , 20:00 29/09 ⚽ Ethiopia vs Senegal (BLV CÒ)
-#EXTVLCOPT:http-referrer=https://sutbong.net/
-https://freem3u.xyz/static/no-signal/low.m3u8
-#EXTINF:-1 tvg-logo="https://sta.vnres.co/file/common/20260926/6c2c3607589829cb8bc5b10150015b69.png" group-title="Sút Bóng TV" , 20:00 29/09 ⚽ Ethiopia vs Senegal (BLV PEWPEW)
-#EXTVLCOPT:http-referrer=https://sutbong.net/
-https://freem3u.xyz/static/no-signal/low.m3u8
-#EXTINF:-1 tvg-logo="https://sta.vnres.co/file/common/20260926/6c2c3607589829cb8bc5b10150015b69.png" group-title="Sút Bóng TV" , 20:00 29/09 ⚽ Ethiopia vs Senegal (CACAO)
-#EXTVLCOPT:http-referrer=https://sutbong.net/
-https://freem3u.xyz/static/no-signal/low.m3u8
-#EXTINF:-1 tvg-logo="https://sta.vnres.co/file/common/20260926/3e7c676308021f0d0584f5223698eee9.png" group-title="Sút Bóng TV" , 20:00 29/09 ⚽ Lesotho vs Morocco (A BỆU)
-#EXTVLCOPT:http-referrer=https://sutbong.net/
-https://freem3u.xyz/static/no-signal/low.m3u8
-#EXTINF:-1 tvg-logo="https://sta.vnres.co/file/common/20260926/3e7c676308021f0d0584f5223698eee9.png" group-title="Sút Bóng TV" , 20:00 29/09 ⚽ Lesotho vs Morocco (A MÂN)
-#EXTVLCOPT:http-referrer=https://sutbong.net/
-https://freem3u.xyz/static/no-signal/low.m3u8
-#EXTINF:-1 tvg-logo="https://sta.vnres.co/file/common/20260926/3e7c676308021f0d0584f5223698eee9.png" group-title="Sút Bóng TV" , 20:00 29/09 ⚽ Lesotho vs Morocco (BLV ENZO)
-#EXTVLCOPT:http-referrer=https://sutbong.net/
-https://freem3u.xyz/static/no-signal/low.m3u8
-#EXTINF:-1 tvg-logo="https://sta.vnres.co/file/common/20260926/3e7c676308021f0d0584f5223698eee9.png" group-title="Sút Bóng TV" , 20:00 29/09 ⚽ Lesotho vs Morocco (CÔNG CHẤT)
-#EXTVLCOPT:http-referrer=https://sutbong.net/
-https://freem3u.xyz/static/no-signal/low.m3u8
-#EXTINF:-1 tvg-logo="https://sta.vnres.co/file/common/20260926/3e7c676308021f0d0584f5223698eee9.png" group-title="Sút Bóng TV" , 20:00 29/09 ⚽ Lesotho vs Morocco (QUỐC KHÁNH)
-#EXTVLCOPT:http-referrer=https://sutbong.net/
-https://freem3u.xyz/static/no-signal/low.m3u8
-#EXTINF:-1 tvg-logo="https://sta.vnres.co/file/common/20260926/3e7c676308021f0d0584f5223698eee9.png" group-title="Sút Bóng TV" , 20:00 29/09 ⚽ Lesotho vs Morocco (SAO LA)
-#EXTVLCOPT:http-referrer=https://sutbong.net/
-https://freem3u.xyz/static/no-signal/low.m3u8
-#EXTINF:-1 tvg-logo="https://sta.vnres.co/file/common/20260926/cc5c86c34e2770e8185e164e52fe157d.png" group-title="Sút Bóng TV" , 20:00 29/09 ⚽ South Sudan vs Egypt (BLV CHIVAS)
-#EXTVLCOPT:http-referrer=https://sutbong.net/
-https://freem3u.xyz/static/no-signal/low.m3u8
-#EXTINF:-1 tvg-logo="https://sta.vnres.co/file/common/20260926/cc5c86c34e2770e8185e164e52fe157d.png" group-title="Sút Bóng TV" , 20:00 29/09 ⚽ South Sudan vs Egypt (BLV LONG)
-#EXTVLCOPT:http-referrer=https://sutbong.net/
-https://freem3u.xyz/static/no-signal/low.m3u8
-#EXTINF:-1 tvg-logo="https://sta.vnres.co/file/common/20260926/cc5c86c34e2770e8185e164e52fe157d.png" group-title="Sút Bóng TV" , 20:00 29/09 ⚽ South Sudan vs Egypt (BLV RYO)
-#EXTVLCOPT:http-referrer=https://sutbong.net/
-https://freem3u.xyz/static/no-signal/low.m3u8
-#EXTINF:-1 tvg-logo="https://sta.vnres.co/file/common/20260926/cc5c86c34e2770e8185e164e52fe157d.png" group-title="Sút Bóng TV" , 20:00 29/09 ⚽ South Sudan vs Egypt (BOSS)
-#EXTVLCOPT:http-referrer=https://sutbong.net/
 https://freem3u.xyz/static/no-signal/low.m3u8
 #EXTINF:-1 tvg-logo="https://sta.vnres.co/file/common/20260926/d283f6a20344976a38b4330e28ae45b9.png" group-title="Sút Bóng TV" , 21:00 29/09 ⚽ Slovenia U21 vs Israel U21 (BLV ANH TÀI)
 #EXTVLCOPT:http-referrer=https://sutbong.net/
@@ -644,12 +531,6 @@ https://freem3u.xyz/static/no-signal/low.m3u8
 #EXTINF:-1 tvg-logo="https://sta.vnres.co/file/common/20260928/d9b750dc4c051dcb46e1aa2467598195.png" group-title="Sút Bóng TV" , 00:45 30/09 🏀 Fenerbahce vs Bayern (HUNTER)
 #EXTVLCOPT:http-referrer=https://sutbong.net/
 https://freem3u.xyz/static/no-signal/low.m3u8
-#EXTINF:-1 tvg-logo="https://sta.vnres.co/file/common/20260926/cc5c86c34e2770e8185e164e52fe157d.png" group-title="Phá Làng TV" , 20:00 29/09 ⚽ South Sudan vs Egypt (Unknown) (HD2) [geo]
-#EXTVLCOPT:http-referrer=https://phalang.live/
-https://pull1.digitalcdn.net/live/fe1100e99cd8415092b4e47434e2f574/index.m3u8
-#EXTINF:-1 tvg-logo="https://sta.vnres.co/file/common/20260926/cc5c86c34e2770e8185e164e52fe157d.png" group-title="Phá Làng TV" , 20:00 29/09 ⚽ South Sudan vs Egypt (Unknown) [geo]
-#EXTVLCOPT:http-referrer=https://phalang.live/
-https://pull.digitalcdn.net/live/fe1100e99cd8415092b4e47434e2f574/index.m3u8
 #EXTINF:-1 tvg-logo="https://sta.vnres.co/file/common/20260926/d283f6a20344976a38b4330e28ae45b9.png" group-title="Phá Làng TV" , 21:00 29/09 ⚽ Slovenia U21 vs Israel U21 (LÝ LINH LỰC) (HD2) [geo]
 #EXTVLCOPT:http-referrer=https://phalang.live/
 https://pull1.digitalcdn.net/live/fa77c0b8a31c4aa3806343fa7fc70472/index.m3u8
