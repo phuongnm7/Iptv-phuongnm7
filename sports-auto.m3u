@@ -1,6 +1,4 @@
 #EXTM3U
-#EXTINF:-1 tvg-logo="https://global-cdn.cdnx.tech/football/team/871d73474b2d6b307fe3862403e9c77d.png" group-title="Vua Sân Cỏ TV" , 17:30 29/09 ⚽ Japan Women vs South Korea Women (Tào Duệ)
-https://cdn-global.ebaclofen.org/vsc/jonhny6/index.m3u8
 #EXTINF:-1 tvg-logo="https://global-cdn.cdnx.tech/football/team/b26f48bd4e40423148b0089092638919.png" group-title="Vua Sân Cỏ TV" , 19:00 29/09 ⚽ Comoros vs Namibia (Trần Hoàng)
 https://cdn1-global.ebaclofen.org/live/pro4/index.m3u8
 #EXTINF:-1 tvg-logo="https://global-cdn.cdnx.tech/football/team/43b2dd1c93748297cfbbea4d31247641.png" group-title="Vua Sân Cỏ TV" , 19:30 29/09 ⚽ Thailand vs Vietnam (18+)
@@ -25,9 +23,6 @@ https://cdn-global.ebaclofen.org/vsc/jonhny6/index.m3u8
 https://cdn-global.ebaclofen.org/vsc/vsc-hiep-si-tan/index.m3u8
 #EXTINF:-1 tvg-logo="https://global-cdn.cdnx.tech/football/team/ca3445d71de0ef386033037868c58d92.png" group-title="Vua Sân Cỏ TV" , 23:00 29/09 ⚽ Russia vs IR Iran (Tào Duệ)
 https://cdn1-global.ebaclofen.org/live/pro4/index.m3u8
-#EXTINF:-1 tvg-logo="https://khandai1.link/media/teams/logos/Flag_of_Japan_K75eDYE.svg.webp" group-title="Khán Đài TV" , 17:30 29/09 ⚽ Japan W vs South Korea W (Tày) [hls]
-#EXTVLCOPT:http-referrer=https://khandai1.link/
-https://luong.phaohoa.live/live/phaohoa8/index.m3u8?expire=1815822079&sign=9a0c1792a57466ace2166ab62a2ea149
 #EXTINF:-1 tvg-logo="https://khandai1.link/media/teams/logos/team_480.jpg" group-title="Khán Đài TV" , 18:30 29/09 ⚽ Thái Lan vs Việt Nam (Chim Nhỏ) [hls]
 #EXTVLCOPT:http-referrer=https://khandai1.link/
 https://luong.phaohoa.live/live/phaohoa5/index.m3u8?expire=1815505159&sign=67cc5bcdcabb081229f5406e5b07483d
@@ -127,12 +122,6 @@ https://luong.phaohoa.live/live/phaohoa4/index.m3u8?expire=1815505159&sign=faaa2
 #EXTINF:-1 tvg-logo="https://khandai1.link/media/teams/logos/team_26.jpg" group-title="Khán Đài TV" , 02:00 02/10 ⚽ Manchester City W vs Real Madrid W (Kền Kền) [hls]
 #EXTVLCOPT:http-referrer=https://khandai1.link/
 https://luong.phaohoa.live/live/phaohoa6/index.m3u8?expire=1815505159&sign=16059952b038cc8982ab6d1980711dc9
-#EXTINF:-1 tvg-logo="https://img.gvapi.cc/football/team/90fb994bffbb0b8754b4d971092ef034.png!w80" group-title="Cola TV" , 17:30 29/09 ⚽ Nhật Bản Nữ vs Hàn Quốc Nữ (BLV AQUA) [flv]
-https://live05.meung.app/live/18812304_tsc.flv
-#EXTINF:-1 tvg-logo="https://img.gvapi.cc/football/team/90fb994bffbb0b8754b4d971092ef034.png!w80" group-title="Cola TV" , 17:30 29/09 ⚽ Nhật Bản Nữ vs Hàn Quốc Nữ (BLV AQUA) [hls 2]
-https://live05.miekgo.app/live/18812304_tsc.m3u8
-#EXTINF:-1 tvg-logo="https://img.gvapi.cc/football/team/90fb994bffbb0b8754b4d971092ef034.png!w80" group-title="Cola TV" , 17:30 29/09 ⚽ Nhật Bản Nữ vs Hàn Quốc Nữ (BLV AQUA) [hls]
-https://live05.meung.app/live/18812304_tsc.m3u8
 #EXTINF:-1 tvg-logo="https://img.gvapi.cc/football/team/509b91468e833ffe3fd9edd04f06ddee.png!w80" group-title="Cola TV" , 18:00 29/09 ⚽ Wuxi Wugou vs Shanghai Jiading Huilong (BLV FANTA) [flv]
 https://live05.meung.app/live/16226575_tsc.flv
 #EXTINF:-1 tvg-logo="https://img.gvapi.cc/football/team/509b91468e833ffe3fd9edd04f06ddee.png!w80" group-title="Cola TV" , 18:00 29/09 ⚽ Wuxi Wugou vs Shanghai Jiading Huilong (BLV FANTA) [hls 2]
@@ -435,10 +424,6 @@ https://live2.zktsva.app/live/796315.m3u8
 https://live2.zktsva.app/live/741294.flv
 #EXTINF:-1 tvg-logo="https://img.gvapi.cc/football/team/344c0d0b85274807ba668a603ef5a05e.png" group-title="Gà Vàng 33 TV" , 00:30 30/09 ⚽ Saudi Arabia vs Iraq (Gà Siêu Kiêu) [hls]
 https://live2.zktsva.app/live/741294.m3u8
-#EXTINF:-1 tvg-logo="https://s8tvkc.top/wp-json/s8-image/c8aa8c48-ef22-467c-b88b-4c42811ede03" group-title="S8 TV" , 17:30 29/09 ⚽ Japan Women vs South Korea Women (NGƯỜI SẮT) [flv]
-https://flv.lauthaitv.cc/live/jpn-kor-asiadw.flv
-#EXTINF:-1 tvg-logo="https://s8tvkc.top/wp-json/s8-image/c8aa8c48-ef22-467c-b88b-4c42811ede03" group-title="S8 TV" , 17:30 29/09 ⚽ Japan Women vs South Korea Women (NGƯỜI SẮT) [hls]
-https://hls.lauthaitv.cc/live/jpn-kor-asiadw/index.m3u8
 #EXTINF:-1 tvg-logo="https://s8tvkc.top/wp-json/s8-image/9deb6aa1-28d7-4001-96e0-0ac540fee953" group-title="S8 TV" , 19:30 29/09 ⚽ Thailand vs Viet Nam (NGƯỜI CAT) [flv]
 https://flv.lauthaitv.cc/live/tha-vie-asiad-cat.flv
 #EXTINF:-1 tvg-logo="https://s8tvkc.top/wp-json/s8-image/9deb6aa1-28d7-4001-96e0-0ac540fee953" group-title="S8 TV" , 19:30 29/09 ⚽ Thailand vs Viet Nam (NGƯỜI CAT) [hls]
@@ -503,9 +488,6 @@ https://hls.lauthaitv.cc/live/usa-chi-intfr/index.m3u8
 https://flv.lauthaitv.cc/live/mex-per-intfr.flv
 #EXTINF:-1 tvg-logo="https://s8tvkc.top/wp-json/s8-image/c2277b67-3909-4d7d-81b8-f07552adccaf" group-title="S8 TV" , 08:00 30/09 ⚽ Mexico vs Peru (NGƯỜI NẶN) [hls]
 https://hls.lauthaitv.cc/live/mex-per-intfr/index.m3u8
-#EXTINF:-1 tvg-logo="https://static.flashscore.com/res/image/data/AiWVfPjC-E1YhvyqD.png" group-title="Sao Kê TV" , 17:30 29/09 ⚽ Japan W vs South Korea W (Tít) [hls]
-#EXTVLCOPT:http-referrer=https://sk.mediastation.live/
-https://wtyi0525.edgemaxcdn.org/live/x2-hd-1111/playlist.m3u8
 #EXTINF:-1 tvg-logo="https://static.flashscore.com/res/image/data/UaNLIZkC-GOsncUhM.png" group-title="Sao Kê TV" , 21:35 29/09 ⚽ Al Fujairah vs Al Jazira Hamra (Teppy) [hls]
 #EXTVLCOPT:http-referrer=https://sk.mediastation.live/
 https://wtyi0525.edgemaxcdn.org/live/x31-hd-1111/playlist.m3u8
@@ -562,9 +544,6 @@ https://cdnhls.xbdbotv.live/live/MTkzODU0ODk6dWppY2ViaXFnN2Fmazdhendla3Q3azE3OnZ
 https://cdnflv.xbdbotv.live/live/MTk2NzY3ODE6YThsY2E2YTk4dWpna3Q2bXcydDZwYXRxOm90d3pjNHpqeGIzZ3NxdXl3bXdibnljYg.flv
 #EXTINF:-1 tvg-logo="https://d1c0s7hi3ugzoc.cloudfront.net/teams/finland-18570" group-title="Bia Ôm TV" , 23:00 29/09 ⚽ Phần Lan vs Belarus (Lẩu Ếch) [hls]
 https://cdnhls.xbdbotv.live/live/MTk2NzY3ODE6YThsY2E2YTk4dWpna3Q2bXcydDZwYXRxOm90d3pjNHpqeGIzZ3NxdXl3bXdibnljYg/index.m3u8
-#EXTINF:-1 tvg-logo="https://media.chuoichientv.net/media/uploads/20250623_133018_f7c8e720.png" group-title="Chuối Chiên TV" , 17:30 29/09 ⚽ Japan W vs South Korea W (Chuối Chao) [FHD] [hls]
-#EXTVLCOPT:http-referrer=https://live.chuoichien.tv/
-https://stm9ee346727718.stream.hdplaylink.com/cctvlive/chuoichaohd/playlist.m3u8
 #EXTINF:-1 tvg-logo="https://media.chuoichientv.net/media/uploads/20250623_132715_358dda20.png" group-title="Chuối Chiên TV" , 19:30 29/09 ⚽ Thailand vs Việt Nam (Chuối Ngao) [FHD] [hls]
 #EXTVLCOPT:http-referrer=https://live.chuoichien.tv/
 https://gckc0525.edgemaxcdn.org/live/chuoingaohd/playlist.m3u8
@@ -598,8 +577,6 @@ https://stm9ee346727718.stream.hdplaylink.com/cctvlive/troctruhd/playlist.m3u8
 #EXTINF:-1 tvg-logo="https://media.chuoichientv.net/media/uploads/20250623_132739_e67768f5.png" group-title="Chuối Chiên TV" , 07:00 30/09 ⚽ USA vs Chile (Chuối Ngao) [FHD] [hls]
 #EXTVLCOPT:http-referrer=https://live.chuoichien.tv/
 https://gckc0525.edgemaxcdn.org/live/chuoingaohd/playlist.m3u8
-#EXTINF:-1 tvg-logo="https://images.keovip88.net/images/teams/japan.png" group-title="Giờ Vàng TV" , 17:30 29/09 ⚽ Nhật Bản W vs Hàn Quốc W (blv-mason) [hls]
-https://freem3u.xyz/static/no-signal/low.m3u8
 #EXTINF:-1 tvg-logo="https://images.keovip88.net/images/teams/gibraltar-u17.png" group-title="Giờ Vàng TV" , 19:00 29/09 ⚽ U17 Gibraltar vs Bosnia and Herzegovina U17 (blv-tri) [hls]
 https://freem3u.xyz/static/no-signal/low.m3u8
 #EXTINF:-1 tvg-logo="https://images.keovip88.net/images/teams/thailand.png" group-title="Giờ Vàng TV" , 19:30 29/09 ⚽ Thái Lan vs Việt Nam (blvhau) [hls]
@@ -611,24 +588,6 @@ https://freem3u.xyz/static/no-signal/low.m3u8
 #EXTINF:-1 tvg-logo="https://images.keovip88.net/images/teams/slovenia-u21.png" group-title="Giờ Vàng TV" , 21:00 29/09 ⚽ U21 Slovenia vs U21 Israel (blv-mason) [hls]
 https://freem3u.xyz/static/no-signal/low.m3u8
 #EXTINF:-1 tvg-logo="https://images.keovip88.net/images/teams/iceland-u21.png" group-title="Giờ Vàng TV" , 22:00 29/09 ⚽ U21 Iceland vs Thụy Sĩ U21 (blv-tri) [hls]
-https://freem3u.xyz/static/no-signal/low.m3u8
-#EXTINF:-1 tvg-logo="https://sta.vnres.co/file/common/20260926/0a7f988173d930c4e450e2300f71d260.png" group-title="Sút Bóng TV" , 17:30 29/09 ⚽ Japan Women vs South Korea Women (BLV ALEX)
-#EXTVLCOPT:http-referrer=https://sutbong.net/
-https://freem3u.xyz/static/no-signal/low.m3u8
-#EXTINF:-1 tvg-logo="https://sta.vnres.co/file/common/20260926/0a7f988173d930c4e450e2300f71d260.png" group-title="Sút Bóng TV" , 17:30 29/09 ⚽ Japan Women vs South Korea Women (BLV GIÓ)
-#EXTVLCOPT:http-referrer=https://sutbong.net/
-https://freem3u.xyz/static/no-signal/low.m3u8
-#EXTINF:-1 tvg-logo="https://sta.vnres.co/file/common/20260926/0a7f988173d930c4e450e2300f71d260.png" group-title="Sút Bóng TV" , 17:30 29/09 ⚽ Japan Women vs South Korea Women (BLV PEWPEW)
-#EXTVLCOPT:http-referrer=https://sutbong.net/
-https://freem3u.xyz/static/no-signal/low.m3u8
-#EXTINF:-1 tvg-logo="https://sta.vnres.co/file/common/20260926/0a7f988173d930c4e450e2300f71d260.png" group-title="Sút Bóng TV" , 17:30 29/09 ⚽ Japan Women vs South Korea Women (BLV RÔSI)
-#EXTVLCOPT:http-referrer=https://sutbong.net/
-https://freem3u.xyz/static/no-signal/low.m3u8
-#EXTINF:-1 tvg-logo="https://sta.vnres.co/file/common/20260926/0a7f988173d930c4e450e2300f71d260.png" group-title="Sút Bóng TV" , 17:30 29/09 ⚽ Japan Women vs South Korea Women (BLV XO)
-#EXTVLCOPT:http-referrer=https://sutbong.net/
-https://freem3u.xyz/static/no-signal/low.m3u8
-#EXTINF:-1 tvg-logo="https://sta.vnres.co/file/common/20260926/0a7f988173d930c4e450e2300f71d260.png" group-title="Sút Bóng TV" , 17:30 29/09 ⚽ Japan Women vs South Korea Women (TRÀ ĐÁ)
-#EXTVLCOPT:http-referrer=https://sutbong.net/
 https://freem3u.xyz/static/no-signal/low.m3u8
 #EXTINF:-1 tvg-logo="https://sta.vnres.co/file/common/20260926/80a910fb23566b31694b1202671105d2.png" group-title="Sút Bóng TV" , 18:00 29/09 ⚽ Comoros vs Namibia (BLV A TINH)
 #EXTVLCOPT:http-referrer=https://sutbong.net/
