@@ -120,6 +120,45 @@ jobs:
           echo "Relevant snippets:"
           grep -RniE 'FPL-Custom|FPLCustom|X_ID|X-ID|vips-livecdn|livecdn' /tmp/fptjs 2>/dev/null | head -80 || true
 
+      - name: Test FPT client identity headers and inspect bundles
+        shell: bash
+        run: |
+          set -euo pipefail
+          EVENT07="https://vips-livecdn.fptplay.net/live/media/event-07/hls_avc_v6/index.m3u8"
+          curl -fsSL -D /tmp/fpt.headers -c /tmp/fpt.cookies --max-time 30 "https://fptplay.vn/" -o /tmp/fpt.html
+          DEVICE_ID="$(awk '$6=="device_id"{print $7}' /tmp/fpt.cookies | tail -1)"
+          echo "device_id=$DEVICE_ID"
+
+          echo "=== event-07 with device identity headers ==="
+          profiles=(
+            "x_id|-H|X_ID: $DEVICE_ID"
+            "x_dash_id|-H|X-ID: $DEVICE_ID"
+            "fpl_custom|-H|FPL-Custom: $DEVICE_ID"
+            "fpl_json|-H|FPL-Custom: {"device_id":"$DEVICE_ID"}"
+            "fpl_json_camel|-H|FPL-Custom: {"deviceId":"$DEVICE_ID"}"
+          )
+          for p in "${profiles[@]}"; do
+            IFS='|' read -r name kind header <<< "$p"
+            echo "--- $name ---"
+            curl -sS --http1.1 --max-time 20               -A "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 Chrome/140.0 Mobile Safari/537.36"               -H "Referer: https://fptplay.vn/"               -H "Origin: https://fptplay.vn"               -H "Accept: application/vnd.apple.mpegurl,application/x-mpegURL,*/*"               -H "Cache-Control: no-cache"               -H "$header"               -b "/tmp/fpt.cookies"               -o /tmp/e07-ident -D /tmp/e07-ident.headers               -w "status=%{http_code} type=%{content_type} size=%{size_download}\n"               "$EVENT07" || true
+            grep -iE 'HTTP/|x-srv:|x-channel:|content-type:|x-|ftel|cdn53|_ver:' /tmp/e07-ident.headers || true
+            rm -f /tmp/e07-ident /tmp/e07-ident.headers
+          done
+
+          echo "=== inspect FPT Play JS bundles for player header strings ==="
+          mkdir -p /tmp/fptjs
+          grep -oE '<script[^>]+src="[^"]+"' /tmp/fpt.html | sed -E 's/.*src="([^"]+)".*/\1/' | while read -r p; do
+            case "$p" in
+              http*) u="$p" ;;
+              /*) u="https://fptplay.vn$p" ;;
+              *) u="https://fptplay.vn/$p" ;;
+            esac
+            b="/tmp/fptjs/$(echo "$p" | tr '/:?=&' '_')"
+            curl -fsSL --max-time 30 "$u" -o "$b" || true
+          done
+          grep -RniE 'FPL-Custom|FPLCustom|X_ID|X-ID|device_id|livecdn|vips-livecdn|x-channel' /tmp/fptjs 2>/dev/null | head -120 || true
+          rm -rf /tmp/fptjs /tmp/fpt.headers /tmp/fpt.cookies /tmp/fpt.html
+
       - name: Check Worker status
         shell: bash
         run: |
