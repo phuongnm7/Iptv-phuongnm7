@@ -1157,12 +1157,16 @@ export default {
         scheduler: {
           cron: CRON,
           strategy:
-            "full source scan every 5 minutes; strict live playlist only after clean verification; separate time-bounded fallback for upstream recovery",
+            "full source scan every 5 minutes; blocked-source recovery uses fresh FPT event metadata plus alternate playback paths",
         },
         ...(state.status || {
           ok: false,
           message: "Waiting for first scheduled scan",
         }),
+        // Always report the code version that is actually serving this request.
+        // KV may still contain a status snapshot written by an older Worker version
+        // until the next scheduled scan updates it.
+        workerVersion: WORKER_VERSION,
       });
     }
 
