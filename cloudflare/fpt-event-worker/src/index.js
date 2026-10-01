@@ -434,7 +434,8 @@ async function scan(env, meta = {}) {
 
     let playlist = previous.playlist;
     let restoredFromFallback = false;
-    if (playlist === "#EXTM3U\\n") {
+    const playlistHasEntries = /^#EXTINF:/m.test(playlist);
+    if (!playlistHasEntries) {
       playlist = buildM3U(LAST_KNOWN_GOOD);
       restoredFromFallback = true;
       await env.FPT_EVENT_KV.put(PLAYLIST_KEY, playlist, {
