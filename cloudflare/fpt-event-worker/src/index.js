@@ -728,8 +728,29 @@ export default {
 
     if (url.pathname === "/fpt-event-live.m3u") {
       const state = await getStored(env);
-      const playlistEntries = state.playlist.match(/^#EXTINF:/gm)?.length || 0;
-      return new Response(state.playlist, {
+      let playlist = state.playlist;
+
+      // Never expose a header-only playlist while the upstream is known to be blocked.
+      // Serve the last healthy snapshot (or the baked-in last-known-good snapshot)
+      // directly at the public endpoint. This prevents IPTV clients from seeing a
+      // momentarily empty list while FPT CDN access is recovering.
+      if (
+        !/^#EXTINF:/m.test(playlist) &&
+        state.status?.sourceBlocked === true
+      ) {
+        const fallbackEntries =
+          Array.isArray(state.status.lastHealthyLiveChannels) &&
+          state.status.lastHealthyLiveChannels.length > 0
+            ? state.status.lastHealthyLiveChannels
+            : LAST_KNOWN_GOOD;
+        playlist = buildM3U(fallbackEntries);
+        await env.FPT_EVENT_KV.put(PLAYLIST_KEY, playlist, {
+          expirationTtl: PLAYLIST_TTL,
+        });
+      }
+
+      const playlistEntries = playlist.match(/^#EXTINF:/gm)?.length || 0;
+      return new Response(playlist, {
         headers: {
           "Content-Type": "application/x-mpegURL; charset=utf-8",
           "Cache-Control": "no-store, no-cache, must-revalidate",
