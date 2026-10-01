@@ -145,3 +145,36 @@ If the FPT CDN itself changes its response format or starts requiring additional
 - Post-deploy production verification showed the public playlist endpoint returning **5 entries** with the v7 worker.
 - At the verification time, FPT upstream was still returning HTTP 403 for all 46 candidates, so the Worker was in adaptive recovery and deliberately preserved the 5-entry last-known-good playlist instead of publishing an empty list.
 - This hardening makes playlist availability resilient to prolonged upstream blocking. It cannot guarantee that an upstream FPT URL remains playable while FPT itself returns 403; a clean recovery scan is still required to refresh the live set.
+
+
+## 2026-10-01 — v8 strict live filtering fix (authoritative current state)
+
+The filtering bug was confirmed to be caused by mixing the persistent last-known-good recovery playlist with the public live playlist. When FPT returned HTTP 403 for all 46 endpoints, the old Worker preserved the 5 previously healthy channels and exposed them through the same /fpt-event-live.m3u URL even though their current live state could not be verified.
+
+### v8 changes
+
+- Worker version: fpt-event-strict-live-v8.
+- /fpt-event-live.m3u is now strict: it exposes entries only after a clean 46-endpoint scan with zero probe errors.
+- During 403/timeout/network-degraded recovery, the strict endpoint returns a header-only M3U and sets X-NM7-FPT-Verified: false and X-NM7-FPT-Filter: upstream-unverified.
+- A separate /fpt-event-fallback.m3u endpoint is available for temporary recovery playback and is limited to 30 minutes of fallback age.
+- The persistent last-known-good pool is no longer allowed to masquerade as the current live set.
+- v7 KV state is migrated into the new fallback key when v8 recovery starts, so the old recovery pool is not lost.
+- lastCleanLiveChannels, verifiedPlaylistEntries and fallback timestamps are retained in status for clearer diagnostics.
+- GitHub Actions now runs node --check src/index.js before Wrangler deployment and verifies the v8 headers/endpoints without forcing a new FPT origin scan.
+
+### Verification
+
+- Main v8 code commit: 0ba070839e65489bb1415f0d23d4c947d82286b6.
+- Compatibility/fallback hardening commit: 5d026ddee430c997a274128c758ed908372813bb.
+- Production deployment version from Wrangler: b13102f4-a89b-4380-a98c-e59ac6300ed1.
+- GitHub Actions deploy run: 36889765021, conclusion: success.
+- JavaScript validation: success.
+- Wrangler deployment: success.
+- Production /status: Worker version v8, Cron */5 * * * *.
+- Production strict playlist during the verification window: 0 entries with X-NM7-FPT-Verified: false, because FPT returned HTTP 403 on the current recovery probes.
+- Separate FPT CDN diagnostic run confirmed all tested official and alternate representative endpoints returned HTTP 403 from the GitHub runner.
+- This means the Worker is running and the filtering logic now avoids publishing stale channels as currently live when the upstream cannot be verified.
+
+### Operational rule going forward
+
+A new clean scan is required before /fpt-event-live.m3u shows channels again. When FPT becomes reachable, the next 5-minute Cron resumes the full 46-endpoint scan; only channels whose current manifests pass the live checks are published.
