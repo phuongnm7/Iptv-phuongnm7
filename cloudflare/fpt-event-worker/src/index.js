@@ -500,16 +500,31 @@ async function scan(env, meta = {}) {
     // the separate fallback playlist remains available only at /fpt-event-fallback.m3u.
     const playlist = previous.playlist;
     const playlistEntries = 0;
-    const previousFallbackEntries =
+    let previousFallbackEntries =
       previous.fallbackPlaylist.match(/^#EXTINF:/gm)?.length || 0;
-    const publishedAtText = await env.FPT_EVENT_KV.get(PUBLISHED_AT_KEY);
-    const publishedAt = publishedAtText ? Number(publishedAtText) : 0;
-    const fallbackPublishedAtText = await env.FPT_EVENT_KV.get(
+    let fallbackPublishedAtText = await env.FPT_EVENT_KV.get(
       FALLBACK_PUBLISHED_AT_KEY
     );
-    const fallbackPublishedAt = fallbackPublishedAtText
+    let fallbackPublishedAt = fallbackPublishedAtText
       ? Number(fallbackPublishedAtText)
       : 0;
+
+    // Migrate the persistent v7 last-known-good pool into the new separate
+    // fallback key the first time recovery mode is entered after v8 deploy.
+    if (previousFallbackEntries === 0 && priorHealthyChannels.length > 0) {
+      const migratedFallback = buildM3U(priorHealthyChannels);
+      await env.FPT_EVENT_KV.put(FALLBACK_PLAYLIST_KEY, migratedFallback);
+      fallbackPublishedAt = fallbackPublishedAt || Date.now();
+      await env.FPT_EVENT_KV.put(
+        FALLBACK_PUBLISHED_AT_KEY,
+        String(fallbackPublishedAt)
+      );
+      previousFallbackEntries = priorHealthyChannels.length;
+      fallbackPublishedAtText = String(fallbackPublishedAt);
+    }
+
+    const publishedAtText = await env.FPT_EVENT_KV.get(PUBLISHED_AT_KEY);
+    const publishedAt = publishedAtText ? Number(publishedAtText) : 0;
     const status = {
       ...priorStatus,
       ok: true,
