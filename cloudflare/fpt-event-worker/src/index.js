@@ -871,12 +871,12 @@ export default {
           fallbackAgeMs !== null &&
           fallbackAgeMs > FALLBACK_MAX_AGE_MS
         ) {
-          playlist = "#EXTM3U\\n";
+          playlist = "#EXTM3U\n";
         }
       } else if (!cleanScan) {
         // The primary endpoint is strict: no degraded/recovery snapshot is ever
         // exposed as "live".
-        playlist = "#EXTM3U\\n";
+        playlist = "#EXTM3U\n";
       }
 
       const playlistEntries = playlist.match(/^#EXTINF:/gm)?.length || 0;
