@@ -6,6 +6,7 @@ on:
       - main
   schedule:
     - cron: "0 * * * *"
+    - cron: "*/5 * * * *"
   workflow_dispatch:
 
 permissions:
@@ -17,6 +18,7 @@ concurrency:
 
 jobs:
   update:
+    if: github.event_name != 'schedule' || github.event.schedule == '0 * * * *'
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -223,4 +225,75 @@ jobs:
           done
 
           echo "::error::Failed to push generated playlist after 5 attempts."
+          exit 1
+
+
+  scan-fpt-events:
+    if: github.event_name == 'schedule' && github.event.schedule == '*/5 * * * *'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+        with:
+          ref: main
+
+      - name: Scan exact FPT source URLs
+        env:
+          OUTPUT_M3U: generated/fpt-event-live.m3u
+          OUTPUT_STATUS: generated/fpt-event-live.status.json
+          MAX_PROXY_TRIES: "40"
+          MAX_WORKERS: "4"
+          PROBE_TIMEOUT: "12"
+        run: |
+          set -euo pipefail
+          python3 cloudflare/fpt-event-worker/tools/source-live-scanner.py
+
+      - name: Validate source-only live set
+        run: |
+          set -euo pipefail
+          SOURCE="https://raw.githubusercontent.com/phuongnm7/Iptv-phuongnm7/main/sources/fpt-events-source.m3u"
+          test -f generated/fpt-event-live.m3u
+          SOURCE_TEXT="$(curl -fsSL --retry 3 --max-time 30 "$SOURCE")"
+          OUTPUT_TEXT="$(cat generated/fpt-event-live.m3u)"
+
+          printf '%s\n' "$OUTPUT_TEXT" | awk '/^https?:\/\//{print}' | while read -r url; do
+            grep -Fqx "$url" <<< "$SOURCE_TEXT" || {
+              echo "ERROR: output URL is not an exact member of source: $url"
+              exit 1
+            }
+          done
+
+          ! grep -qE 'vhd0/Stuff|vuminhthanh12|metadata-assisted|event-a\.fptplay53|livecdn\.fptplay\.net/schedule' generated/fpt-event-live.m3u
+
+          echo "=== CURRENT FPT LIVE SET ==="
+          cat generated/fpt-event-live.m3u
+          echo "=== SCAN STATUS ==="
+          cat generated/fpt-event-live.status.json
+
+      - name: Commit only when live set changed
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add generated/fpt-event-live.m3u
+          if git diff --cached --quiet; then
+            echo "Live set unchanged; no commit needed."
+            exit 0
+          fi
+          git commit -m "data(fpt): update current live event set"
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            if ! git rebase origin/main; then
+              git rebase --abort || true
+              echo "::error::Could not rebase generated FPT event playlist commit."
+              exit 1
+            fi
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            echo "Push race detected (attempt $attempt/5); retrying..."
+            sleep $((attempt * 2))
+          done
+          echo "::error::Failed to push generated FPT live set after 5 attempts."
           exit 1
