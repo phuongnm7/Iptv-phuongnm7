@@ -386,6 +386,9 @@ async function recordFailure(env, error, meta = {}) {
     );
   }
 
+  const fallbackCreatedAt =
+    previousFallbackEntries === 0 ? Date.now() : null;
+
   const status = {
     ...(previous.status || {}),
     ok: false,
@@ -403,6 +406,15 @@ async function recordFailure(env, error, meta = {}) {
     verifiedPlaylistEntries: previousPlaylistEntries,
     fallbackPlaylistEntries:
       previousFallbackEntries > 0 ? previousFallbackEntries : previousHealthy.length,
+    fallbackPublishedAt:
+      fallbackCreatedAt !== null
+        ? new Date(fallbackCreatedAt).toISOString()
+        : previous.status?.fallbackPublishedAt || null,
+    lastCleanLiveChannels:
+      Array.isArray(previous.status?.lastCleanLiveChannels) &&
+      previous.status.lastCleanLiveChannels.length > 0
+        ? previous.status.lastCleanLiveChannels
+        : previousHealthy,
     lastHealthyLiveChannels: previousHealthy,
     ...meta,
   };
@@ -563,9 +575,11 @@ async function scan(env, meta = {}) {
       fallbackPublishedAt: fallbackPublishedAt
         ? new Date(fallbackPublishedAt).toISOString()
         : null,
-      lastCleanLiveChannels: Array.isArray(priorStatus.lastCleanLiveChannels)
-        ? priorStatus.lastCleanLiveChannels
-        : [],
+      lastCleanLiveChannels:
+        Array.isArray(priorStatus.lastCleanLiveChannels) &&
+        priorStatus.lastCleanLiveChannels.length > 0
+          ? priorStatus.lastCleanLiveChannels
+          : priorHealthyChannels,
       lastHealthyLiveChannels:
         priorHealthyChannels.length > 0
           ? priorHealthyChannels
@@ -856,6 +870,23 @@ export default {
 
       let playlist = strictMode ? state.playlist : state.fallbackPlaylist;
       let fallbackAgeMs = null;
+
+      if (!strictMode && !/^#EXTINF:/m.test(playlist)) {
+        const fallbackEntries =
+          Array.isArray(state.status?.lastHealthyLiveChannels) &&
+          state.status.lastHealthyLiveChannels.length > 0
+            ? state.status.lastHealthyLiveChannels
+            : LAST_KNOWN_GOOD;
+        playlist = buildM3U(fallbackEntries);
+        await env.FPT_EVENT_KV.put(FALLBACK_PLAYLIST_KEY, playlist);
+        if (!state.status?.fallbackPublishedAt) {
+          const now = new Date().toISOString();
+          await env.FPT_EVENT_KV.put(FALLBACK_PUBLISHED_AT_KEY, String(Date.now()));
+          if (state.status) {
+            state.status.fallbackPublishedAt = now;
+          }
+        }
+      }
 
       if (!strictMode) {
         const fallbackPublishedAt = Number(
