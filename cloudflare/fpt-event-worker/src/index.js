@@ -15,7 +15,7 @@ const WORKER_VERSION = "fpt-event-resilient-v7-subrequest-safe";
 // Reserve one request as a safety margin; at most 2 fallback probes are allowed.
 const MAX_EXTERNAL_SUBREQUESTS = 49;
 const MAX_FALLBACK_PROBES = 2;
-const MAX_CONCURRENCY = 5;
+const MAX_CONCURRENCY = 3;
 const PROBE_TIMEOUT_MS = 8000;
 
 const UAS = ["VThanhTivi", "KhoaTivi", "BearTV"];
@@ -253,7 +253,6 @@ async function probe(item, budget, retryState) {
 
   const needsFallback =
     first.httpStatus === 401 ||
-    first.httpStatus === 403 ||
     (first.httpStatus >= 300 && first.httpStatus < 400 && first.redirectUrl);
 
   if (!needsFallback || retryState.remaining <= 0) {
