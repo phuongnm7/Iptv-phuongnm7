@@ -38,7 +38,13 @@ jobs:
         run: |
           set -euo pipefail
           URL="https://nm7-fpt-event-live.phuongnm7-iptv.workers.dev/scan"
-          BODY="$(curl -fsSL --retry 3 --retry-delay 2 --max-time 90 "$URL")"
+          BODY="$(curl -fsSL --retry 3 --retry-delay 2 --max-time 120 "$URL")"
           echo "$BODY"
-          echo "$BODY" | jq -e '.ok == true and .candidates > 0 and (.liveEntries + .inactiveEntries + .probeErrors == .candidates) and .workerVersion == "fpt-event-resilient-v6-dash-diagnostics"' >/dev/null
-          echo "Verified: FPT source totals and resilient Worker version; probe errors, if any, are reported without discarding the last good playlist."
+          echo "$BODY" | jq -e '
+            .ok == true
+            and .candidates > 0
+            and (.liveEntries + .inactiveEntries + .probeErrors == .candidates)
+            and .workerVersion == "fpt-event-resilient-v7-subrequest-safe"
+            and .subrequestBudget.used <= .subrequestBudget.maxExternalSubrequests
+          ' >/dev/null
+          echo "Verified: v7 quota-safe scan completed without exceeding its external subrequest safety budget."
