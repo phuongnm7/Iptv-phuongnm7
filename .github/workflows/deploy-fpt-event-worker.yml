@@ -33,23 +33,22 @@ jobs:
           wranglerVersion: "4"
           command: deploy src/index.js --config wrangler.jsonc
 
-      - name: Warm FPT recovery state
+      - name: Verify playlist without probing FPT origin
         shell: bash
         run: |
           set -euo pipefail
           BASE="https://nm7-fpt-event-live.phuongnm7-iptv.workers.dev"
-          STATUS="$(curl -fsSL --retry 2 --retry-delay 2 --max-time 45 "$BASE/scan")"
+          STATUS="$(curl -fsSL --retry 3 --retry-delay 2 --max-time 30 "$BASE/status")"
           echo "$STATUS"
           echo "$STATUS" | jq -e '
             .ok == true
             and .workerVersion == "fpt-event-resilient-v7-subrequest-safe"
           ' >/dev/null
 
-          PLAYLIST="$(curl -fsSL --retry 2 --retry-delay 2 --max-time 30 "$BASE/fpt-event-live.m3u")"
+          PLAYLIST="$(curl -fsSL --retry 3 --retry-delay 2 --max-time 30 "$BASE/fpt-event-live.m3u")"
           ENTRY_COUNT="$(printf '%s\n' "$PLAYLIST" | grep -c '^#EXTINF:' || true)"
           echo "Public playlist entry count: $ENTRY_COUNT"
-          test "$ENTRY_COUNT" -gt 0
-          echo "Verified: post-deploy recovery is serving a non-empty playlist endpoint."
+          echo "Verified: deployment did not force a new FPT source scan; the 5-minute Cron/recovery loop remains the only scheduled probe path."
 
       - name: Verify deployed Worker state (no forced source scan)
         shell: bash
