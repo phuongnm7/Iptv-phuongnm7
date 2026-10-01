@@ -104,6 +104,22 @@ jobs:
           echo
           rm -f /tmp/fpt.headers /tmp/fpt.cookies /tmp/fpt.html /tmp/e07-cookie /tmp/e07-cookie.headers
 
+          echo "=== Inspect FPT Play JavaScript bundles ==="
+          mkdir -p /tmp/fptjs
+          grep -oE '<script[^>]+src="[^"]+"' /tmp/fpt.html | sed -E 's/.*src="([^"]+)".*/\1/' | while read -r p; do
+            case "$p" in
+              http*) u="$p" ;;
+              /*) u="https://fptplay.vn$p" ;;
+              *) u="https://fptplay.vn/$p" ;;
+            esac
+            b="/tmp/fptjs/$(echo "$p" | tr '/:?=&' '_')"
+            curl -fsSL --max-time 30 "$u" -o "$b" || true
+          done
+          echo "Bundle matches:"
+          grep -RohE 'FPL-Custom|FPLCustom|X_ID|X-ID|x-channel|device_id|livecdn|vips-livecdn|FPT_CUSTOM|customHeader' /tmp/fptjs 2>/dev/null | sort | uniq -c | sort -nr | head -100 || true
+          echo "Relevant snippets:"
+          grep -RniE 'FPL-Custom|FPLCustom|X_ID|X-ID|vips-livecdn|livecdn' /tmp/fptjs 2>/dev/null | head -80 || true
+
       - name: Check Worker status
         shell: bash
         run: |
