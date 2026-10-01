@@ -49,7 +49,7 @@ jobs:
           echo "$STATUS"
           echo "$STATUS" | jq -e '
             .ok == true
-            and .workerVersion == "fpt-event-strict-live-v10"
+            and .workerVersion == "fpt-event-source-only-live-v11"
           ' >/dev/null
 
           PLAYLIST="$(curl -fsSL --retry 3 --retry-delay 2 --max-time 30 "$BASE/fpt-event-live.m3u")"
@@ -58,11 +58,29 @@ jobs:
           HEADERS="$(curl -fsS -D - -o /dev/null --retry 3 --retry-delay 2 --max-time 30 "$BASE/fpt-event-live.m3u")"
           echo "$HEADERS"
           echo "$HEADERS" | grep -qi '^x-nm7-fpt-verified: '
-          echo "Verified: deployment did not force a new FPT source scan; strict live filtering uses clean verification when available and metadata-assisted current-event tracking during upstream 403."
+          echo "Verified: deployment did not force a new FPT source scan; strict live filtering is only published after a clean scan."
 
           FALLBACK_HEADERS="$(curl -fsS -D - -o /dev/null --retry 3 --retry-delay 2 --max-time 30 "$BASE/fpt-event-fallback.m3u")"
           echo "$FALLBACK_HEADERS"
           echo "$FALLBACK_HEADERS" | grep -qi '^content-type: application/x-mpegURL'
+
+      - name: Enforce source-only playlist
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE="https://nm7-fpt-event-live.phuongnm7-iptv.workers.dev"
+          
+                    echo "Checking that every public playlist URL is present in the source M3U..."
+                    SOURCE="$(curl -fsSL --retry 3 --retry-delay 2 --max-time 30 "https://raw.githubusercontent.com/phuongnm7/Iptv-phuongnm7/main/sources/fpt-events-source.m3u")"
+                    PLAYLIST="$(curl -fsSL --retry 3 --retry-delay 2 --max-time 30 "$BASE/fpt-event-live.m3u")"
+                    printf '%s\n' "$PLAYLIST" | awk '/^https?:\/\//{print}' | while read -r url; do
+                      test -z "$url" || grep -Fqx "$url" <<< "$SOURCE" || {
+                        echo "ERROR: playlist URL is not in source: $url"
+                        exit 1
+                      }
+                    done
+                    ! grep -qE 'vhd0/Stuff|vuminhthanh12|metadata-assisted|event-a\.fptplay53|livecdn\.fptplay\.net/schedule' <<< "$PLAYLIST"
+          
 
       - name: Verify deployed Worker state (no forced source scan)
         shell: bash
@@ -73,7 +91,7 @@ jobs:
           echo "$STATUS"
           echo "$STATUS" | jq -e '
             .ok == true
-            and .workerVersion == "fpt-event-strict-live-v10"
+            and .workerVersion == "fpt-event-source-only-live-v11"
             and .scheduler.cron == "*/5 * * * *"
             and ((.scheduler.strategy // "") | contains("every 5 minutes"))
           ' >/dev/null
@@ -81,5 +99,5 @@ jobs:
           HEADERS="$(curl -fsS -D - -o /dev/null --retry 3 --retry-delay 2 --max-time 30 "https://nm7-fpt-event-live.phuongnm7-iptv.workers.dev/fpt-event-live.m3u")"
           echo "$HEADERS"
           echo "$HEADERS" | grep -qi '^content-type: application/x-mpegURL'
-          echo "$HEADERS" | grep -qi '^x-nm7-fpt-version: fpt-event-strict-live-v10'
-          echo "Verified: v10 is deployed, Cron is configured for every 5 minutes, and the strict live endpoint is exposing the expected version. No forced full scan is executed during CI deploy."
+          echo "$HEADERS" | grep -qi '^x-nm7-fpt-version: fpt-event-source-only-live-v11'
+          echo "Verified: v11 is deployed, Cron is configured for every 5 minutes, and the strict live endpoint is exposing the expected version. No forced full scan is executed during CI deploy."

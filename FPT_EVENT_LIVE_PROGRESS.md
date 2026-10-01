@@ -207,3 +207,21 @@ The metadata source tells us which FPT event streams are currently advertised by
 - GitHub Actions must validate `fpt-event-strict-live-v10`.
 - Cron remains `*/5 * * * *`.
 - No CI step should force a new 46-endpoint FPT scan.
+
+
+## 2026-10-01 — v11 source-only live filter — authoritative
+
+Đã loại bỏ hoàn toàn hướng metadata-assisted trước đó theo đúng yêu cầu.
+
+- Chỉ dùng `sources/fpt-events-source.m3u`.
+- Chỉ probe URL nguyên bản nằm trong source.
+- Chỉ URL có manifest live mới được xuất.
+- 403/404/VOD/ENDLIST/non-manifest bị loại.
+- Không dùng `vhd0/Stuff`.
+- Không dùng `vuminhthanh12/vmttv`.
+- Không đổi sang hostname FPT khác trong lúc recovery.
+- Không dùng last-known-good để giả làm live hiện tại.
+- GitHub Actions thêm test bảo đảm mọi URL trong playlist chính là URL có trong source M3U.
+- Worker version: `fpt-event-source-only-live-v11`.
+
+Lưu ý vận hành: hiện FPT đang trả HTTP 403 từ môi trường server-side, nên trong giai đoạn đó playlist strict sẽ có 0 entry. Worker không được phép biến trạng thái 403 thành các kênh "live" giả.
