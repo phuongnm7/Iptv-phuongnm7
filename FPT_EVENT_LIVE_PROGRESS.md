@@ -88,3 +88,19 @@ If the FPT CDN itself changes its response format or starts requiring additional
   - expires degraded snapshots after the grace period instead of keeping stale events indefinitely.
 - CI deployment verification now checks /status and the playlist endpoint without triggering another full scan.
 - Manual FPT CDN diagnostics were separated into .github/workflows/diagnose-fpt-event-cdn.yml.
+
+### Final runtime/CI state — 2026-10-01
+
+- Final runtime fix commit: ff6e07e9a9a23318945d39f6b91ff4fba29fe3a1.
+- Final production deployment verified by GitHub Actions: run 36837503122, conclusion success.
+- Cloudflare production Version ID: a011faa9-baa1-4110-b3fa-7e1445e43281.
+- Production trigger confirmed: */5 * * * *.
+- Final runtime probe pool is limited to 3 concurrent endpoint checks and does not perform immediate retries on HTTP 403.
+- The deployment workflow no longer forces /scan after every deploy. It verifies /status and the playlist endpoint only, avoiding back-to-back full scans that can trigger source-side blocking.
+- Manual FPT CDN diagnostics are isolated in .github/workflows/diagnose-fpt-event-cdn.yml.
+- Latest healthy full scan before the source-side block confirmed 5 live HLS entries:
+  Sự kiện FPT 01, Sự kiện FPT 09, Sự kiện FPT 10, Sự kiện FPT Event 02, Sự kiện FPT Event 07.
+- The same healthy scan confirmed all 8 DASH candidates as clean HTTP 404 and all remaining 33 HLS candidates as inactive.
+- At the 08:35:47 UTC Cron run, FPT returned HTTP 403 for all 46 candidates. The Worker marked the scan degraded and preserved the 5-entry last healthy playlist instead of replacing it with an empty playlist.
+- Current safety behavior: the last healthy playlist is preserved for a maximum of 15 minutes during degraded scans; after that it expires rather than remaining stale indefinitely.
+- Root cause of the original empty playlist was Cloudflare's per-invocation subrequest limit combined with Promise.all + multi-UA retries + redirect:follow. That architecture has now been removed.
