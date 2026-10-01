@@ -250,27 +250,6 @@ def scan_all(candidates, proxies):
     results.sort(key=lambda x: order.get(x["url"], 999999))
     return results, details
 
-def scan_all(candidates, proxy):
-    results = []
-    with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKERS) as pool:
-        futures = {
-            pool.submit(curl_probe, item["url"], proxy): item
-            for item in candidates
-        }
-        for future in concurrent.futures.as_completed(futures):
-            item = futures[future]
-            try:
-                results.append(classify(item, future.result()))
-            except Exception as exc:
-                results.append({
-                    "name": item["name"], "url": item["url"], "live": False,
-                    "status": 0, "content_type": "", "error": str(exc),
-                    "inactive_reason": None,
-                })
-    order = {item["url"]: i for i, item in enumerate(candidates)}
-    results.sort(key=lambda x: order.get(x["url"], 999999))
-    return results
-
 def build_m3u(results):
     lines = ["#EXTM3U", "#NM7-SCAN-VERIFIED: true", "#NM7-SCAN-MODE: vietnam-transport-source-only"]
     for row in results:
