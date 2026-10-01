@@ -10,12 +10,12 @@ const FALLBACK_PUBLISHED_AT_KEY = "fpt:live:fallbackPublishedAt";
 const HEALTHY_CHANNELS_KEY = "fpt:live:healthyChannels";
 const STATUS_KEY = "fpt:live:status";
 const CRON = "*/5 * * * *";
-// Published playlist and last-known-good channels are intentionally persistent.
-// A degraded upstream must never erase the last usable IPTV list merely because KV TTL elapsed.
+// Published playlist state is persistent, but its contents are rebuilt from the current scan.
+// Historical/fallback state is kept separately and is never used as current live.
 const STATUS_TTL = 24 * 60 * 60;
 const MIN_MANUAL_SCAN_GAP_MS = 4 * 60 * 1000;
 const FALLBACK_MAX_AGE_MS = 30 * 60 * 1000;
-const WORKER_VERSION = "fpt-event-source-only-live-v11";
+const WORKER_VERSION = "fpt-event-source-proven-live-v12";
 
 // Cloudflare Workers Free: 50 external subrequests/invocation.
 // This worker needs 1 request for SOURCE_URL + 46 primary probes today.
@@ -416,6 +416,11 @@ async function recordFailure(env, error, meta = {}) {
         ? previous.status.lastCleanLiveChannels
         : previousHealthy,
     lastHealthyLiveChannels: previousHealthy,
+    publishedFromCurrentScan: false,
+    liveEntries: 0,
+    currentScanLiveEntries: 0,
+    playlistEntries: 0,
+    verifiedPlaylistEntries: 0,
     ...meta,
   };
 
@@ -461,167 +466,10 @@ async function scan(env, meta = {}) {
       ? priorStatus.lastHealthyLiveChannels
       : LAST_KNOWN_GOOD;
 
-  const priorErrors = Array.isArray(priorStatus.errors) ? priorStatus.errors : [];
-  const priorLooksBlocked =
-    priorStatus.sourceBlocked === true ||
-    (priorStatus.scanDegraded === true &&
-      priorStatus.candidates > 0 &&
-      priorStatus.probeErrors === priorStatus.candidates &&
-      priorErrors.length > 0 &&
-      priorErrors.every((x) => Number(x.httpStatus) === 403));
-
-  if (priorLooksBlocked) {
-    const recoveryStartIndex =
-      Number.isInteger(priorStatus.recoveryProbeIndex)
-        ? priorStatus.recoveryProbeIndex % priorHealthyChannels.length
-        : 0;
-    const recoveryCandidates = Array.from(
-      { length: Math.min(RECOVERY_PROBE_LIMIT, priorHealthyChannels.length) },
-      (_, offset) =>
-        priorHealthyChannels[
-          (recoveryStartIndex + offset) % priorHealthyChannels.length
-        ]
-    );
-
-    const recoveryResults = await mapWithConcurrency(
-      recoveryCandidates,
-      1,
-      (item) => probeOnce(item, UAS[0], budget)
-    );
-
-    const recoveryHealthy = recoveryResults.some(
-      (item) => item.httpStatus === 200 && item.live
-    );
-    const recoverySaw403 = recoveryResults.some((item) => item.httpStatus === 403);
-    const recoverySawReachable = recoveryResults.some(
-      (item) =>
-        item.httpStatus !== null &&
-        item.httpStatus !== 403 &&
-        item.httpStatus !== 401
-    );
-    // Stay in low-frequency recovery until we have positive evidence that the
-    // upstream is reachable again. 403, 401, timeout and network failure are all
-    // treated as "not recovered yet"; 404/410/other HTTP responses count as reachable.
-    const recoveryLooksBlocked =
-      recoveryResults.length > 0 &&
-      !recoveryHealthy &&
-      !recoverySawReachable;
-
-    // Recovery never publishes stale entries through the strict live endpoint.
-    // The previous strict playlist stays stored for the next clean scan, while
-    // the separate fallback playlist remains available only at /fpt-event-fallback.m3u.
-    const playlist = previous.playlist;
-    const playlistEntries = 0;
-    let previousFallbackEntries =
-      previous.fallbackPlaylist.match(/^#EXTINF:/gm)?.length || 0;
-    let fallbackPublishedAtText = await env.FPT_EVENT_KV.get(
-      FALLBACK_PUBLISHED_AT_KEY
-    );
-    let fallbackPublishedAt = fallbackPublishedAtText
-      ? Number(fallbackPublishedAtText)
-      : 0;
-
-    // Migrate the persistent v7 last-known-good pool into the new separate
-    // fallback key the first time recovery mode is entered after v8 deploy.
-    if (previousFallbackEntries === 0 && priorHealthyChannels.length > 0) {
-      const migratedFallback = buildM3U(priorHealthyChannels);
-      await env.FPT_EVENT_KV.put(FALLBACK_PLAYLIST_KEY, migratedFallback);
-      fallbackPublishedAt = fallbackPublishedAt || Date.now();
-      await env.FPT_EVENT_KV.put(
-        FALLBACK_PUBLISHED_AT_KEY,
-        String(fallbackPublishedAt)
-      );
-      previousFallbackEntries = priorHealthyChannels.length;
-      fallbackPublishedAtText = String(fallbackPublishedAt);
-    }
-
-    const publishedAtText = await env.FPT_EVENT_KV.get(PUBLISHED_AT_KEY);
-    const publishedAt = publishedAtText ? Number(publishedAtText) : 0;
-    const status = {
-      ...priorStatus,
-      ok: true,
-      scanHealthy: false,
-      scanDegraded: true,
-      recoveryMode: true,
-      recoveryProbeSucceeded: recoveryHealthy,
-      recoverySaw403,
-      sourceBlocked: recoveryLooksBlocked,
-      recoveryProbeIndex:
-        (recoveryStartIndex + recoveryResults.length) % priorHealthyChannels.length,
-      recoverySawReachable,
-      stalePlaylist: false,
-      staleExpired: false,
-      fallbackStale: true,
-      filteringUnavailable: true,
-      restoredFromLastKnownGood: false,
-      workerVersion: WORKER_VERSION,
-      generatedAt: new Date().toISOString(),
-      scanDurationMs: Date.now() - scanStarted,
-      trigger: meta.trigger || "cron",
-      cron: meta.cron || null,
-      scheduledTime: meta.scheduledTime
-        ? new Date(meta.scheduledTime).toISOString()
-        : null,
-      playlistEntries,
-      verifiedPlaylistEntries:
-        Array.isArray(priorStatus.lastCleanLiveChannels)
-          ? priorStatus.lastCleanLiveChannels.length
-          : 0,
-      fallbackPlaylistEntries:
-        previousFallbackEntries > 0
-          ? previousFallbackEntries
-          : LAST_KNOWN_GOOD.length,
-      publishedFromCurrentScan: false,
-      fallbackPublishedAt: fallbackPublishedAt
-        ? new Date(fallbackPublishedAt).toISOString()
-        : null,
-      lastCleanLiveChannels:
-        Array.isArray(priorStatus.lastCleanLiveChannels) &&
-        priorStatus.lastCleanLiveChannels.length > 0
-          ? priorStatus.lastCleanLiveChannels
-          : priorHealthyChannels,
-      lastHealthyLiveChannels:
-        priorHealthyChannels.length > 0
-          ? priorHealthyChannels
-          : LAST_KNOWN_GOOD,
-      subrequestBudget: {
-        maxExternalSubrequests: MAX_EXTERNAL_SUBREQUESTS,
-        used: budget.used,
-        reservedMargin: 50 - MAX_EXTERNAL_SUBREQUESTS,
-        primaryProbes: 0,
-        recoveryProbeLimit: RECOVERY_PROBE_LIMIT,
-        recoveryProbesUsed: recoveryResults.length,
-        fallbackProbeLimit: MAX_FALLBACK_PROBES,
-        fallbackProbesUsed: 0,
-        concurrency: 1,
-      },
-    };
-
-    if (recoveryHealthy) {
-      status.sourceBlocked = false;
-      status.message =
-        "Recovery probe found a live FPT stream; full source scan will resume on the next 5-minute Cron.";
-    } else if (recoverySawReachable) {
-      status.sourceBlocked = false;
-      status.message =
-        "FPT source is reachable again but the sampled recovery streams are not live; full source scan will resume on the next 5-minute Cron.";
-    } else {
-      status.sourceBlocked = recoveryLooksBlocked;
-      status.message =
-        "FPT source still appears blocked; strict live playlist is intentionally empty until a clean scan verifies the current live set. Use /fpt-event-fallback.m3u only for temporary recovery playback.";
-    }
-
-    await env.FPT_EVENT_KV.put(
-      HEALTHY_CHANNELS_KEY,
-      JSON.stringify(status.lastHealthyLiveChannels)
-    );
-    await env.FPT_EVENT_KV.put(STATUS_KEY, JSON.stringify(status), {
-      expirationTtl: STATUS_TTL,
-    });
-    console.log(JSON.stringify(status));
-    return { playlist, status };
-  }
-
+  // Always probe every exact URL from SOURCE_URL on every scheduled scan.
+  // Do not shortcut to a historical recovery pool: a newly live event can be absent
+  // from that pool. Positively verified live URLs may be published even when other
+  // exact source URLs are temporarily blocked with 403.
   const sourceResponse = await fetchWithBudget(
     SOURCE_URL,
     {
@@ -674,82 +522,51 @@ async function scan(env, meta = {}) {
   const dashResults = results.filter((x) => x.protocol === "DASH");
   const hlsResults = results.filter((x) => x.protocol === "HLS");
 
-  const previousHasPlaylist = /^#EXTINF:/m.test(previous.playlist);
-  const previousFallbackEntries =
-    previous.fallbackPlaylist.match(/^#EXTINF:/gm)?.length || 0;
-  const publishedAtText = await env.FPT_EVENT_KV.get(PUBLISHED_AT_KEY);
-  const publishedAt = publishedAtText ? Number(publishedAtText) : 0;
-  const fallbackPublishedAtText = await env.FPT_EVENT_KV.get(
-    FALLBACK_PUBLISHED_AT_KEY
-  );
-  const fallbackPublishedAt = fallbackPublishedAtText
-    ? Number(fallbackPublishedAtText)
-    : 0;
-
-  // Only a clean scan can change the strict public playlist. Any degraded scan means
-  // the current live set is unknown, so /fpt-event-live.m3u must not expose stale
-  // entries. The next clean scan is what removes ended events.
   const cleanScan = probeErrors === 0;
   const allProbeErrorsAre403 =
     results.length > 0 &&
     results.every((x) => x.error && Number(x.httpStatus) === 403);
+  const partialScan = probeErrors > 0 && live.length > 0;
+  const playlist = buildM3U(live);
 
-  const strictPlaylistPreservedInternally =
-    !cleanScan && previousHasPlaylist;
-  const staleExpired = false;
+  // Publish exactly the entries this scan positively verified as live.
+  // Unknown/403 endpoints are omitted; they are never guessed as live.
+  await env.FPT_EVENT_KV.put(PLAYLIST_KEY, playlist);
+  await env.FPT_EVENT_KV.put(PUBLISHED_AT_KEY, String(Date.now()));
 
-  let playlist;
   let fallbackPlaylist = previous.fallbackPlaylist;
   let fallbackUpdated = false;
-
-  if (cleanScan) {
-    playlist = buildM3U(live);
-    await env.FPT_EVENT_KV.put(PLAYLIST_KEY, playlist);
-    await env.FPT_EVENT_KV.put(PUBLISHED_AT_KEY, String(Date.now()));
-
-    // Only a non-empty clean scan refreshes the optional fallback snapshot.
-    if (live.length > 0) {
-      fallbackPlaylist = playlist;
-      await env.FPT_EVENT_KV.put(FALLBACK_PLAYLIST_KEY, fallbackPlaylist);
-      await env.FPT_EVENT_KV.put(
-        FALLBACK_PUBLISHED_AT_KEY,
-        String(Date.now())
-      );
-      fallbackUpdated = true;
-    }
-
-    // Persist a recovery pool from the newest clean live scan.
-    const healthySnapshot = live.length > 0 ? live : priorHealthyChannels;
-    await env.FPT_EVENT_KV.put(
-      HEALTHY_CHANNELS_KEY,
-      JSON.stringify(healthySnapshot)
-    );
-  } else {
-    // Degraded scans never change the strict playlist. The public endpoint will
-    // suppress it until scanHealthy becomes true again.
-    playlist = previous.playlist;
+  if (live.length > 0) {
+    fallbackPlaylist = playlist;
+    await env.FPT_EVENT_KV.put(FALLBACK_PLAYLIST_KEY, fallbackPlaylist);
+    await env.FPT_EVENT_KV.put(FALLBACK_PUBLISHED_AT_KEY, String(Date.now()));
+    fallbackUpdated = true;
   }
 
-  const publishedPlaylistEntries =
-    cleanScan ? live.length : 0;
+  if (cleanScan) {
+    await env.FPT_EVENT_KV.put(HEALTHY_CHANNELS_KEY, JSON.stringify(live));
+  }
+
+  const publishedPlaylistEntries = live.length;
   const fallbackPlaylistEntries =
     fallbackPlaylist.match(/^#EXTINF:/gm)?.length || 0;
 
   const status = {
+    ...priorStatus,
     ok: true,
-    scanHealthy: probeErrors === 0,
-    scanDegraded: probeErrors > 0,
+    scanHealthy: cleanScan,
+    scanDegraded: !cleanScan,
     stalePlaylist: false,
-    staleExpired,
-    strictPlaylistPreservedInternally: strictPlaylistPreservedInternally,
+    staleExpired: false,
+    strictPlaylistPreservedInternally: false,
     filteringUnavailable: !cleanScan,
     fallbackStale: !fallbackUpdated && fallbackPlaylistEntries > 0,
-    lastHealthyPublishAt: publishedAt ? new Date(publishedAt).toISOString() : null,
+    lastHealthyPublishAt: cleanScan
+      ? new Date().toISOString()
+      : (priorStatus.lastHealthyPublishAt || null),
     fallbackPublishedAt: fallbackUpdated
       ? new Date().toISOString()
-      : fallbackPublishedAt
-      ? new Date(fallbackPublishedAt).toISOString()
-      : null,
+      : (priorStatus.fallbackPublishedAt || null),
     persistentLastKnownGood: true,
     workerVersion: WORKER_VERSION,
     generatedAt: new Date().toISOString(),
@@ -765,16 +582,19 @@ async function scan(env, meta = {}) {
     recoveryProbeSucceeded: false,
     recoverySaw403: false,
     candidates: candidates.length,
-    liveEntries: cleanScan ? live.length : 0,
+    liveEntries: live.length,
     currentScanLiveEntries: live.length,
     playlistEntries: publishedPlaylistEntries,
-    verifiedPlaylistEntries: cleanScan ? live.length : 0,
+    verifiedPlaylistEntries: live.length,
     fallbackPlaylistEntries,
-    publishedFromCurrentScan: cleanScan,
+    publishedFromCurrentScan: true,
+    partialScan,
     inactiveEntries: results.filter((x) => !x.live && !x.error).length,
     probeErrors,
     preservedBecauseDegradedScan: false,
-    lastCleanLiveChannels: cleanScan ? live : (previous.status?.lastCleanLiveChannels || []),
+    lastCleanLiveChannels: cleanScan
+      ? live
+      : (previous.status?.lastCleanLiveChannels || []),
     quotaFailureDetected: allProbeErrorsAreQuota,
     quotaSafetyBlocked: allProbeErrorsAreQuota,
     allProbeErrorsAre403,
@@ -789,9 +609,9 @@ async function scan(env, meta = {}) {
     },
     liveChannels: live,
     lastHealthyLiveChannels:
-      live.length > 0
+      cleanScan && live.length > 0
         ? live
-        : previous.status?.lastHealthyLiveChannels || LAST_KNOWN_GOOD,
+        : (previous.status?.lastHealthyLiveChannels || priorHealthyChannels),
     dashDiagnostics: dashResults.map((x) => ({
       name: x.name,
       url: x.url,
@@ -866,7 +686,9 @@ export default {
     ) {
       const state = await getStored(env);
       const strictMode = url.pathname === "/fpt-event-live.m3u";
-      const cleanScan = state.status?.scanHealthy === true;
+      const publishedCurrentScan =
+        state.status?.publishedFromCurrentScan === true;
+      const scanHealthy = state.status?.scanHealthy === true;
 
       let playlist = strictMode ? state.playlist : state.fallbackPlaylist;
       let fallbackAgeMs = null;
@@ -904,14 +726,13 @@ export default {
         ) {
           playlist = "#EXTM3U\n";
         }
-      } else if (!cleanScan) {
-        // The primary endpoint is strict: no degraded/recovery snapshot is ever
-        // exposed as "live".
+      } else if (strictMode && !publishedCurrentScan) {
+        // No current scan result is available to publish.
         playlist = "#EXTM3U\n";
       }
 
       const playlistEntries = playlist.match(/^#EXTINF:/gm)?.length || 0;
-      const verified = strictMode && cleanScan;
+      const verified = strictMode && publishedCurrentScan;
 
       return new Response(playlist, {
         headers: {
@@ -922,8 +743,10 @@ export default {
           "X-NM7-FPT-Events": String(playlistEntries),
           "X-NM7-FPT-Verified": String(verified),
           "X-NM7-FPT-Filter": strictMode
-            ? cleanScan
-              ? "clean-scan-live-only"
+            ? publishedCurrentScan
+              ? scanHealthy
+                ? "clean-scan-live-only"
+                : "partial-scan-confirmed-live-only"
               : "upstream-unverified"
             : "last-clean-fallback",
           "X-NM7-FPT-Version": WORKER_VERSION,
@@ -952,10 +775,12 @@ export default {
           ? {
               strictVerificationMode: "upstream-unverified",
               liveEntries: 0,
+              currentScanLiveEntries: 0,
               playlistEntries: 0,
               verifiedPlaylistEntries: 0,
               filteringUnavailable: true,
               publishedFromMetadata: false,
+              publishedFromCurrentScan: false,
               assistedSourceUrl: null,
               assistedCandidates: 0,
             }
