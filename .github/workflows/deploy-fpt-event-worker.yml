@@ -51,7 +51,7 @@ jobs:
             echo "Status check attempt $attempt:"
             echo "$STATUS"
             if echo "$STATUS" | jq -e '
-              .workerVersion == "fpt-event-source-proven-live-v12"
+              .workerVersion == "fpt-event-source-mirror-v13"
               and .sourceOnly == true
             ' >/dev/null 2>&1; then
               break
@@ -60,7 +60,7 @@ jobs:
           done
 
           echo "$STATUS" | jq -e '
-            .workerVersion == "fpt-event-source-proven-live-v12"
+            .workerVersion == "fpt-event-source-mirror-v13"
             and .sourceOnly == true
           ' >/dev/null
 
@@ -115,7 +115,7 @@ jobs:
             echo "Final deployed-state check attempt $attempt:"
             echo "$STATUS"
             if echo "$STATUS" | jq -e '
-              .workerVersion == "fpt-event-source-proven-live-v12"
+              .workerVersion == "fpt-event-source-mirror-v13"
               and .sourceOnly == true
               and .scheduler.cron == "*/5 * * * *"
               and ((.scheduler.strategy // "") | contains("every 5 minutes"))
@@ -126,7 +126,7 @@ jobs:
           done
 
           echo "$STATUS" | jq -e '
-            .workerVersion == "fpt-event-source-proven-live-v12"
+            .workerVersion == "fpt-event-source-mirror-v13"
             and .sourceOnly == true
             and .scheduler.cron == "*/5 * * * *"
             and ((.scheduler.strategy // "") | contains("every 5 minutes"))
@@ -135,5 +135,5 @@ jobs:
           HEADERS="$(curl -fsS -D - -o /dev/null --retry 3 --retry-delay 2 --max-time 30 "https://nm7-fpt-event-live.phuongnm7-iptv.workers.dev/fpt-event-live.m3u")"
           echo "$HEADERS"
           echo "$HEADERS" | grep -qi '^content-type: application/x-mpegURL'
-          echo "$HEADERS" | grep -qi '^x-nm7-fpt-version: fpt-event-source-proven-live-v12'
-          echo "Verified: v12 is deployed, Cron is configured for every 5 minutes, and the strict live endpoint is exposing the expected version. No forced full scan is executed during CI deploy."
+          echo "$HEADERS" | grep -qi '^x-nm7-fpt-version: fpt-event-source-mirror-v13'
+          echo "Verified: v12 is deployed, Cron is configured for every 5 minutes, and the strict live endpoint is exposing the expected version. The live set is supplied by the Vietnam scanner; CI deploy does not probe FPT directly."
