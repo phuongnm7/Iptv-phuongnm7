@@ -1,69 +1,64 @@
 # NM7 FPT Event Live — Progress
 
-## 2026-09-26
+## 2026-10-01 — v7 subrequest-safe fix
 
-### Baseline problem
-- GitHub Actions workflow `.github/workflows/update-fpt-event-live.yml` used `*/5 * * * *`.
-- Historical runs showed long gaps, so the 5-minute schedule was not dependable.
-- A successful GitHub run only proved that `curl` received HTTP success; the Worker could still report probe errors.
-- The existing Worker source already had the correct 250-candidate / 5-batch architecture, but it did not define a real Cloudflare Cron Trigger.
-- The Worker performed an exact fetch and then a cache-busted retry, which could create unnecessary subrequests.
+### Runtime evidence
+- Production /status reported 46 candidates: 38 HLS + 8 DASH.
+- liveEntries = 0 and playlistEntries = 0.
+- probeErrors = 46.
+- Every reported probe error was:
+  "Too many subrequests by single Worker invocation."
+- Therefore the failure was in the probe architecture, not evidence that all 46 FPT sources were offline.
 
-### Implemented
-1. Cloudflare Worker now has `scheduled()` and owns the automatic scan schedule.
-2. `wrangler.jsonc` now defines `* * * * *`.
-3. One batch is scanned per minute using `scheduledTime minute % 8`.
-4. Full 250-candidate coverage is therefore completed every ~8 minutes.
-5. Each candidate uses one no-store/cache-bypass HLS request.
-6. Only confirmed HLS playlists are published.
-7. 404/410, ended playlists, VOD playlists, invalid playlists, and probe errors are excluded from the published batch.
-8. Each batch KV record expires after 15 minutes.
-9. Playlist generation requires all 8 batches to be fresh within 11 minutes; otherwise the playlist endpoint returns HTTP 503 rather than serving an incomplete/stale playlist.
-10. `/status` now exposes batch freshness, live count, inactive count, and error count.
-11. GitHub Actions was changed from scheduled execution to manual fallback and now validates the Worker JSON instead of treating HTTP 200 alone as success.
-12. FPT Worker README was updated with the new automatic architecture.
+### Root causes isolated
+1. scan() used Promise.all(candidates.map(probe)) and launched all endpoint probes together.
+2. probe() could retry the same endpoint across three User-Agent values on 401/403.
+3. Each manifest fetch used redirect: "follow", so redirect chains could consume extra subrequests.
+4. The source fetch plus 46 probes had almost no margin under the Workers Free 50 external-subrequest limit.
+5. scheduled() caught and swallowed scan failures inside waitUntil(), so a real scan failure could be recorded as a successful Cron invocation.
+6. README and the actual deployed source had drifted: README described an older 250-candidate batch architecture while the current Worker source had 46 direct candidates and a 5-minute Cron.
 
-### Commits
-- Worker logic: `947105b4468d07e871dd271359d3ea1d03a0f2d5` + `d4a5fc94429a74c0d54a6c78587348aa20598297`
-- Cron configuration: `5877dbdbf97df538a174bfbd2e9e45dd73d053f8`
-- Manual GitHub fallback: `a9b631b15ef2c999a59df7b712829586cdbb27ee`
-- Documentation: `e6070c93515f3918959ebc213047d3e074234dde`
+### v7 implemented
+- Worker version: fpt-event-resilient-v7-subrequest-safe.
+- Full 46-endpoint scan remains every 5 minutes.
+- Maximum 5 endpoint probes run concurrently.
+- One primary probe per endpoint.
+- Maximum 2 fallback probes per invocation for 401/403 or redirect cases.
+- Manifest fetches use redirect: "manual" to avoid hidden redirect subrequests.
+- External subrequest safety budget is hard-capped at 49, leaving a margin below the Workers Free 50-request limit.
+- Current source size above the safe full-scan capacity fails explicitly instead of silently skipping endpoints.
+- Duplicate source URLs are removed before probing.
+- 8-second per-probe timeout added.
+- HTTP 200 with non-M3U/non-MPD content is treated as probe error, not as clean inactive.
+- If all probes fail specifically because of a subrequest-limit condition, the previous good playlist is preserved.
+- Individual endpoint errors do not preserve unrelated stale channels; only currently confirmed live results are published.
+- /status now exposes probe budget, concurrency, fallback usage, scan health, scan duration, protocol statistics and DASH diagnostics.
+- scheduled() now rethrows after recording failure so Cron Past Events can reflect a real failure.
 
-### 2026-09-26 — Subrequest-limit fix
-- Runtime verification showed exactly 10 probe errors in every 50-candidate batch.
-- Cloudflare Free allows 50 external subrequests per invocation, and redirect chains count additional subrequests. A 50-candidate batch therefore had no safety margin.
-- Scanner changed to 8 batches: 32 candidates per batch for the first 7 batches and 26 in the final batch. Full coverage remains 250 candidates every ~8 minutes.
-- Batch records now retain up to 12 error details in `/status` so any remaining probe problem can be identified by URL/source instead of only a count.
-- The Worker must be redeployed after this code change before runtime can be re-tested.
+### Validation performed locally
+- Syntax check passed for the new Worker source.
+- Mock full-scan test: 46 candidates, 5-way concurrency, 47 external requests when no fallback is needed; playlist/result counts matched.
+- Quota-failure test: 46 probe errors were handled without exceeding 47 external requests; the last good playlist remained intact.
+- Fallback budget test reached the hard ceiling of 49 external requests and did not exceed it.
 
-### Verification still required after Cloudflare deploy
-Open:
+### GitHub updates
+- cloudflare/fpt-event-worker/src/index.js updated to v7.
+- .github/workflows/deploy-fpt-event-worker.yml updated to verify v7 and enforce the declared subrequest budget.
+- cloudflare/fpt-event-worker/README.md rewritten to match the real 46-endpoint architecture.
+- This progress file updated with the diagnosis and validation.
 
-- `https://nm7-fpt-event-live.phuongnm7-iptv.workers.dev/status`
-- `https://nm7-fpt-event-live.phuongnm7-iptv.workers.dev/fpt-event-live.m3u`
+### Deployment
+The source changes are committed on main. The deploy workflow is configured to run on changes under cloudflare/fpt-event-worker and then call /scan for post-deploy verification.
 
-Expected after the first complete cycle:
-- `ready: true`
-- `batchesReady: 8`
-- `candidates: 250`
-- `batchErrors` should be all zero; if not, inspect `errorDetails`
-- `liveEntries` = current confirmed FPT events
+### Next production verification
+After the GitHub Actions deployment completes, /status should show:
+- workerVersion = fpt-event-resilient-v7-subrequest-safe
+- candidates = 46 (unless the source file changes)
+- subrequestBudget.maxExternalSubrequests = 49
+- subrequestBudget.used <= 49
+- probeErrors reported per actual source condition
+- protocolStats showing 38 HLS + 8 DASH
+- liveEntries = currently confirmed live events
+- /fpt-event-live.m3u containing only the entries accepted by the current scan
 
-Cloudflare Cron Trigger changes can take several minutes to propagate after deployment.
-
-### 2026-09-26 — Integrate into main IPTV playlist
-- The main `IPTV_Gop_VMTTV_vAppTV.m3u` previously had no `SỰ KIỆN FPT` section.
-- `.github/workflows/update-merged-iptv.yml` now fetches the authoritative Worker playlist and appends its current FPT events to the main playlist.
-- The merged playlist workflow now runs every 5 minutes as a secondary static mirror. If the Worker temporarily returns 503, the existing FPT section is preserved rather than being erased. When the Worker returns an empty but valid playlist, the FPT section is removed automatically.
-- The Cloudflare Worker remains the primary real-time source; the GitHub merged playlist is a static mirror and can be delayed if GitHub scheduled workflows are delayed.
-
-### Important
-The authoritative automatic playlist is the Cloudflare Worker URL above. The repository file `fpt-event-live.m3u` remains a static GitHub snapshot and is not the source of truth for the automatic runtime playlist.
-
-
-### 2026-09-26 — Rollback after regression
-- The 8-batch scanner and automatic merge integration introduced a regression after deployment/testing.
-- The Worker source has been restored to the previously known 5-batch baseline (f23b85b6ee174b080e99de817ee4992d3b3f6494).
-- The merged IPTV workflow has been restored to its pre-FPT-integration version.
-- The manual FPT fallback workflow has also been restored to 5 batches.
-- No further FPT architecture changes should be deployed until the original 10-probe-error cause is isolated and tested independently.
+If the FPT CDN itself changes its response format or starts requiring additional authorization/signatures, that is a separate source-access issue and will be visible in the per-endpoint diagnostics rather than being masked as a quota failure.
