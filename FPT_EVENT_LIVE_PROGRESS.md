@@ -129,3 +129,19 @@ If the FPT CDN itself changes its response format or starts requiring additional
   - sourceBlocked = false
   - public playlist entry count = 5
 - This means the public playlist is non-empty again and FPT access has shown a live response through the recovery path.
+
+
+## 2026-10-01 — Persistent fail-safe hardening
+
+- Fixed a latent failure in `recordFailure()`: it referenced scan-local variables that do not exist in the failure handler.
+- Removed the 1-hour KV expiry from the published playlist, publication timestamp and recovery channel pool. These states are now persistent.
+- Any degraded scan (403, timeout, network failure, invalid manifest, etc.) preserves the last usable playlist indefinitely until a clean scan confirms a new state.
+- The public `/fpt-event-live.m3u` endpoint now falls back to the last-known-good event set whenever the stored playlist is empty and the latest scan is not clean.
+- Manual `/scan` calls now have a 4-minute protection window so repeated CI/manual calls cannot hammer the FPT origin.
+- Deployment no longer calls `/scan`; deployment validation checks the Worker and playlist endpoint only. Normal source probing remains on the Cloudflare 5-minute Cron/recovery loop.
+- Clean scans persist the newest non-empty recovery pool for future recovery.
+- Commit: `9c2bad3b89e6bdcbb0749cfa2a76519e8152fc01` plus diagnostic commit `3a2b053fd25a369c8c3d56c702a58c43b1bc9dca`.
+- Production deploy workflow for the hardening commit completed successfully.
+- Post-deploy production verification showed the public playlist endpoint returning **5 entries** with the v7 worker.
+- At the verification time, FPT upstream was still returning HTTP 403 for all 46 candidates, so the Worker was in adaptive recovery and deliberately preserved the 5-entry last-known-good playlist instead of publishing an empty list.
+- This hardening makes playlist availability resilient to prolonged upstream blocking. It cannot guarantee that an upstream FPT URL remains playable while FPT itself returns 403; a clean recovery scan is still required to refresh the live set.
