@@ -229,7 +229,7 @@ def scan_all(candidates, proxy):
     return results
 
 def build_m3u(results):
-    lines = ["#EXTM3U"]
+    lines = ["#EXTM3U", "#NM7-SCAN-VERIFIED: true", "#NM7-SCAN-MODE: vietnam-transport-source-only"]
     for row in results:
         if not row["live"]:
             continue
