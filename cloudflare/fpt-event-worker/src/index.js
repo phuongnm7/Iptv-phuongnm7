@@ -6,9 +6,27 @@ const STATUS_KEY = "fpt:live:status";
 const CRON = "*/5 * * * *";
 const PLAYLIST_TTL = 60 * 60;
 const STATUS_TTL = 60 * 60;
-const WORKER_VERSION = "fpt-event-resilient-v6-dash-diagnostics";
+const WORKER_VERSION = "fpt-event-resilient-v7-subrequest-safe";
+
+// Cloudflare Workers Free: 50 external subrequests/invocation.
+// This worker needs 1 request for SOURCE_URL + 46 primary probes today.
+// Reserve one request as a safety margin; at most 2 fallback probes are allowed.
+const MAX_EXTERNAL_SUBREQUESTS = 49;
+const MAX_FALLBACK_PROBES = 2;
+const MAX_CONCURRENCY = 5;
+const PROBE_TIMEOUT_MS = 8000;
 
 const UAS = ["VThanhTivi", "KhoaTivi", "BearTV"];
+
+function isDashUrl(url) {
+  return /\.mpd(?:[?#]|$)/i.test(url || "");
+}
+
+function protocolFor(item, contentType = "") {
+  return isDashUrl(item.url) || /application\/dash\+xml/i.test(contentType)
+    ? "DASH"
+    : "HLS";
+}
 
 function parseSource(text) {
   const lines = text.split(/\r?\n/);
@@ -37,7 +55,13 @@ function parseSource(text) {
     result.push({ name, url });
   }
 
-  return result;
+  // Do not probe the exact same URL twice if the source accidentally duplicates it.
+  const seen = new Set();
+  return result.filter((item) => {
+    if (seen.has(item.url)) return false;
+    seen.add(item.url);
+    return true;
+  });
 }
 
 function isLiveHls(text) {
@@ -45,9 +69,9 @@ function isLiveHls(text) {
   if (text.includes("#EXT-X-ENDLIST")) return false;
   if (/^#EXT-X-PLAYLIST-TYPE:VOD\s*$/mi.test(text)) return false;
 
-  const hasSegments = text.includes("#EXTINF:");
-  const hasVariant = text.includes("#EXT-X-STREAM-INF:");
-  const hasMediaSequence = text.includes("#EXT-X-MEDIA-SEQUENCE:");
+  const hasSegments = /(^|\n)#EXTINF:/m.test(text);
+  const hasVariant = /(^|\n)#EXT-X-STREAM-INF:/m.test(text);
+  const hasMediaSequence = /(^|\n)#EXT-X-MEDIA-SEQUENCE:/m.test(text);
   return hasSegments || hasVariant || hasMediaSequence;
 }
 
@@ -57,11 +81,14 @@ function isLiveDash(text) {
   const xml = text.replace(/^\uFEFF/, "").trim();
   if (!/<MPD(?:\s|>)/i.test(xml)) return false;
 
+  const typeMatch = xml.match(
+    /<MPD\b[^>]*\btype\s*=\s*["']([^"']+)["']/i
+  );
+
   // Explicit static MPD = VOD/on-demand.
-  const typeMatch = xml.match(/<MPD\b[^>]*\btype\s*=\s*["']([^"']+)["']/i);
   if (typeMatch && typeMatch[1].toLowerCase() === "static") return false;
 
-  // Live-oriented DASH signals. FPT may omit type="dynamic", so do not require it.
+  // FPT may omit type="dynamic", so accept other live-oriented MPD signals.
   const hasLiveSignal =
     (typeMatch && typeMatch[1].toLowerCase() === "dynamic") ||
     /\bminimumUpdatePeriod\s*=\s*["'][^"']+["']/i.test(xml) ||
@@ -71,72 +98,203 @@ function isLiveDash(text) {
 
   if (!hasLiveSignal) return false;
 
-  return /<AdaptationSet\b/i.test(xml) || /<Representation\b/i.test(xml) ||
-    /<SegmentTemplate\b/i.test(xml) || /<SegmentTimeline\b/i.test(xml);
+  return (
+    /<AdaptationSet\b/i.test(xml) ||
+    /<Representation\b/i.test(xml) ||
+    /<SegmentTemplate\b/i.test(xml) ||
+    /<SegmentTimeline\b/i.test(xml)
+  );
 }
 
-async function probe(item) {
-  let lastError = null;
+function timeoutSignal() {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), PROBE_TIMEOUT_MS);
+  return { signal: controller.signal, cancel: () => clearTimeout(timer) };
+}
 
-  for (const ua of UAS) {
-    try {
-      const response = await fetch(item.url, {
+async function fetchWithBudget(url, options, budget) {
+  if (budget.used >= MAX_EXTERNAL_SUBREQUESTS) {
+    throw new Error(
+      "Local subrequest safety budget exhausted before fetch (reserved Cloudflare margin)"
+    );
+  }
+
+  budget.used += 1;
+  return fetch(url, options);
+}
+
+async function probeOnce(item, ua, budget, targetUrl = item.url) {
+  const { signal, cancel } = timeoutSignal();
+
+  try {
+    const response = await fetchWithBudget(
+      targetUrl,
+      {
         method: "GET",
         headers: {
           "User-Agent": ua,
-          "Accept":
-            item.url.toLowerCase().includes(".mpd")
-              ? "application/dash+xml,application/xml,text/xml,*/*"
-              : "application/vnd.apple.mpegurl,application/x-mpegURL,text/plain,*/*",
+          Accept: isDashUrl(targetUrl)
+            ? "application/dash+xml,application/xml,text/xml,*/*"
+            : "application/vnd.apple.mpegurl,application/x-mpegURL,text/plain,*/*",
           "Cache-Control": "no-cache, no-store",
-          "Pragma": "no-cache",
-          "Referer": "https://fptplay.vn/",
-          "Origin": "https://fptplay.vn",
+          Pragma: "no-cache",
+          Referer: "https://fptplay.vn/",
+          Origin: "https://fptplay.vn",
           "Accept-Language": "vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7",
         },
         cache: "no-store",
-        redirect: "follow",
-      });
+        redirect: "manual",
+        signal,
+      },
+      budget
+    );
 
-      const contentType = response.headers.get("content-type") || "";
-      const isDash =
-        /\.mpd(?:[?#]|$)/i.test(item.url) ||
-        /application\/dash\+xml/i.test(contentType);
+    const contentType = response.headers.get("content-type") || "";
+    const protocol = protocolFor({ ...item, url: targetUrl }, contentType);
 
-      if (response.ok) {
-        const body = await response.text();
-        const live = isDash ? isLiveDash(body) : isLiveHls(body);
+    if (response.status >= 300 && response.status < 400) {
+      const location = response.headers.get("location") || "";
+      return {
+        ...item,
+        protocol,
+        live: false,
+        error: `HTTP ${response.status} redirect`,
+        redirectUrl: location ? new URL(location, targetUrl).toString() : null,
+        httpStatus: response.status,
+        contentType,
+        userAgent: ua,
+      };
+    }
+
+    if (response.ok) {
+      const body = await response.text();
+      const live = protocol === "DASH" ? isLiveDash(body) : isLiveHls(body);
+
+      // HTTP 200 with a non-manifest body is treated as a probe error, not as a clean
+      // inactive stream. This prevents a transient block/HTML response from erasing
+      // the entire published state.
+      const validManifest =
+        protocol === "DASH"
+          ? /<MPD(?:\s|>)/i.test(body)
+          : body.includes("#EXTM3U");
+
+      if (!validManifest) {
         return {
           ...item,
-          protocol: isDash ? "DASH" : "HLS",
-          live,
-          error: null,
-          inactiveReason: live ? null : (isDash ? "DASH MPD is not live" : "HLS playlist is not live"),
+          protocol,
+          live: false,
+          error: "HTTP 200 but manifest is invalid/non-M3U/non-MPD",
+          inactiveReason: null,
           httpStatus: response.status,
           contentType,
           userAgent: ua,
         };
       }
 
-      if (response.status === 404) {
-        return { ...item, live: false, error: null, inactiveReason: "HTTP 404" };
-      }
+      return {
+        ...item,
+        protocol,
+        live,
+        error: null,
+        inactiveReason: live
+          ? null
+          : protocol === "DASH"
+          ? "DASH MPD is not live"
+          : "HLS playlist is not live",
+        httpStatus: response.status,
+        contentType,
+        userAgent: ua,
+      };
+    }
 
-      lastError = "HTTP " + response.status + (contentType ? " (" + contentType + ")" : "");
-      if (response.status !== 401 && response.status !== 403) break;
-    } catch (error) {
-      lastError = error instanceof Error ? error.message : String(error);
+    if (response.status === 404 || response.status === 410) {
+      return {
+        ...item,
+        protocol,
+        live: false,
+        error: null,
+        inactiveReason: `HTTP ${response.status}`,
+        httpStatus: response.status,
+        contentType,
+        userAgent: ua,
+      };
+    }
+
+    return {
+      ...item,
+      protocol,
+      live: false,
+      error: `HTTP ${response.status}${contentType ? ` (${contentType})` : ""}`,
+      inactiveReason: null,
+      httpStatus: response.status,
+      contentType,
+      userAgent: ua,
+    };
+  } catch (error) {
+    return {
+      ...item,
+      protocol: protocolFor(item),
+      live: false,
+      error: error instanceof Error ? error.message : String(error),
+      inactiveReason: null,
+      httpStatus: null,
+      contentType: null,
+      userAgent: ua,
+    };
+  } finally {
+    cancel();
+  }
+}
+
+async function probe(item, budget, retryState) {
+  const first = await probeOnce(item, UAS[0], budget);
+
+  const needsFallback =
+    first.httpStatus === 401 ||
+    first.httpStatus === 403 ||
+    (first.httpStatus >= 300 && first.httpStatus < 400 && first.redirectUrl);
+
+  if (!needsFallback || retryState.remaining <= 0) {
+    return first;
+  }
+
+  retryState.remaining -= 1;
+  retryState.used += 1;
+  const fallbackUa =
+    UAS[1 + (retryState.nextUa % Math.max(1, UAS.length - 1))];
+  retryState.nextUa += 1;
+  const retryTarget = first.redirectUrl || item.url;
+  const second = await probeOnce(item, fallbackUa, budget, retryTarget);
+
+  return {
+    ...second,
+    originalUrl: item.url,
+    retried: true,
+  };
+}
+
+async function mapWithConcurrency(items, limit, mapper) {
+  const results = new Array(items.length);
+  let nextIndex = 0;
+
+  async function runner() {
+    while (true) {
+      const index = nextIndex++;
+      if (index >= items.length) return;
+      results[index] = await mapper(items[index], index);
     }
   }
 
-  return { ...item, live: false, error: lastError };
+  const workerCount = Math.min(limit, items.length);
+  await Promise.all(Array.from({ length: workerCount }, runner));
+  return results;
 }
 
 function buildM3U(entries) {
   const lines = ["#EXTM3U", ""];
   for (const entry of entries) {
     lines.push(
-      "#EXTINF:-1 group-title=\"" + GROUP + "\"," + entry.name,
+      `#EXTINF:-1 group-title="${GROUP}",${entry.name}`,
       entry.url,
       ""
     );
@@ -144,18 +302,71 @@ function buildM3U(entries) {
   return lines.join("\n");
 }
 
-async function scan(env) {
-  const sourceResponse = await fetch(SOURCE_URL + "?_=" + Date.now(), {
-    headers: {
-      "User-Agent": UAS[0],
-      "Cache-Control": "no-cache, no-store",
-      "Pragma": "no-cache",
-    },
-    cache: "no-store",
+function isSubrequestLimitError(error) {
+  return /Too many subrequests by single Worker invocation|subrequest safety budget exhausted/i.test(
+    error || ""
+  );
+}
+
+async function getStored(env) {
+  const [playlist, statusText] = await Promise.all([
+    env.FPT_EVENT_KV.get(PLAYLIST_KEY),
+    env.FPT_EVENT_KV.get(STATUS_KEY),
+  ]);
+
+  let status = null;
+  if (statusText) {
+    try {
+      status = JSON.parse(statusText);
+    } catch {
+      status = null;
+    }
+  }
+
+  return {
+    playlist: playlist || "#EXTM3U\n",
+    status,
+  };
+}
+
+async function recordFailure(env, error, meta = {}) {
+  const previous = await getStored(env);
+  const status = {
+    ...(previous.status || {}),
+    ok: false,
+    scanHealthy: false,
+    generatedAt: new Date().toISOString(),
+    lastError: error instanceof Error ? error.message : String(error),
+    ...meta,
+  };
+
+  await env.FPT_EVENT_KV.put(STATUS_KEY, JSON.stringify(status), {
+    expirationTtl: STATUS_TTL,
   });
+  console.error(JSON.stringify(status));
+}
+
+async function scan(env, meta = {}) {
+  const scanStarted = Date.now();
+  const budget = { used: 0 };
+  const retryState = { remaining: MAX_FALLBACK_PROBES, used: 0, nextUa: 0 };
+
+  const sourceResponse = await fetchWithBudget(
+    SOURCE_URL,
+    {
+      headers: {
+        "User-Agent": UAS[0],
+        "Cache-Control": "no-cache, no-store",
+        Pragma: "no-cache",
+      },
+      cache: "no-store",
+      redirect: "manual",
+    },
+    budget
+  );
 
   if (!sourceResponse.ok) {
-    throw new Error("Source HTTP " + sourceResponse.status);
+    throw new Error(`Source HTTP ${sourceResponse.status}`);
   }
 
   const sourceText = await sourceResponse.text();
@@ -165,21 +376,45 @@ async function scan(env) {
     throw new Error("Source M3U contains no valid entries");
   }
 
-  const results = await Promise.all(candidates.map(probe));
+  // The source currently contains 46 endpoints. With the Free-plan safety budget,
+  // a larger source must move to an explicit multi-invocation/batch architecture
+  // instead of silently skipping endpoints.
+  if (candidates.length > MAX_EXTERNAL_SUBREQUESTS - 1) {
+    throw new Error(
+      `Source contains ${candidates.length} endpoints; maximum safe full-scan size is ${MAX_EXTERNAL_SUBREQUESTS - 1}.`
+    );
+  }
+
+  const results = await mapWithConcurrency(
+    candidates,
+    MAX_CONCURRENCY,
+    (item) => probe(item, budget, retryState)
+  );
+
   const live = results
     .filter((item) => item.live)
     .map(({ name, url }) => ({ name, url }));
 
   const probeErrors = results.filter((x) => x.error).length;
-  const dashResults = results.filter((x) => x.protocol === "DASH" || /\.mpd(?:[?#]|$)/i.test(x.url));
-  const hlsResults = results.filter((x) => x.protocol === "HLS" || !/\.mpd(?:[?#]|$)/i.test(x.url));
-  const previous = await getStored(env);
-  // Preserve the last good playlist if a partial probe failure could remove live channels.
-  // An empty playlist is valid only after a clean scan of every source.
-  const keepPrevious = probeErrors > 0 && previous.playlist !== "#EXTM3U\n";
-  const playlist = keepPrevious ? previous.playlist : buildM3U(live);
+  const allProbeErrorsAreQuota =
+    results.length > 0 &&
+    results.every((x) => x.error && isSubrequestLimitError(x.error));
 
-  if (!keepPrevious) {
+  const dashResults = results.filter((x) => x.protocol === "DASH");
+  const hlsResults = results.filter((x) => x.protocol === "HLS");
+
+  const previous = await getStored(env);
+  const previousHasPlaylist = previous.playlist !== "#EXTM3U\n";
+
+  // Only preserve the last good playlist when the scan itself is globally blocked by
+  // the Worker subrequest limit. Individual endpoint errors are not allowed to keep
+  // old/stale channels alive; only cleanly confirmed live entries are published.
+  const preservePrevious = allProbeErrorsAreQuota && previousHasPlaylist;
+  const playlist = preservePrevious ? previous.playlist : buildM3U(live);
+  const previousPlaylistEntries =
+    previous.playlist.match(/^#EXTINF:/gm)?.length || 0;
+
+  if (!preservePrevious) {
     await env.FPT_EVENT_KV.put(PLAYLIST_KEY, playlist, {
       expirationTtl: PLAYLIST_TTL,
     });
@@ -187,14 +422,34 @@ async function scan(env) {
 
   const status = {
     ok: true,
+    scanHealthy: probeErrors === 0,
+    scanDegraded: probeErrors > 0,
+    stalePlaylist: preservePrevious,
     workerVersion: WORKER_VERSION,
     generatedAt: new Date().toISOString(),
+    scanDurationMs: Date.now() - scanStarted,
+    trigger: meta.trigger || "manual",
+    cron: meta.cron || null,
+    scheduledTime: meta.scheduledTime
+      ? new Date(meta.scheduledTime).toISOString()
+      : null,
+    sourceUrl: SOURCE_URL,
     candidates: candidates.length,
     liveEntries: live.length,
+    playlistEntries: preservePrevious ? previousPlaylistEntries : live.length,
     inactiveEntries: results.filter((x) => !x.live && !x.error).length,
     probeErrors,
-    stalePlaylist: keepPrevious,
-    playlistEntries: keepPrevious ? (previous.playlist.match(/^#EXTINF:/gm) || []).length : live.length,
+    preservedBecauseQuotaFailure: preservePrevious,
+    quotaFailureDetected: allProbeErrorsAreQuota,
+    subrequestBudget: {
+      maxExternalSubrequests: MAX_EXTERNAL_SUBREQUESTS,
+      used: budget.used,
+      reservedMargin: 50 - MAX_EXTERNAL_SUBREQUESTS,
+      primaryProbes: candidates.length,
+      fallbackProbeLimit: MAX_FALLBACK_PROBES,
+      fallbackProbesUsed: retryState.used,
+      concurrency: MAX_CONCURRENCY,
+    },
     liveChannels: live,
     dashDiagnostics: dashResults.map((x) => ({
       name: x.name,
@@ -205,6 +460,7 @@ async function scan(env) {
       httpStatus: x.httpStatus || null,
       contentType: x.contentType || null,
       userAgent: x.userAgent || null,
+      retried: x.retried || false,
     })),
     protocolStats: {
       HLS: {
@@ -223,7 +479,13 @@ async function scan(env) {
     errors: results
       .filter((x) => x.error)
       .slice(0, 12)
-      .map((x) => ({ name: x.name, url: x.url, protocol: x.protocol || (/\.mpd(?:[?#]|$)/i.test(x.url) ? "DASH" : "HLS"), error: x.error })),
+      .map((x) => ({
+        name: x.name,
+        url: x.url,
+        protocol: x.protocol,
+        httpStatus: x.httpStatus || null,
+        error: x.error,
+      })),
   };
 
   await env.FPT_EVENT_KV.put(STATUS_KEY, JSON.stringify(status), {
@@ -234,33 +496,24 @@ async function scan(env) {
   return { playlist, status };
 }
 
-async function getStored(env) {
-  const [playlist, statusText] = await Promise.all([
-    env.FPT_EVENT_KV.get(PLAYLIST_KEY),
-    env.FPT_EVENT_KV.get(STATUS_KEY),
-  ]);
-
-  return {
-    playlist: playlist || "#EXTM3U\n",
-    status: statusText ? JSON.parse(statusText) : null,
-  };
-}
-
 export default {
-  async scheduled(controller, env, ctx) {
-    ctx.waitUntil(
-      scan(env).catch(async (error) => {
-        const status = {
-          ok: false,
-          generatedAt: new Date().toISOString(),
-          error: error instanceof Error ? error.message : String(error),
-        };
-        await env.FPT_EVENT_KV.put(STATUS_KEY, JSON.stringify(status), {
-          expirationTtl: STATUS_TTL,
-        });
-        console.error(JSON.stringify(status));
-      })
-    );
+  async scheduled(controller, env) {
+    try {
+      await scan(env, {
+        trigger: "cron",
+        cron: controller.cron,
+        scheduledTime: controller.scheduledTime,
+      });
+    } catch (error) {
+      // Do not swallow the rejection: Cron Past Events must show the invocation
+      // as failed when the scan really failed.
+      await recordFailure(env, error, {
+        trigger: "cron",
+        cron: controller.cron,
+        scheduledTime: controller.scheduledTime,
+      });
+      throw error;
+    }
   },
 
   async fetch(request, env) {
@@ -268,13 +521,15 @@ export default {
 
     if (url.pathname === "/fpt-event-live.m3u") {
       const state = await getStored(env);
+      const playlistEntries = state.playlist.match(/^#EXTINF:/gm)?.length || 0;
       return new Response(state.playlist, {
         headers: {
           "Content-Type": "application/x-mpegURL; charset=utf-8",
-          "Cache-Control": "no-store",
+          "Cache-Control": "no-store, no-cache, must-revalidate",
+          Pragma: "no-cache",
           "Access-Control-Allow-Origin": "*",
-          "X-NM7-FPT-Events":
-            state.status && state.status.ok ? String(state.status.liveEntries) : "0",
+          "X-NM7-FPT-Events": String(playlistEntries),
+          "X-NM7-FPT-Version": WORKER_VERSION,
         },
       });
     }
@@ -283,7 +538,10 @@ export default {
       const state = await getStored(env);
       return Response.json({
         service: "NM7 FPT Event Live",
-        scheduler: { cron: CRON, strategy: "full source scan every 5 minutes" },
+        scheduler: {
+          cron: CRON,
+          strategy: "full source scan every 5 minutes; quota-safe sequential pool",
+        },
         ...(state.status || {
           ok: false,
           message: "Waiting for first scheduled scan",
@@ -293,12 +551,14 @@ export default {
 
     if (url.pathname === "/scan") {
       try {
-        const state = await scan(env);
+        const state = await scan(env, { trigger: "manual" });
         return Response.json(state.status);
       } catch (error) {
+        await recordFailure(env, error, { trigger: "manual" });
         return Response.json(
           {
             ok: false,
+            scanHealthy: false,
             error: error instanceof Error ? error.message : String(error),
           },
           { status: 502 }
@@ -308,7 +568,7 @@ export default {
 
     return new Response(
       "NM7 FPT Event Live\n\n/fpt-event-live.m3u\n/status\n/scan\n",
-      { headers: { "Content-Type": "text/plain" } }
+      { headers: { "Content-Type": "text/plain; charset=utf-8" } }
     );
   },
 };
