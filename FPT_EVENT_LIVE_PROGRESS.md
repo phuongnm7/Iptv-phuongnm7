@@ -104,3 +104,28 @@ If the FPT CDN itself changes its response format or starts requiring additional
 - At the 08:35:47 UTC Cron run, FPT returned HTTP 403 for all 46 candidates. The Worker marked the scan degraded and preserved the 5-entry last healthy playlist instead of replacing it with an empty playlist.
 - Current safety behavior: the last healthy playlist is preserved for a maximum of 15 minutes during degraded scans; after that it expires rather than remaining stale indefinitely.
 - Root cause of the original empty playlist was Cloudflare's per-invocation subrequest limit combined with Promise.all + multi-UA retries + redirect:follow. That architecture has now been removed.
+
+### Final recovery fix — 2026-10-01
+
+- Root cause of the second disappearance confirmed at 08:53:24 UTC:
+  - last healthy snapshot was from 08:33:26 UTC;
+  - subsequent Cron scans received 403 for all 46 candidates;
+  - the previous 15-minute degraded grace period expired;
+  - KV contained a header-only M3U, so playlistEntries became 0.
+- Adaptive recovery was added:
+  - when the previous scan is globally blocked by 403, the Worker stops full-scanning 46 endpoints;
+  - it probes at most 2 previously healthy channels, rotating through the known-good set;
+  - while the source remains blocked, the last healthy playlist is preserved;
+  - a header-only/empty KV playlist is replaced by the last-known-good 5-entry snapshot;
+  - the public /fpt-event-live.m3u endpoint itself guarantees the same fallback instead of exposing an empty playlist;
+  - when any recovery probe proves the source reachable/live again, the normal full 46-endpoint scan resumes on the next 5-minute Cron.
+- Final runtime commit: f419458454bd1280b33af26fe64105e9966aaadd.
+- Final CI commit: e29fb69cd2c5261ea33a332f8d36dc1585ae983f.
+- Final deployment run 36839685317 completed successfully.
+- Production Version ID from the final successful deployment: recorded in the successful Wrangler deployment immediately preceding the warm recovery check.
+- Final warm-recovery verification at 08:58:53 UTC reported:
+  - recoveryMode = true
+  - recoveryProbeSucceeded = true
+  - sourceBlocked = false
+  - public playlist entry count = 5
+- This means the public playlist is non-empty again and FPT access has shown a live response through the recovery path.
