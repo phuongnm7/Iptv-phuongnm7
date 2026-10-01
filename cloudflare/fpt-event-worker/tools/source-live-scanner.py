@@ -180,30 +180,75 @@ def load_proxies():
     # De-duplicate while preserving the current public ordering.
     return list(dict.fromkeys(proxies))
 
-def find_working_proxy(proxies, candidates):
-    direct = curl_probe(EVENT7_URL)
-    if direct["status"] == 200 and is_live_hls(direct["body"]):
-        return None, "direct"
+def probe_via_rotating_proxies(item, proxies, max_proxy_tries=8):
+    # Direct first: some FPT POPs may allow direct requests.
+    direct = curl_probe(item["url"])
+    if direct["status"] == 200:
+        return classify(item, direct), "direct"
+    if direct["status"] in (404, 410):
+        return classify(item, direct), "direct"
 
-    def test(proxy):
-        result = curl_probe(EVENT7_URL, proxy)
-        if result["status"] == 200 and is_live_hls(result["body"]):
-            return proxy, "event-07-live"
-        return None
+    # FPT can rate-limit/kill a free proxy after a few requests. Each source URL
+    # therefore gets its own rotating proxy attempts instead of reusing one proxy
+    # for the whole 46-entry scan.
+    tried = set()
+    attempts = 0
+    for proxy in proxies:
+        if proxy in tried:
+            continue
+        tried.add(proxy)
+        attempts += 1
+        result = curl_probe(item["url"], proxy)
+        if result["status"] == 200:
+            classified = classify(item, result)
+            # Valid manifest is enough to accept the exact source URL.
+            if classified["live"]:
+                return classified, proxy
+            # A real HTTP 200 non-live manifest is still definitive for this URL.
+            if classified["content_type"] or result["body"]:
+                return classified, proxy
+        elif result["status"] in (404, 410):
+            return classify(item, result), proxy
 
-    # Try many fresh Vietnam HTTP proxies concurrently. The media target URLs are
-    # always taken verbatim from the user's source M3U; the proxy is transport only.
+        if attempts >= max_proxy_tries:
+            break
+
+    fallback = {
+        "name": item["name"],
+        "url": item["url"],
+        "live": False,
+        "status": direct["status"],
+        "content_type": direct["content_type"],
+        "error": direct["error"] or f"HTTP {direct['status']}",
+        "inactive_reason": None,
+    }
+    return fallback, None
+
+def scan_all(candidates, proxies):
+    results = []
+    details = {}
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as pool:
-        futures = [pool.submit(test, p) for p in proxies[:MAX_PROXY_TRIES]]
+        futures = {
+            pool.submit(probe_via_rotating_proxies, item, proxies, 8): item
+            for item in candidates
+        }
         for future in concurrent.futures.as_completed(futures):
+            item = futures[future]
             try:
-                found = future.result()
-                if found:
-                    return found
-            except Exception:
-                pass
+                classified, transport = future.result()
+                results.append(classified)
+                details[item["url"]] = transport
+            except Exception as exc:
+                results.append({
+                    "name": item["name"], "url": item["url"], "live": False,
+                    "status": 0, "content_type": "", "error": str(exc),
+                    "inactive_reason": None,
+                })
+                details[item["url"]] = None
 
-    return None, "no-working-proxy"
+    order = {item["url"]: i for i, item in enumerate(candidates)}
+    results.sort(key=lambda x: order.get(x["url"], 999999))
+    return results, details
 
 def scan_all(candidates, proxy):
     results = []
@@ -242,12 +287,12 @@ def main():
         raise RuntimeError("Source M3U contains no valid HTTP(S) endpoints")
 
     proxies = load_proxies()
-    proxy, selection = find_working_proxy(proxies, candidates)
-    if selection == "no-working-proxy" and proxy is None:
-        raise RuntimeError("FPT source cannot be reached from direct path or fresh Vietnam HTTP proxies")
+    if not proxies:
+        raise RuntimeError("No fresh Vietnam HTTP proxies available")
 
-    # Direct path may work; otherwise use a fresh Vietnam proxy as the transport only.
-    results = scan_all(candidates, proxy)
+    # Every exact source URL gets its own direct+rotating-proxy decision.
+    # This avoids reusing one unstable free proxy across the whole 46-entry scan.
+    results, transports = scan_all(candidates, proxies)
     live = [x for x in results if x["live"]]
     errors = [x for x in results if x["error"]]
     all_403 = len(results) > 0 and all(x["status"] == 403 for x in results)
@@ -265,7 +310,9 @@ def main():
         "allProbeErrorsAre403": all_403,
         "scanHealthy": len(errors) == 0,
         "partialScan": len(errors) > 0 and len(live) > 0,
-        "transport": selection,
+        "transport": "per-url-rotating-vietnam-proxy",
+        "transportCount": sum(1 for v in transports.values() if v),
+        "event07Transport": transports.get(EVENT7_URL),
         "liveChannels": [{"name": x["name"], "url": x["url"]} for x in live],
         "errors": results if len(results) <= 60 else results[:60],
     }
@@ -295,7 +342,7 @@ def main():
         "scanHealthy": status["scanHealthy"],
         "partialScan": status["partialScan"],
         "transport": selection,
-        "proxyUsed": proxy is not None,
+        "proxyUsed": any(v for v in transports.values()),
         "liveChannels": status["liveChannels"],
         "allProbeErrorsAre403": all_403,
         "publishedCurrentScan": can_publish,
