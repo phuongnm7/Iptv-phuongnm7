@@ -26,6 +26,7 @@ jobs:
 
       - name: Validate Worker JavaScript
         shell: bash
+        working-directory: cloudflare/fpt-event-worker
         run: |
           set -euo pipefail
           node --check src/index.js
@@ -53,7 +54,8 @@ jobs:
 
           PLAYLIST="$(curl -fsSL --retry 3 --retry-delay 2 --max-time 30 "$BASE/fpt-event-live.m3u")"
           ENTRY_COUNT="$(printf '%s\n' "$PLAYLIST" | grep -c '^#EXTINF:' || true)"
-                    HEADERS="$(curl -fsS -D - -o /dev/null --retry 3 --retry-delay 2 --max-time 30 "$BASE/fpt-event-live.m3u")"
+          echo "Public strict playlist entry count: $ENTRY_COUNT"
+          HEADERS="$(curl -fsS -D - -o /dev/null --retry 3 --retry-delay 2 --max-time 30 "$BASE/fpt-event-live.m3u")"
           echo "$HEADERS"
           echo "$HEADERS" | grep -qi '^x-nm7-fpt-verified: '
           echo "Verified: deployment did not force a new FPT source scan; strict live filtering is only published after a clean scan."
@@ -80,4 +82,4 @@ jobs:
           echo "$HEADERS"
           echo "$HEADERS" | grep -qi '^content-type: application/x-mpegURL'
           echo "$HEADERS" | grep -qi '^x-nm7-fpt-version: fpt-event-strict-live-v8'
-          echo "Verified: v7 is deployed, Cron is configured for every 5 minutes, and playlist endpoint is serving the expected protocol/version. No forced full scan is executed during CI deploy."
+          echo "Verified: v8 is deployed, Cron is configured for every 5 minutes, and the strict live endpoint is exposing the expected version. No forced full scan is executed during CI deploy."
