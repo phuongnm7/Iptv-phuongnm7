@@ -17,15 +17,12 @@ https://cdn-global.ebaclofen.org/vsc/jonhny6/index.m3u8
 https://cdn-global.ebaclofen.org/vsc/jonhny5/index.m3u8
 #EXTINF:-1 tvg-logo="https://global-cdn.cdnx.tech/football/team/13d8532225dea4fca8e0ebdfb27b83e4.png" group-title="Vua Sân Cỏ TV" , 23:30 01/10 ⚽ Armenia U21 vs Italy U21 (Triệu Hằng)
 https://cdn1-global.ebaclofen.org/live/pro4/index.m3u8
-#EXTINF:-1 tvg-logo="https://khandai1.link/media/teams/logos/Flag_of_Kazakhstan.svg.webp" group-title="Khán Đài TV" , 🟢 08:00 01/10 🏐 Kazakhstan vs Hong Kong (Tiểu Mây) [hls]
-#EXTVLCOPT:http-referrer=https://khandai1.link/
-https://luong.phaohoa.live/live/phaohoa9/index.m3u8?expire=1815822079&sign=9a0c1792a57466ace2166ab62a2ea149
-#EXTINF:-1 tvg-logo="https://khandai1.link/media/teams/logos/Flag_of_South_Korea.svg.webp" group-title="Khán Đài TV" , 🟡 11:00 01/10 🏐 Hàn Quốc vs Iran (KaKa) [hls]
-#EXTVLCOPT:http-referrer=https://khandai1.link/
-https://luong.phaohoa.live/live/phaohoa7/index.m3u8?expire=1815822079&sign=9a0c1792a57466ace2166ab62a2ea149
 #EXTINF:-1 tvg-logo="https://khandai1.link/media/teams/logos/images.png" group-title="Khán Đài TV" , 🟡 11:00 01/10 🏐 Kyrgyzstan vs Đài Loan (Enzo) [hls]
 #EXTVLCOPT:http-referrer=https://khandai1.link/
 https://luong.phaohoa.live/live/phaohoa2/index.m3u8?expire=1815505159&sign=d3bfcbaa36f949863f22cc89e1cc1afa
+#EXTINF:-1 tvg-logo="https://khandai1.link/media/teams/logos/Flag_of_South_Korea.svg.webp" group-title="Khán Đài TV" , 🟢 11:00 01/10 🏐 Hàn Quốc vs Iran (KaKa) [hls]
+#EXTVLCOPT:http-referrer=https://khandai1.link/
+https://luong.phaohoa.live/live/phaohoa7/index.m3u8?expire=1815822079&sign=9a0c1792a57466ace2166ab62a2ea149
 #EXTINF:-1 tvg-logo="https://khandai1.link/media/teams/logos/OIP_Q9mUTFM.jpg" group-title="Khán Đài TV" , 14:00 01/10 🏐 Thái Lan vs Trung Quốc (KaKa) [hls]
 #EXTVLCOPT:http-referrer=https://khandai1.link/
 https://luong.phaohoa.live/live/phaohoa7/index.m3u8?expire=1815822079&sign=9a0c1792a57466ace2166ab62a2ea149
@@ -221,13 +218,19 @@ https://live05.meung.app/live/59444581_tsc.flv
 https://live05.miekgo.app/live/59444581_tsc.m3u8
 #EXTINF:-1 tvg-logo="https://img.gvapi.cc/football/team/bfdd500484330d63a723cbc396df762c.png!w80" group-title="Cola TV" , 22:30 01/10 ⚽ VfB Stuttgart vs Greuther Furth (BLV PEPSI) [hls]
 https://live05.meung.app/live/59444581_tsc.m3u8
+#EXTINF:-1 tvg-logo="https://img.gvapi.cc/football/team/25a7ebe2fc19902b896b3a184ef420c9.png!w80" group-title="Cola TV" , 22:45 01/10 ⚽ Bani Yas vs Al Wahda (BLV MONSTER) [flv]
+https://live05.meung.app/live/75915087_tsc.flv
+#EXTINF:-1 tvg-logo="https://img.gvapi.cc/football/team/25a7ebe2fc19902b896b3a184ef420c9.png!w80" group-title="Cola TV" , 22:45 01/10 ⚽ Bani Yas vs Al Wahda (BLV MONSTER) [hls 2]
+https://live05.miekgo.app/live/75915087_tsc.m3u8
+#EXTINF:-1 tvg-logo="https://img.gvapi.cc/football/team/25a7ebe2fc19902b896b3a184ef420c9.png!w80" group-title="Cola TV" , 22:45 01/10 ⚽ Bani Yas vs Al Wahda (BLV MONSTER) [hls]
+https://live05.meung.app/live/75915087_tsc.m3u8
 #EXTINF:-1 tvg-logo="https://static.sportsfeed.pro/basketball/team/58709b9e7964e03c28ebe777ef823eca.png" group-title="Gà Vàng 24h TV" , 🟢 08:00 01/10 🏀 Dallas Wings vs Golden State Valkyries (Titan) [flv]
 https://playback.livetl002.com/live/69d37c3a4da3e15776b6db56.flv
 #EXTINF:-1 tvg-logo="https://static.sportsfeed.pro/basketball/team/58709b9e7964e03c28ebe777ef823eca.png" group-title="Gà Vàng 24h TV" , 🟢 08:00 01/10 🏀 Dallas Wings vs Golden State Valkyries (Titan) [hls]
 https://playback.livetl002.com/live/69d37c3a4da3e15776b6db56.m3u8
-#EXTINF:-1 tvg-logo="https://static.sportsfeed.pro/football/team/b6abc1cdf2df183dbe5aea9b8dcbda4b.png" group-title="Gà Vàng 24h TV" , 🟢 09:00 01/10 ⚽ Sacramento Republic FC vs Las Vegas Lights (Siêu Quậy) [flv]
+#EXTINF:-1 tvg-logo="https://static.sportsfeed.pro/football/team/b6abc1cdf2df183dbe5aea9b8dcbda4b.png" group-title="Gà Vàng 24h TV" , 🟢 09:10 01/10 ⚽ Sacramento Republic FC vs Las Vegas Lights (Siêu Quậy) [flv]
 https://playback.livetl002.com/live/6a2a59b347bbddd62a8dc4e4.flv
-#EXTINF:-1 tvg-logo="https://static.sportsfeed.pro/football/team/b6abc1cdf2df183dbe5aea9b8dcbda4b.png" group-title="Gà Vàng 24h TV" , 🟢 09:00 01/10 ⚽ Sacramento Republic FC vs Las Vegas Lights (Siêu Quậy) [hls]
+#EXTINF:-1 tvg-logo="https://static.sportsfeed.pro/football/team/b6abc1cdf2df183dbe5aea9b8dcbda4b.png" group-title="Gà Vàng 24h TV" , 🟢 09:10 01/10 ⚽ Sacramento Republic FC vs Las Vegas Lights (Siêu Quậy) [hls]
 https://playback.livetl002.com/live/6a2a59b347bbddd62a8dc4e4.m3u8
 #EXTINF:-1 tvg-logo="https://static.sportsfeed.pro/football/team/9ae36debba0abd59c01de2e60fc42648.png" group-title="Gà Vàng 24h TV" , 12:00 01/10 ⚽ Khovd Western vs Deren FC (Kayti) [flv]
 https://playback.livetl002.com/live/69b8e6f43bcf2231c35d5144.flv
@@ -261,10 +264,34 @@ https://playback.livetl002.com/live/6a9a5525864ea536c2577392.m3u8
 https://playback.livetl002.com/live/6a0c7c4b1ae4d6db02433c48.flv
 #EXTINF:-1 tvg-logo="https://img.thesports.com/football/team/8ba6b4f123aa2cf2832d19b58bf194ef.png" group-title="Gà Vàng 24h TV" , 22:00 01/10 ⚽ Greece U21 vs Latvia U21 (Cá Mập) [hls]
 https://playback.livetl002.com/live/6a0c7c4b1ae4d6db02433c48.m3u8
+#EXTINF:-1 tvg-logo="https://static.sportsfeed.pro/football/team/bfdd500484330d63a723cbc396df762c.png" group-title="Gà Vàng 24h TV" , 22:30 01/10 ⚽ Stuttgart vs Greuther Fürth (Giàng A Dân) [flv]
+https://playback.livetl002.com/live/6a5b13ceb36a14387baeddaa.flv
+#EXTINF:-1 tvg-logo="https://static.sportsfeed.pro/football/team/bfdd500484330d63a723cbc396df762c.png" group-title="Gà Vàng 24h TV" , 22:30 01/10 ⚽ Stuttgart vs Greuther Fürth (Giàng A Dân) [hls]
+https://playback.livetl002.com/live/6a5b13ceb36a14387baeddaa.m3u8
+#EXTINF:-1 tvg-logo="https://img.thesports.com/football/team/f653d5976458f0dcce2b3939259acffa.png" group-title="Gà Vàng 24h TV" , 23:00 01/10 ⚽ Azerbaijan vs Liechtenstein (Cris) [flv]
+https://playback.livetl002.com/live/69aa9525f5ec459ae275b43f.flv
+#EXTINF:-1 tvg-logo="https://img.thesports.com/football/team/f653d5976458f0dcce2b3939259acffa.png" group-title="Gà Vàng 24h TV" , 23:00 01/10 ⚽ Azerbaijan vs Liechtenstein (Cris) [hls]
+https://playback.livetl002.com/live/69aa9525f5ec459ae275b43f.m3u8
+#EXTINF:-1 tvg-logo="https://img.thesports.com/football/team/9ff0bbc7c4dde77be85a27a1c5ba6d6c.png" group-title="Gà Vàng 24h TV" , 23:00 01/10 ⚽ Guinea vs Kenya (Người Kiến) [flv]
+https://playback.livetl002.com/live/6a439a7fb89dded67b208b87.flv
+#EXTINF:-1 tvg-logo="https://img.thesports.com/football/team/9ff0bbc7c4dde77be85a27a1c5ba6d6c.png" group-title="Gà Vàng 24h TV" , 23:00 01/10 ⚽ Guinea vs Kenya (Người Kiến) [hls]
+https://playback.livetl002.com/live/6a439a7fb89dded67b208b87.m3u8
+#EXTINF:-1 tvg-logo="https://img.thesports.com/football/team/f06adf060c098f11e76fa2ff1565ba70.png" group-title="Gà Vàng 24h TV" , 23:00 01/10 ⚽ North Macedonia U21 vs Montenegro U21 (Khang Hi) [flv]
+https://playback.livetl002.com/live/6a7c0d8f65997681f18cacc4.flv
+#EXTINF:-1 tvg-logo="https://img.thesports.com/football/team/f06adf060c098f11e76fa2ff1565ba70.png" group-title="Gà Vàng 24h TV" , 23:00 01/10 ⚽ North Macedonia U21 vs Montenegro U21 (Khang Hi) [hls]
+https://playback.livetl002.com/live/6a7c0d8f65997681f18cacc4.m3u8
+#EXTINF:-1 tvg-logo="https://img.thesports.com/football/team/13d8532225dea4fca8e0ebdfb27b83e4.png" group-title="Gà Vàng 24h TV" , 23:30 01/10 ⚽ Armenia U21 vs Italy U21 (Đoàn Dự) [flv]
+https://playback.livetl002.com/live/6a5df755b89dded67b39b8bc.flv
+#EXTINF:-1 tvg-logo="https://img.thesports.com/football/team/13d8532225dea4fca8e0ebdfb27b83e4.png" group-title="Gà Vàng 24h TV" , 23:30 01/10 ⚽ Armenia U21 vs Italy U21 (Đoàn Dự) [hls]
+https://playback.livetl002.com/live/6a5df755b89dded67b39b8bc.m3u8
+#EXTINF:-1 tvg-logo="https://static.sportsfeed.pro/football/team/0454e224a578f2d2fb8e4bafc58e140e.png" group-title="Gà Vàng 24h TV" , 23:45 01/10 ⚽ Austria Wien (w) vs Inter Milan(w) (Rio) [flv]
+https://playback.livetl002.com/live/6a01a2511e8555d7a3685f5c.flv
+#EXTINF:-1 tvg-logo="https://static.sportsfeed.pro/football/team/0454e224a578f2d2fb8e4bafc58e140e.png" group-title="Gà Vàng 24h TV" , 23:45 01/10 ⚽ Austria Wien (w) vs Inter Milan(w) (Rio) [hls]
+https://playback.livetl002.com/live/6a01a2511e8555d7a3685f5c.m3u8
 #EXTINF:-1 tvg-logo="https://imgts.sportpulseapiz.com/basketball/team/jednm9ktljoryox/image/small" group-title="Xôi Lạc Z TV" , 🟢 08:00 01/10 🏀 Nữ Dallas Wings vs Nữ Golden State (HD TOMMY)
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Mobile Safari/537.36
 #EXTVLCOPT:http-referrer=https://xlz.domainkqt.cc/
-https://live2.domaincdn.cc/livecdn/channel-29.flv?auth_key=3000001790824883-0-0-fd7b14a366a1657c5ded20883bc15f1d
+https://live2.domaincdn.cc/livecdn/channel-29.flv?auth_key=3000001790825769-0-0-49631257e12b58e2f34b95341da8472f
 #EXTINF:-1 tvg-logo="https://imgts.sportpulseapiz.com/basketball/team/jednm9ktljoryox/image/small" group-title="Xôi Lạc Z TV" , 🟢 08:00 01/10 🏀 Nữ Dallas Wings vs Nữ Golden State (TOMMY)
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Mobile Safari/537.36
 #EXTVLCOPT:http-referrer=https://xlz.domainkqt.cc/
@@ -272,7 +299,7 @@ https://live2.zundrixmediapipeline.com/live/channel29.flv
 #EXTINF:-1 tvg-logo="https://imgts.sportpulseapiz.com/volleyball/team/4zp5rzdhl1zq82w/image/small" group-title="Xôi Lạc Z TV" , 🟢 08:00 01/10 🏐 Ấn Độ vs Pakistan (HD TYSON)
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Mobile Safari/537.36
 #EXTVLCOPT:http-referrer=https://xlz.domainkqt.cc/
-https://live2.domaincdn.cc/livecdn/channel-33.flv?auth_key=3000001790824979-0-0-b954ad7126519368616c2c796d5c7ca6
+https://live2.domaincdn.cc/livecdn/channel-33.flv?auth_key=3000001790825899-0-0-90a9e460887d02f7157a3138a13a7990
 #EXTINF:-1 tvg-logo="https://imgts.sportpulseapiz.com/volleyball/team/4zp5rzdhl1zq82w/image/small" group-title="Xôi Lạc Z TV" , 🟢 08:00 01/10 🏐 Ấn Độ vs Pakistan (TYSON)
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Mobile Safari/537.36
 #EXTVLCOPT:http-referrer=https://xlz.domainkqt.cc/
@@ -280,15 +307,15 @@ https://live2.zundrixmediapipeline.com/live/channel33.flv
 #EXTINF:-1 tvg-logo="https://imgts.sportpulseapiz.com/basketball/team/318q6nt0x33mo9j/image/small" group-title="Xôi Lạc Z TV" , 🟢 08:30 01/10 🏀 Motilones del Norte vs Piratas de Bogota (ALAN)
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Mobile Safari/537.36
 #EXTVLCOPT:http-referrer=https://xlz.domainkqt.cc/
-https://live2.pro2cdnlive.com/live/channel25.flv
+https://live2.zundrixmediapipeline.com/live/channel25.flv
 #EXTINF:-1 tvg-logo="https://imgts.sportpulseapiz.com/basketball/team/318q6nt0x33mo9j/image/small" group-title="Xôi Lạc Z TV" , 🟢 08:30 01/10 🏀 Motilones del Norte vs Piratas de Bogota (HD ALAN)
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Mobile Safari/537.36
 #EXTVLCOPT:http-referrer=https://xlz.domainkqt.cc/
-https://live2.domaincdn.cc/livecdn/channel-25.flv?auth_key=3000001790824938-0-0-83955f2cb0b0874474b87454d1a6d4d9
+https://live2.domaincdn.cc/livecdn/channel-25.flv?auth_key=3000001790825779-0-0-2a6fb8a210d9611cc66f8a83b98afc02
 #EXTINF:-1 tvg-logo="https://imgts.sportpulseapiz.com/football/team/y0or5jh4xllqwzv/image/small" group-title="Xôi Lạc Z TV" , 🟢 09:00 01/10 ⚽ Sacramento Republic vs Las Vegas Lights (HD RIO)
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Mobile Safari/537.36
 #EXTVLCOPT:http-referrer=https://xlz.domainkqt.cc/
-https://live2.domaincdn.cc/livecdn/channel-16.flv?auth_key=3000001790824851-0-0-73cab8107da51a470a5a7f8fcdcf1ad8
+https://live2.domaincdn.cc/livecdn/channel-16.flv?auth_key=3000001790825738-0-0-fe69314e10cca4e0b92aeef362492894
 #EXTINF:-1 tvg-logo="https://imgts.sportpulseapiz.com/football/team/y0or5jh4xllqwzv/image/small" group-title="Xôi Lạc Z TV" , 🟢 09:00 01/10 ⚽ Sacramento Republic vs Las Vegas Lights (RIO)
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Mobile Safari/537.36
 #EXTVLCOPT:http-referrer=https://xlz.domainkqt.cc/
@@ -296,15 +323,15 @@ https://live2.zundrixmediapipeline.com/live/channel16.flv
 #EXTINF:-1 tvg-logo="https://imgts.sportpulseapiz.com/tennis/team/3glrw2fzpv6rdyj/image/small" group-title="Xôi Lạc Z TV" , 🟢 09:00 01/10 🥎 Taylor Fritz vs Jaume Munar (HD VIC)
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Mobile Safari/537.36
 #EXTVLCOPT:http-referrer=https://xlz.domainkqt.cc/
-https://live2.domaincdn.cc/livecdn/channel-32.flv?auth_key=3000001790824950-0-0-97b02eac1e42a3d54b651fdab5746f05
+https://live2.domaincdn.cc/livecdn/channel-32.flv?auth_key=3000001790825838-0-0-1471f98713ddacb6730db133ed619f16
 #EXTINF:-1 tvg-logo="https://imgts.sportpulseapiz.com/tennis/team/3glrw2fzpv6rdyj/image/small" group-title="Xôi Lạc Z TV" , 🟢 09:00 01/10 🥎 Taylor Fritz vs Jaume Munar (VIC)
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Mobile Safari/537.36
 #EXTVLCOPT:http-referrer=https://xlz.domainkqt.cc/
-https://live2.zundrixmediapipeline.com/live/channel32.flv
+https://live2.pro2cdnlive.com/live/channel32.flv
 #EXTINF:-1 tvg-logo="https://imgts.sportpulseapiz.com/tennis/team/l5erg1fee2xr8k0/image/small" group-title="Xôi Lạc Z TV" , 🟢 10:00 01/10 🥎 Zheng Qinwen vs Shi Han (HD LUCAS)
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Mobile Safari/537.36
 #EXTVLCOPT:http-referrer=https://xlz.domainkqt.cc/
-https://live2.domaincdn.cc/livecdn/channel-31.flv?auth_key=3000001790824963-0-0-9130d252cf48015fb072056bacb14d36
+https://live2.domaincdn.cc/livecdn/channel-31.flv?auth_key=3000001790825851-0-0-ffdde5f8fc4da68d845e1e0a17769c9e
 #EXTINF:-1 tvg-logo="https://imgts.sportpulseapiz.com/tennis/team/l5erg1fee2xr8k0/image/small" group-title="Xôi Lạc Z TV" , 🟢 10:00 01/10 🥎 Zheng Qinwen vs Shi Han (LUCAS)
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Mobile Safari/537.36
 #EXTVLCOPT:http-referrer=https://xlz.domainkqt.cc/
@@ -312,7 +339,7 @@ https://live2.zundrixmediapipeline.com/live/channel31.flv
 #EXTINF:-1 tvg-logo="https://imgts.sportpulseapiz.com/tennis/team/2y8m4vfj894ml07/image/small" group-title="Xôi Lạc Z TV" , 🟢 10:10 01/10 🥎 Kei Nishikori vs Frances Tiafoe (HD VIC)
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Mobile Safari/537.36
 #EXTVLCOPT:http-referrer=https://xlz.domainkqt.cc/
-https://live2.domaincdn.cc/livecdn/channel-32.flv?auth_key=3000001790824971-0-0-c00d7e14f226b39da06b1009fb37c8c9
+https://live2.domaincdn.cc/livecdn/channel-32.flv?auth_key=3000001790825874-0-0-dd8f8f81e90b787395dad780a7e015c5
 #EXTINF:-1 tvg-logo="https://imgts.sportpulseapiz.com/tennis/team/2y8m4vfj894ml07/image/small" group-title="Xôi Lạc Z TV" , 🟢 10:10 01/10 🥎 Kei Nishikori vs Frances Tiafoe (VIC)
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Mobile Safari/537.36
 #EXTVLCOPT:http-referrer=https://xlz.domainkqt.cc/
@@ -320,27 +347,27 @@ https://live2.zundrixmediapipeline.com/live/channel32.flv
 #EXTINF:-1 tvg-logo="https://imgts.sportpulseapiz.com/volleyball/team/gx7lm75h194q2wd/image/small" group-title="Xôi Lạc Z TV" , 🟡 11:00 01/10 🏐 Hàn Quốc vs Iran (HD TYSON)
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Mobile Safari/537.36
 #EXTVLCOPT:http-referrer=https://xlz.domainkqt.cc/
-https://live2.domaincdn.cc/livecdn/channel-33.flv?auth_key=3000001790825097-0-0-09fb8ae2c48ba329e97901bab5cb2a9f
+https://live2.domaincdn.cc/livecdn/channel-33.flv?auth_key=3000001790825917-0-0-0ab3915e7f5c47743f4425833ad9e4a6
 #EXTINF:-1 tvg-logo="https://imgts.sportpulseapiz.com/volleyball/team/gx7lm75h194q2wd/image/small" group-title="Xôi Lạc Z TV" , 🟡 11:00 01/10 🏐 Hàn Quốc vs Iran (TYSON)
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Mobile Safari/537.36
 #EXTVLCOPT:http-referrer=https://xlz.domainkqt.cc/
 https://live2.zundrixmediapipeline.com/live/channel33.flv
-#EXTINF:-1 tvg-logo="https://imgts.sportpulseapiz.com/lol/team/ednm926hkj88ryo/image/small" group-title="Xôi Lạc Z TV" , 11:30 01/10 🎮 Hàn Quốc vs Saudi Arabia (HD MARTY)
+#EXTINF:-1 tvg-logo="https://imgts.sportpulseapiz.com/lol/team/ednm926hkj88ryo/image/small" group-title="Xôi Lạc Z TV" , 🟡 11:30 01/10 🎮 Hàn Quốc vs Saudi Arabia (HD MARTY)
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Mobile Safari/537.36
 #EXTVLCOPT:http-referrer=https://xlz.domainkqt.cc/
-https://live2.domaincdn.cc/livecdn/channel-30.flv?auth_key=3000001790825115-0-0-087b860bdcd9a8e349988bc99f9a5e8b
-#EXTINF:-1 tvg-logo="https://imgts.sportpulseapiz.com/lol/team/ednm926hkj88ryo/image/small" group-title="Xôi Lạc Z TV" , 11:30 01/10 🎮 Hàn Quốc vs Saudi Arabia (MARTY)
+https://live2.domaincdn.cc/livecdn/channel-30.flv?auth_key=3000001790826024-0-0-da3a2ad3195d0d834881d6d2208a0f68
+#EXTINF:-1 tvg-logo="https://imgts.sportpulseapiz.com/lol/team/ednm926hkj88ryo/image/small" group-title="Xôi Lạc Z TV" , 🟡 11:30 01/10 🎮 Hàn Quốc vs Saudi Arabia (MARTY)
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Mobile Safari/537.36
 #EXTVLCOPT:http-referrer=https://xlz.domainkqt.cc/
 https://live2.zundrixmediapipeline.com/live/channel30.flv
 #EXTINF:-1 tvg-logo="https://imgts.sportpulseapiz.com/volleyball/team/8y39mpwh29pqojx/image/small" group-title="Xôi Lạc Z TV" , 14:00 01/10 🏐 Thái Lan vs Trung Quốc (HD 1)
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Mobile Safari/537.36
 #EXTVLCOPT:http-referrer=https://xlz.domainkqt.cc/
-https://live1.quickscoreboardz.com/live/channel80.flv?wsSecret=e6b2e0eb03e455d1244eb770a4aac3cd&wsABSTime=1790868306
+https://live1.quickscoreboardz.com/live/channel80.flv?wsSecret=4a3f694962a4d97ed3665c4209f4401f&wsABSTime=1790869195
 #EXTINF:-1 tvg-logo="https://imgts.sportpulseapiz.com/volleyball/team/gy0or58h20xrwzv/image/small" group-title="Xôi Lạc Z TV" , 14:00 01/10 🏐 Việt Nam vs Uzbekistan (HD TYSON)
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Mobile Safari/537.36
 #EXTVLCOPT:http-referrer=https://xlz.domainkqt.cc/
-https://live2.domaincdn.cc/livecdn/channel-33.flv?auth_key=3000001790825103-0-0-d9942166ed275843ce980a55ea0ea3f1
+https://live2.domaincdn.cc/livecdn/channel-33.flv?auth_key=3000001790825974-0-0-d6f5186ae37c6a11e38dabcfafc30358
 #EXTINF:-1 tvg-logo="https://imgts.sportpulseapiz.com/volleyball/team/gy0or58h20xrwzv/image/small" group-title="Xôi Lạc Z TV" , 14:00 01/10 🏐 Việt Nam vs Uzbekistan (TYSON)
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Mobile Safari/537.36
 #EXTVLCOPT:http-referrer=https://xlz.domainkqt.cc/
@@ -348,7 +375,7 @@ https://live2.zundrixmediapipeline.com/live/channel33.flv
 #EXTINF:-1 tvg-logo="https://imgts.sportpulseapiz.com/tennis/team/2y8m4vfgnooml07/image/small" group-title="Xôi Lạc Z TV" , 14:00 01/10 🥎 Alexander Zverev vs Cameron Norrie (HD LUCAS)
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Mobile Safari/537.36
 #EXTVLCOPT:http-referrer=https://xlz.domainkqt.cc/
-https://live2.domaincdn.cc/livecdn/channel-31.flv?auth_key=3000001790825053-0-0-340ffee027ec41075de7b5b0f804eb8d
+https://live2.domaincdn.cc/livecdn/channel-31.flv?auth_key=3000001790825948-0-0-d097172ecb13cc964d8aa3b7c33807d7
 #EXTINF:-1 tvg-logo="https://imgts.sportpulseapiz.com/tennis/team/2y8m4vfgnooml07/image/small" group-title="Xôi Lạc Z TV" , 14:00 01/10 🥎 Alexander Zverev vs Cameron Norrie (LUCAS)
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Mobile Safari/537.36
 #EXTVLCOPT:http-referrer=https://xlz.domainkqt.cc/
@@ -356,7 +383,7 @@ https://live2.zundrixmediapipeline.com/live/channel31.flv
 #EXTINF:-1 tvg-logo="https://imgts.sportpulseapiz.com/tennis/team/y0or5ofgwx8mwzv/image/small" group-title="Xôi Lạc Z TV" , 14:00 01/10 🥎 Carlos Alcaraz Garfia vs Alex Michelsen (HD VIC)
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Mobile Safari/537.36
 #EXTVLCOPT:http-referrer=https://xlz.domainkqt.cc/
-https://live2.domaincdn.cc/livecdn/channel-32.flv?auth_key=3000001790825068-0-0-0814447c01eee394e850ac46defa1eb8
+https://live2.domaincdn.cc/livecdn/channel-32.flv?auth_key=3000001790825959-0-0-0115b4c0a6dcbbd8b665c1c1cedd0ed4
 #EXTINF:-1 tvg-logo="https://imgts.sportpulseapiz.com/tennis/team/y0or5ofgwx8mwzv/image/small" group-title="Xôi Lạc Z TV" , 14:00 01/10 🥎 Carlos Alcaraz Garfia vs Alex Michelsen (VIC)
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Mobile Safari/537.36
 #EXTVLCOPT:http-referrer=https://xlz.domainkqt.cc/
@@ -449,6 +476,14 @@ https://live2.pro2cdnlive.com/live/channel-29.flv
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Mobile Safari/537.36
 #EXTVLCOPT:http-referrer=https://xlz.domainkqt.cc/
 https://live2.pro2cdnlive.com/live/channel29.flv
+#EXTINF:-1 tvg-logo="https://imgts.sportpulseapiz.com/lol/team/k82repjtv5g4qep/image/small" group-title="Xôi Lạc Z TV" , 22:00 01/10 🎮 Colossal Gaming vs Unicorns of Love Sexy Edition (HD MARTY)
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Mobile Safari/537.36
+#EXTVLCOPT:http-referrer=https://xlz.domainkqt.cc/
+https://live2.pro2cdnlive.com/live/channel-30.flv
+#EXTINF:-1 tvg-logo="https://imgts.sportpulseapiz.com/lol/team/k82repjtv5g4qep/image/small" group-title="Xôi Lạc Z TV" , 22:00 01/10 🎮 Colossal Gaming vs Unicorns of Love Sexy Edition (MARTY)
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Mobile Safari/537.36
+#EXTVLCOPT:http-referrer=https://xlz.domainkqt.cc/
+https://live2.pro2cdnlive.com/live/channel30.flv
 #EXTINF:-1 tvg-logo="https://imgts.sportpulseapiz.com/basketball/team/8y39mp4tlolmojx/image/small" group-title="Xôi Lạc Z TV" , 23:00 01/10 🏀 Hapoel Tel Aviv vs Real Madrid (ALAN)
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Mobile Safari/537.36
 #EXTVLCOPT:http-referrer=https://xlz.domainkqt.cc/
@@ -465,6 +500,10 @@ https://live2.pro2cdnlive.com/live/channel-27.flv
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Mobile Safari/537.36
 #EXTVLCOPT:http-referrer=https://xlz.domainkqt.cc/
 https://live2.pro2cdnlive.com/live/channel27.flv
+#EXTINF:-1 tvg-logo="https://imgts.sportpulseapiz.com/lol/team/pxwrx81ug4j2qyk/image/small" group-title="Xôi Lạc Z TV" , 01:00 02/10 🎮 Berlin International Gaming vs NightBirds (HD 1)
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Mobile Safari/537.36
+#EXTVLCOPT:http-referrer=https://xlz.domainkqt.cc/
+https://live2.pro2cdnlive.com/live/channel68.flv
 #EXTINF:-1 tvg-logo="https://imgts.sportpulseapiz.com/basketball/team/dn1m17te6yymoep/image/small" group-title="Xôi Lạc Z TV" , 08:15 02/10 🏀 El Calor de Cancún vs Gambusinos de Fresnillo (HD TOMMY)
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Mobile Safari/537.36
 #EXTVLCOPT:http-referrer=https://xlz.domainkqt.cc/
@@ -537,10 +576,6 @@ https://live2.zktsva.app/live/796315.m3u8
 https://live2.zktsva.app/live/301263.flv
 #EXTINF:-1 tvg-logo="https://img.gvapi.cc/football/team/bfdd500484330d63a723cbc396df762c.png" group-title="Gà Vàng 33 TV" , 22:30 01/10 ⚽ VfB Stuttgart vs SpVgg Greuther Fürth (Gà Siêu Nhí) [hls]
 https://live2.zktsva.app/live/301263.m3u8
-#EXTINF:-1 tvg-logo="https://s8tvkc.top/wp-json/s8-image/227f5406-1596-43ea-bfd3-b542b8acfbde" group-title="S8 TV" , 🟢 08:00 01/10 ⚽ Atletico Nacional Medellin vs Atletico Junior Barranquilla (NGƯỜI SẮT) [flv]
-https://flv.lauthaitv.cc/live/medellin-barran-cate.flv
-#EXTINF:-1 tvg-logo="https://s8tvkc.top/wp-json/s8-image/227f5406-1596-43ea-bfd3-b542b8acfbde" group-title="S8 TV" , 🟢 08:00 01/10 ⚽ Atletico Nacional Medellin vs Atletico Junior Barranquilla (NGƯỜI SẮT) [hls]
-https://hls.lauthaitv.cc/live/medellin-barran-cate/index.m3u8
 #EXTINF:-1 tvg-logo="https://s8tvkc.top/wp-json/s8-image/6abbb992-322d-41df-864f-6ba3d42a3ba5" group-title="S8 TV" , 13:10 01/10 ⚽ Panama vs New Zealand (NGƯỜI CHÈ) [flv]
 https://flv.lauthaitv.cc/live/pan-nzl-jpnkirin.flv
 #EXTINF:-1 tvg-logo="https://s8tvkc.top/wp-json/s8-image/6abbb992-322d-41df-864f-6ba3d42a3ba5" group-title="S8 TV" , 13:10 01/10 ⚽ Panama vs New Zealand (NGƯỜI CHÈ) [hls]
@@ -802,9 +837,9 @@ https://ftlh5sc02iliv.vcdn.cloud/1790779757_hd/1790779757_hd@720p.m3u8
 https://ftlh5sc02iliv.vcdn.cloud/1790781031_hd/1790781031_hd@720p.m3u8
 #EXTINF:-1 tvg-logo="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTADC3pRGirDoA1eaQtvYds8PQ-vmcEESiPHvywMVtvYU3ERTP__FyL8m8F&s=10" group-title="Giờ Vàng TV" , 🟢 10:00 01/10 🥎 Beijing Open vs 2026 (Ben) [hls]
 https://ftlh5sc02iliv.vcdn.cloud/1790780943_hd/1790780943_hd@720p.m3u8
-#EXTINF:-1 tvg-logo="https://static.flashscore.com/res/image/data/xUGWvAzB-fHcbO6Ye.png" group-title="Giờ Vàng TV" , 🟡 11:00 01/10 🏐 Hàn Quốc vs Iran (blv-sun) [hls]
-https://freem3u.xyz/static/no-signal/low.m3u8
-#EXTINF:-1 tvg-logo="https://static.flashscore.com/res/image/data/6ZpGvVEa-C0A1Du90.png" group-title="Giờ Vàng TV" , 11:30 01/10 🎮 Hàn Quốc vs Ả Rập Xê Út (blv-vit) [hls]
+#EXTINF:-1 tvg-logo="https://static.flashscore.com/res/image/data/xUGWvAzB-fHcbO6Ye.png" group-title="Giờ Vàng TV" , 🟢 11:00 01/10 🏐 Hàn Quốc vs Iran (Sún) [hls]
+https://ftlh5sc02iliv.vcdn.cloud/1790779361_hd/1790779361_hd@720p.m3u8
+#EXTINF:-1 tvg-logo="https://static.flashscore.com/res/image/data/6ZpGvVEa-C0A1Du90.png" group-title="Giờ Vàng TV" , 🟡 11:30 01/10 🎮 Hàn Quốc vs Ả Rập Xê Út (blv-vit) [hls]
 https://freem3u.xyz/static/no-signal/low.m3u8
 #EXTINF:-1 tvg-logo="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTLL7ALhq-iF9bdJhJA0UtIC9Cg3T02IhWIhh-ox2mZkA&s=10" group-title="Giờ Vàng TV" , 12:30 01/10 🎱 VietNam Men vs Spain Man (blv-diec) [hls]
 https://freem3u.xyz/static/no-signal/low.m3u8
@@ -826,27 +861,45 @@ https://freem3u.xyz/static/no-signal/low.m3u8
 https://freem3u.xyz/static/no-signal/low.m3u8
 #EXTINF:-1 tvg-logo="https://images.keovip88.net/images/teams/al-ettifaq.png" group-title="Giờ Vàng TV" , 22:00 01/10 ⚽ Al-Gharafa vs Al Mesaimeer (blv-tri) [hls]
 https://freem3u.xyz/static/no-signal/low.m3u8
+#EXTINF:-1 tvg-logo="https://sta.vnres.co/file/common/20260927/2ac326d0636e5fff034249e5afb66a0c.png" group-title="Sút Bóng TV" , 🟢 08:00 01/10 ⚽ Atletico Nacional Medellin vs Atletico Junior Barranquilla (BLV CÒ)
+#EXTVLCOPT:http-referrer=https://sutbong.net/
+https://sutbong.net/wp-json/soco/v1/stream/resolve?post_id=60660&blv=582342
+#EXTINF:-1 tvg-logo="https://sta.vnres.co/file/common/20260927/2ac326d0636e5fff034249e5afb66a0c.png" group-title="Sút Bóng TV" , 🟢 08:00 01/10 ⚽ Atletico Nacional Medellin vs Atletico Junior Barranquilla (BLV VOI)
+#EXTVLCOPT:http-referrer=https://sutbong.net/
+https://sutbong.net/wp-json/soco/v1/stream/resolve?post_id=60660&blv=552716
+#EXTINF:-1 tvg-logo="https://sta.vnres.co/file/common/20260927/2ac326d0636e5fff034249e5afb66a0c.png" group-title="Sút Bóng TV" , 🟢 08:00 01/10 ⚽ Atletico Nacional Medellin vs Atletico Junior Barranquilla (BLV YONE)
+#EXTVLCOPT:http-referrer=https://sutbong.net/
+https://sutbong.net/wp-json/soco/v1/stream/resolve?post_id=60660&blv=372746
+#EXTINF:-1 tvg-logo="https://sta.vnres.co/file/common/20260927/2ac326d0636e5fff034249e5afb66a0c.png" group-title="Sút Bóng TV" , 🟢 08:00 01/10 ⚽ Atletico Nacional Medellin vs Atletico Junior Barranquilla (CHAN ĐÊ)
+#EXTVLCOPT:http-referrer=https://sutbong.net/
+https://sutbong.net/wp-json/soco/v1/stream/resolve?post_id=60660&blv=621887
+#EXTINF:-1 tvg-logo="https://sta.vnres.co/file/common/20260927/2ac326d0636e5fff034249e5afb66a0c.png" group-title="Sút Bóng TV" , 🟢 08:00 01/10 ⚽ Atletico Nacional Medellin vs Atletico Junior Barranquilla (HÀ DUY KIÊN)
+#EXTVLCOPT:http-referrer=https://sutbong.net/
+https://sutbong.net/wp-json/soco/v1/stream/resolve?post_id=60660&blv=607400
+#EXTINF:-1 tvg-logo="https://sta.vnres.co/file/common/20260927/2ac326d0636e5fff034249e5afb66a0c.png" group-title="Sút Bóng TV" , 🟢 08:00 01/10 ⚽ Atletico Nacional Medellin vs Atletico Junior Barranquilla (RICKHANTER)
+#EXTVLCOPT:http-referrer=https://sutbong.net/
+https://sutbong.net/wp-json/soco/v1/stream/resolve?post_id=60660&blv=123226
 #EXTINF:-1 tvg-logo="https://sta.vnres.co/file/common/20260929/a36befda7f332eefe5f95f2250d67f23.png" group-title="Sút Bóng TV" , 🟢 08:00 01/10 🏀 Dallas Wings W vs Golden State Valkyries W (BRIAN)
 #EXTVLCOPT:http-referrer=https://sutbong.net/
-https://pull.niues.live/live/stream-9912106_lhd.m3u8?auth_key=1790828464-0-0-6077b2d98b7e6393e9de4bf23fce4bcb
+https://sutbong.net/wp-json/soco/v1/stream/resolve?post_id=59336&blv=122591
 #EXTINF:-1 tvg-logo="https://sta.vnres.co/file/common/20260929/a36befda7f332eefe5f95f2250d67f23.png" group-title="Sút Bóng TV" , 🟢 08:00 01/10 🏀 Dallas Wings W vs Golden State Valkyries W (HUNTER)
 #EXTVLCOPT:http-referrer=https://sutbong.net/
-https://pull.niur.live/live/stream-558264_lhd.m3u8?txSecret=ffde351a7842f1add8c3f95973f39825&txTime=6abe2600
+https://sutbong.net/wp-json/soco/v1/stream/resolve?post_id=59336&blv=558264
 #EXTINF:-1 tvg-logo="https://sta.vnres.co/file/common/20260929/fa10aab8b1c9907a61eb68b0024c3d8d.png" group-title="Sút Bóng TV" , 🟢 08:30 01/10 🏀 Motilones del Norte vs Piratas de Bogota (CHAN SENA)
 #EXTVLCOPT:http-referrer=https://sutbong.net/
-https://pull.niues.live/live/stream-9912115_lhd.m3u8?auth_key=1790828464-0-0-d38974be8b4e84c6fd7fcf75c49bdfa6
+https://pull.niues.live/live/stream-9912115_lhd.m3u8?auth_key=1790829040-0-0-10ccec91ee0f377dd14f21af862b30d3
 #EXTINF:-1 tvg-logo="https://sta.vnres.co/file/common/20260929/fa10aab8b1c9907a61eb68b0024c3d8d.png" group-title="Sút Bóng TV" , 🟢 08:30 01/10 🏀 Motilones del Norte vs Piratas de Bogota (KING)
 #EXTVLCOPT:http-referrer=https://sutbong.net/
-https://pull.niues.live/live/stream-9912099_lhd.m3u8?auth_key=1790828464-0-0-380b7259bc48f2627219c4ff38613b96
+https://pull.niues.live/live/stream-9912099_lhd.m3u8?auth_key=1790828723-0-0-d3d555a67e7bc8f29c7cc899cddafe15
 #EXTINF:-1 tvg-logo="https://sta.vnres.co/file/common/20260927/b8d642698c5a8efa141374c37adebc67.png" group-title="Sút Bóng TV" , 🟢 09:00 01/10 ⚽ Sacramento Republic FC vs Las Vegas Lights (A PÁO)
 #EXTVLCOPT:http-referrer=https://sutbong.net/
-https://pull.niues.live/live/stream-235232_lhd.m3u8?auth_key=1790824924-0-0-7f05d85ee04b8b2854fea2fe9db4e499
+https://pull.niues.live/live/stream-235232_lhd.m3u8?auth_key=1790823064-0-0-7eb33a04347483bc17f2f8d6805f7715
 #EXTINF:-1 tvg-logo="https://sta.vnres.co/file/common/20260927/b8d642698c5a8efa141374c37adebc67.png" group-title="Sút Bóng TV" , 🟢 09:00 01/10 ⚽ Sacramento Republic FC vs Las Vegas Lights (BLV TAP)
 #EXTVLCOPT:http-referrer=https://sutbong.net/
-https://pull.niur.live/live/stream-9912041_lhd.m3u8?txSecret=286797ab80f0794a749e05cc86d70932&txTime=6abe17f0
+https://pull.niur.live/live/stream-9912041_lhd.m3u8?txSecret=641a87fd999dedefe19574a92bcec99d&txTime=6abe10e8
 #EXTINF:-1 tvg-logo="https://sta.vnres.co/file/common/20260927/b8d642698c5a8efa141374c37adebc67.png" group-title="Sút Bóng TV" , 🟢 09:00 01/10 ⚽ Sacramento Republic FC vs Las Vegas Lights (BLV ĐỐM)
 #EXTVLCOPT:http-referrer=https://sutbong.net/
-https://pull.niues.live/live/stream-9912110_lhd.m3u8?auth_key=1790828464-0-0-b6e619af0201f82b55a48fb8bc016c15
+https://pull.niues.live/live/stream-9912110_lhd.m3u8?auth_key=1790823124-0-0-4780767232f14eef44d453fbe37ddcba
 #EXTINF:-1 tvg-logo="https://sta.vnres.co/file/common/20260927/b8d642698c5a8efa141374c37adebc67.png" group-title="Sút Bóng TV" , 🟢 09:00 01/10 ⚽ Sacramento Republic FC vs Las Vegas Lights (HẢI THANH)
 #EXTVLCOPT:http-referrer=https://sutbong.net/
 https://freem3u.xyz/static/no-signal/low.m3u8
@@ -1039,6 +1092,24 @@ https://freem3u.xyz/static/no-signal/low.m3u8
 #EXTINF:-1 tvg-logo="https://sta.vnres.co/file/common/20260928/dd3e773d9a031cdbdef576f0eab4c063.png" group-title="Sút Bóng TV" , 22:00 01/10 ⚽ Greece U21 vs Latvia U21 (TẠ BIÊN GIỚI)
 #EXTVLCOPT:http-referrer=https://sutbong.net/
 https://freem3u.xyz/static/no-signal/low.m3u8
+#EXTINF:-1 tvg-logo="https://sta.vnres.co/file/common/20260927/833f0466d0c0c91d99ff95bd6801c037.png" group-title="Sút Bóng TV" , 22:45 01/10 ⚽ Baniyas Club vs Al Wahda(UAE) (BLV CHIVAS)
+#EXTVLCOPT:http-referrer=https://sutbong.net/
+https://freem3u.xyz/static/no-signal/low.m3u8
+#EXTINF:-1 tvg-logo="https://sta.vnres.co/file/common/20260927/833f0466d0c0c91d99ff95bd6801c037.png" group-title="Sút Bóng TV" , 22:45 01/10 ⚽ Baniyas Club vs Al Wahda(UAE) (BLV LION)
+#EXTVLCOPT:http-referrer=https://sutbong.net/
+https://freem3u.xyz/static/no-signal/low.m3u8
+#EXTINF:-1 tvg-logo="https://sta.vnres.co/file/common/20260927/833f0466d0c0c91d99ff95bd6801c037.png" group-title="Sút Bóng TV" , 22:45 01/10 ⚽ Baniyas Club vs Al Wahda(UAE) (BLV LONG)
+#EXTVLCOPT:http-referrer=https://sutbong.net/
+https://freem3u.xyz/static/no-signal/low.m3u8
+#EXTINF:-1 tvg-logo="https://sta.vnres.co/file/common/20260927/833f0466d0c0c91d99ff95bd6801c037.png" group-title="Sút Bóng TV" , 22:45 01/10 ⚽ Baniyas Club vs Al Wahda(UAE) (BOSS)
+#EXTVLCOPT:http-referrer=https://sutbong.net/
+https://freem3u.xyz/static/no-signal/low.m3u8
+#EXTINF:-1 tvg-logo="https://sta.vnres.co/file/common/20260927/833f0466d0c0c91d99ff95bd6801c037.png" group-title="Sút Bóng TV" , 22:45 01/10 ⚽ Baniyas Club vs Al Wahda(UAE) (PEANUT)
+#EXTVLCOPT:http-referrer=https://sutbong.net/
+https://freem3u.xyz/static/no-signal/low.m3u8
+#EXTINF:-1 tvg-logo="https://sta.vnres.co/file/common/20260927/833f0466d0c0c91d99ff95bd6801c037.png" group-title="Sút Bóng TV" , 22:45 01/10 ⚽ Baniyas Club vs Al Wahda(UAE) (XUÂN TÓC ĐỎ)
+#EXTVLCOPT:http-referrer=https://sutbong.net/
+https://freem3u.xyz/static/no-signal/low.m3u8
 #EXTINF:-1 tvg-logo="https://img0.aiscore.com/volleyball/team/604a26fb4f696d522d464fc2ff0919de.png!w80" group-title="Phá Làng TV" , 🟢 11:00 01/10 🏐 Hàn Quốc vs Iran (LÝ LÊN LỬA) (HD2) [geo]
 #EXTVLCOPT:http-referrer=https://phalang.live/
 https://pull1.digitalcdn.net/live/48f8760363914843886819765b0520c1/index.m3u8
@@ -1147,7 +1218,7 @@ https://pull1.digitalcdn.net/live/5e9da67fcacd4795b768d30c489c96ca/index.m3u8
 #EXTINF:-1 tvg-logo="https://img0.aiscore.com/football/team/14b75c2d38d88b747c19de8ea5509d16.png!w80" group-title="Phá Làng TV" , 16:00 02/10 ⚽ Vietnam vs Pakistan (LÝ LONG) [geo]
 #EXTVLCOPT:http-referrer=https://phalang.live/
 https://pull.digitalcdn.net/live/5e9da67fcacd4795b768d30c489c96ca/index.m3u8
-#EXTINF:-1 group-title="Updated 01/10 10:25", 01/10 10:25
+#EXTINF:-1 group-title="Updated 01/10 10:40", 01/10 10:40
 https://freem3u.xyz/static/no-signal/low.m3u8
 #EXTINF:-1 group-title="EU | UK | SKY SPORTS+" tvg-logo="https://go4.pw/FORMULA/ff1.png" tvg-expire="04/04/2027" gau-status="MƯỢT" gau-open="2.2s" gau-resolution="1280x720" gau-bitrate="Không rõ",##### F1 - SKY SPORTS F1 #####
 http://zazaint.com:80/MAGU52TLAM/SAAk0NZH71/1311457
