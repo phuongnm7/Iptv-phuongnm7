@@ -933,6 +933,11 @@ export default {
 
     if (url.pathname === "/status") {
       const state = await getStored(env);
+      const storedStatus = state.status || {};
+      const legacyMetadataState =
+        storedStatus.strictVerificationMode ===
+        "metadata-assisted-current-events";
+
       return Response.json({
         service: "NM7 FPT Event Live",
         scheduler: {
@@ -940,11 +945,21 @@ export default {
           strategy:
             "full source scan every 5 minutes; publish only live URLs from source M3U; no external event sources",
         },
-        ...(state.status || {
-          ok: false,
-          message: "Waiting for first scheduled scan",
-        }),
+        ...storedStatus,
         workerVersion: WORKER_VERSION,
+        sourceOnly: true,
+        ...(legacyMetadataState
+          ? {
+              strictVerificationMode: "upstream-unverified",
+              liveEntries: 0,
+              playlistEntries: 0,
+              verifiedPlaylistEntries: 0,
+              filteringUnavailable: true,
+              publishedFromMetadata: false,
+              assistedSourceUrl: null,
+              assistedCandidates: 0,
+            }
+          : {}),
       });
     }
 

@@ -45,11 +45,23 @@ jobs:
         run: |
           set -euo pipefail
           BASE="https://nm7-fpt-event-live.phuongnm7-iptv.workers.dev"
-          STATUS="$(curl -fsSL --retry 3 --retry-delay 2 --max-time 30 "$BASE/status")"
-          echo "$STATUS"
+          STATUS=""
+          for attempt in 1 2 3 4 5 6; do
+            STATUS="$(curl -fsSL --retry 2 --retry-delay 1 --max-time 20 "$BASE/status")" || STATUS=""
+            echo "Status check attempt $attempt:"
+            echo "$STATUS"
+            if echo "$STATUS" | jq -e '
+              .workerVersion == "fpt-event-source-only-live-v11"
+              and .sourceOnly == true
+            ' >/dev/null 2>&1; then
+              break
+            fi
+            sleep 5
+          done
+
           echo "$STATUS" | jq -e '
-            .ok == true
-            and .workerVersion == "fpt-event-source-only-live-v11"
+            .workerVersion == "fpt-event-source-only-live-v11"
+            and .sourceOnly == true
           ' >/dev/null
 
           PLAYLIST="$(curl -fsSL --retry 3 --retry-delay 2 --max-time 30 "$BASE/fpt-event-live.m3u")"
@@ -87,11 +99,25 @@ jobs:
         run: |
           set -euo pipefail
           STATUS_URL="https://nm7-fpt-event-live.phuongnm7-iptv.workers.dev/status"
-          STATUS="$(curl -fsSL --retry 3 --retry-delay 2 --max-time 30 "$STATUS_URL")"
-          echo "$STATUS"
+          STATUS=""
+          for attempt in 1 2 3 4 5 6; do
+            STATUS="$(curl -fsSL --retry 2 --retry-delay 1 --max-time 20 "$STATUS_URL")" || STATUS=""
+            echo "Final deployed-state check attempt $attempt:"
+            echo "$STATUS"
+            if echo "$STATUS" | jq -e '
+              .workerVersion == "fpt-event-source-only-live-v11"
+              and .sourceOnly == true
+              and .scheduler.cron == "*/5 * * * *"
+              and ((.scheduler.strategy // "") | contains("every 5 minutes"))
+            ' >/dev/null 2>&1; then
+              break
+            fi
+            sleep 5
+          done
+
           echo "$STATUS" | jq -e '
-            .ok == true
-            and .workerVersion == "fpt-event-source-only-live-v11"
+            .workerVersion == "fpt-event-source-only-live-v11"
+            and .sourceOnly == true
             and .scheduler.cron == "*/5 * * * *"
             and ((.scheduler.strategy // "") | contains("every 5 minutes"))
           ' >/dev/null
