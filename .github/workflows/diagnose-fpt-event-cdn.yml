@@ -1,6 +1,10 @@
 name: Diagnose NM7 FPT Event CDN
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/diagnose-fpt-event-cdn.yml"
   workflow_dispatch:
 
 permissions:
