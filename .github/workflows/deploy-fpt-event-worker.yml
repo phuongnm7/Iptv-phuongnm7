@@ -24,6 +24,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Validate Worker JavaScript
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check src/index.js
+
       - name: Deploy Worker
         uses: cloudflare/wrangler-action@v4
         with:
@@ -42,13 +48,19 @@ jobs:
           echo "$STATUS"
           echo "$STATUS" | jq -e '
             .ok == true
-            and .workerVersion == "fpt-event-resilient-v7-subrequest-safe"
+            and .workerVersion == "fpt-event-strict-live-v8"
           ' >/dev/null
 
           PLAYLIST="$(curl -fsSL --retry 3 --retry-delay 2 --max-time 30 "$BASE/fpt-event-live.m3u")"
           ENTRY_COUNT="$(printf '%s\n' "$PLAYLIST" | grep -c '^#EXTINF:' || true)"
-          echo "Public playlist entry count: $ENTRY_COUNT"
-          echo "Verified: deployment did not force a new FPT source scan; the 5-minute Cron/recovery loop remains the only scheduled probe path."
+                    HEADERS="$(curl -fsS -D - -o /dev/null --retry 3 --retry-delay 2 --max-time 30 "$BASE/fpt-event-live.m3u")"
+          echo "$HEADERS"
+          echo "$HEADERS" | grep -qi '^x-nm7-fpt-verified: '
+          echo "Verified: deployment did not force a new FPT source scan; strict live filtering is only published after a clean scan."
+
+          FALLBACK_HEADERS="$(curl -fsS -D - -o /dev/null --retry 3 --retry-delay 2 --max-time 30 "$BASE/fpt-event-fallback.m3u")"
+          echo "$FALLBACK_HEADERS"
+          echo "$FALLBACK_HEADERS" | grep -qi '^content-type: application/x-mpegURL'
 
       - name: Verify deployed Worker state (no forced source scan)
         shell: bash
@@ -59,7 +71,7 @@ jobs:
           echo "$STATUS"
           echo "$STATUS" | jq -e '
             .ok == true
-            and .workerVersion == "fpt-event-resilient-v7-subrequest-safe"
+            and .workerVersion == "fpt-event-strict-live-v8"
             and .scheduler.cron == "*/5 * * * *"
             and ((.scheduler.strategy // "") | contains("every 5 minutes"))
           ' >/dev/null
@@ -67,5 +79,5 @@ jobs:
           HEADERS="$(curl -fsS -D - -o /dev/null --retry 3 --retry-delay 2 --max-time 30 "https://nm7-fpt-event-live.phuongnm7-iptv.workers.dev/fpt-event-live.m3u")"
           echo "$HEADERS"
           echo "$HEADERS" | grep -qi '^content-type: application/x-mpegURL'
-          echo "$HEADERS" | grep -qi '^x-nm7-fpt-version: fpt-event-resilient-v7-subrequest-safe'
+          echo "$HEADERS" | grep -qi '^x-nm7-fpt-version: fpt-event-strict-live-v8'
           echo "Verified: v7 is deployed, Cron is configured for every 5 minutes, and playlist endpoint is serving the expected protocol/version. No forced full scan is executed during CI deploy."
