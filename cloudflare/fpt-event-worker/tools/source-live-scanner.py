@@ -341,7 +341,7 @@ def main():
         "probeErrors": len(errors),
         "scanHealthy": status["scanHealthy"],
         "partialScan": status["partialScan"],
-        "transport": selection,
+        "transport": "per-url-rotating-vietnam-proxy",
         "proxyUsed": any(v for v in transports.values()),
         "liveChannels": status["liveChannels"],
         "allProbeErrorsAre403": all_403,
