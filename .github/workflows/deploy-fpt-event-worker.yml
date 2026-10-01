@@ -40,7 +40,7 @@ jobs:
           wranglerVersion: "4"
           command: deploy src/index.js --config wrangler.jsonc
 
-      - name: Verify playlist without probing FPT origin
+      - name: Verify deployed Worker before source probe
         shell: bash
         run: |
           set -euo pipefail
@@ -51,7 +51,7 @@ jobs:
             echo "Status check attempt $attempt:"
             echo "$STATUS"
             if echo "$STATUS" | jq -e '
-              .workerVersion == "fpt-event-source-only-live-v11"
+              .workerVersion == "fpt-event-source-proven-live-v12"
               and .sourceOnly == true
             ' >/dev/null 2>&1; then
               break
@@ -60,7 +60,7 @@ jobs:
           done
 
           echo "$STATUS" | jq -e '
-            .workerVersion == "fpt-event-source-only-live-v11"
+            .workerVersion == "fpt-event-source-proven-live-v12"
             and .sourceOnly == true
           ' >/dev/null
 
@@ -75,6 +75,16 @@ jobs:
           FALLBACK_HEADERS="$(curl -fsS -D - -o /dev/null --retry 3 --retry-delay 2 --max-time 30 "$BASE/fpt-event-fallback.m3u")"
           echo "$FALLBACK_HEADERS"
           echo "$FALLBACK_HEADERS" | grep -qi '^content-type: application/x-mpegURL'
+
+      - name: Probe current source after deploy (best effort)
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE="https://nm7-fpt-event-live.phuongnm7-iptv.workers.dev"
+          echo "Running one current-source scan so a newly live event can be detected immediately when FPT accepts server-side probes..."
+          curl -fsSL --max-time 120 "$BASE/scan" || true
+          echo "Current strict playlist:"
+          curl -fsSL --max-time 30 "$BASE/fpt-event-live.m3u" || true
 
       - name: Enforce source-only playlist
         shell: bash
@@ -105,7 +115,7 @@ jobs:
             echo "Final deployed-state check attempt $attempt:"
             echo "$STATUS"
             if echo "$STATUS" | jq -e '
-              .workerVersion == "fpt-event-source-only-live-v11"
+              .workerVersion == "fpt-event-source-proven-live-v12"
               and .sourceOnly == true
               and .scheduler.cron == "*/5 * * * *"
               and ((.scheduler.strategy // "") | contains("every 5 minutes"))
@@ -116,7 +126,7 @@ jobs:
           done
 
           echo "$STATUS" | jq -e '
-            .workerVersion == "fpt-event-source-only-live-v11"
+            .workerVersion == "fpt-event-source-proven-live-v12"
             and .sourceOnly == true
             and .scheduler.cron == "*/5 * * * *"
             and ((.scheduler.strategy // "") | contains("every 5 minutes"))
@@ -125,5 +135,5 @@ jobs:
           HEADERS="$(curl -fsS -D - -o /dev/null --retry 3 --retry-delay 2 --max-time 30 "https://nm7-fpt-event-live.phuongnm7-iptv.workers.dev/fpt-event-live.m3u")"
           echo "$HEADERS"
           echo "$HEADERS" | grep -qi '^content-type: application/x-mpegURL'
-          echo "$HEADERS" | grep -qi '^x-nm7-fpt-version: fpt-event-source-only-live-v11'
-          echo "Verified: v11 is deployed, Cron is configured for every 5 minutes, and the strict live endpoint is exposing the expected version. No forced full scan is executed during CI deploy."
+          echo "$HEADERS" | grep -qi '^x-nm7-fpt-version: fpt-event-source-proven-live-v12'
+          echo "Verified: v12 is deployed, Cron is configured for every 5 minutes, and the strict live endpoint is exposing the expected version. No forced full scan is executed during CI deploy."
