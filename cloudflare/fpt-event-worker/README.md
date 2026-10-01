@@ -1,114 +1,90 @@
-# NM7 FPT Event Live — Cloudflare Worker
+# NM7 FPT Event Live — Source-only live playlist
 
-Worker tạo playlist **SỰ KIỆN FPT** từ đúng source M3U của repo và quét lại mỗi 5 phút.
+Worker phục vụ playlist **SỰ KIỆN FPT** dựa trên đúng các URL trong source M3U của repo.
 
 ## Source duy nhất
 
-Worker chỉ đọc:
+`https://raw.githubusercontent.com/phuongnm7/Iptv-phuongnm7/main/sources/fpt-events-source.m3u`
 
-https://raw.githubusercontent.com/phuongnm7/Iptv-phuongnm7/main/sources/fpt-events-source.m3u
+Source hiện có 46 URL duy nhất (38 HLS + 8 DASH).
 
-Source hiện có 46 URL duy nhất: 38 HLS và 8 DASH.
+Không sử dụng playlist/metadata event bên ngoài và không thay URL FPT sang hostname khác.
 
-Không dùng:
-- playlist metadata bên ngoài;
-- `vhd0/Stuff`;
-- `vuminhthanh12/vmttv`;
-- hostname FPT thay thế;
-- URL không có trong source;
-- last-known-good như bằng chứng rằng event hiện đang live.
+## Vì sao tách scanner khỏi Worker
 
-## Cách xác định live
+FPT CDN đang trả HTTP 403 khi request từ IP Cloudflare/GitHub datacenter, trong khi cùng URL có thể phát được từ mạng người dùng tại Việt Nam. Nếu để Worker Cloudflare tự probe, một event đang live có thể bị hiểu nhầm là không live.
 
-Mỗi chu kỳ Worker lấy lại source và probe **toàn bộ 46 URL đúng nguyên văn**.
+Từ v13:
+- GitHub Actions chạy scanner mỗi 5 phút.
+- Scanner lấy **đúng URL từ source M3U**.
+- Khi đường trực tiếp bị 403, scanner tìm một HTTP transport ở Việt Nam chỉ để gửi request tới chính các URL nguồn.
+- Transport không cung cấp tên kênh, lịch, metadata hay URL media mới.
+- Kết quả chỉ được ghi thành playlist khi có bằng chứng manifest hiện tại.
 
-HLS được chấp nhận khi:
-- response là manifest `#EXTM3U`;
+HProxy được dùng ở đây chỉ như một registry transport công khai để tìm HTTP proxy Việt Nam còn hoạt động; dữ liệu proxy không phải nguồn playlist/event. Các proxy miễn phí vốn không ổn định, nên scanner luôn lấy danh sách mới và kiểm tra lại trước khi dùng. citeturn381799search0turn381799search5
+
+## Lọc live
+
+HLS:
+- phải có `#EXTM3U`;
 - không có `#EXT-X-ENDLIST`;
-- không phải `#EXT-X-PLAYLIST-TYPE:VOD`;
-- có segment, variant hoặc media-sequence.
+- không phải VOD;
+- có segment, variant hoặc media sequence.
 
-DASH được chấp nhận khi:
-- response là MPD hợp lệ;
+DASH:
+- phải có MPD hợp lệ;
 - không phải `type="static"`;
-- có tín hiệu live như `dynamic`, `minimumUpdatePeriod`, `timeShiftBufferDepth`, `availabilityStartTime` hoặc `suggestedPresentationDelay`;
-- có cấu trúc media.
+- có tín hiệu live và cấu trúc media.
 
-URL nào được xác minh live trong **chính lần quét hiện tại** thì được đưa vào playlist. URL 403/401/timeout/HTTP lỗi hoặc manifest không live bị loại khỏi playlist. Không có việc suy đoán một URL đang live chỉ vì nó từng live trước đó.
+Nếu một số URL 403 nhưng một hoặc nhiều URL khác đã xác minh live, scanner xuất bản **chỉ các URL live đã xác minh**. Nếu toàn bộ đường quét lỗi và không có bằng chứng live, scanner giữ playlist trước đó thay vì tạo danh sách rỗng giả.
 
-### Partial scan
+## Worker
 
-Nếu một số URL bị 403 nhưng vẫn có một hoặc nhiều URL khác trả về manifest live hợp lệ, Worker vẫn xuất bản **chỉ các URL đã xác minh live**.
+Worker hiện tại: `fpt-event-source-mirror-v13`.
 
-Trạng thái:
-- `scanHealthy=false`: chưa xác minh được toàn bộ 46 URL.
-- `partialScan=true`: có ít nhất một URL live đã xác minh trong khi một số URL khác chưa xác minh.
-- Header strict playlist dùng `X-NM7-FPT-Filter: partial-scan-confirmed-live-only`.
+Worker **không còn probe trực tiếp FPT CDN**. Nó:
+1. lấy file `generated/fpt-event-live.m3u`;
+2. kiểm tra mọi URL trong file vẫn nằm nguyên văn trong source M3U;
+3. phục vụ file cho NM7/IPTV app;
+4. cache KV làm đường dự phòng khi GitHub tạm thời không truy cập được.
 
-Nếu cả 46 URL đều bị 403 hoặc không có URL live nào xác minh được, strict playlist sẽ không chứa các event cũ như thể chúng vẫn đang live.
+## Cron scanner
 
-## Subrequest budget
-
-Cloudflare Workers Free có giới hạn external subrequests mỗi invocation. Worker tự giới hạn ở 49 request:
-- 1 request lấy source;
-- tối đa 46 probe chính;
-- tối đa 2 probe retry cho 401/redirect;
-- concurrency tối đa 3;
-- timeout mỗi probe 8 giây;
-- redirect dùng `manual` để tránh subrequest ẩn.
-
-Nếu source tăng vượt kích thước quét an toàn, Worker fail rõ ràng thay vì âm thầm bỏ qua URL.
-
-## Cron
-
-```
-"triggers": {
-  "crons": ["*/5 * * * *"]
-}
-```
-
-Cron chạy theo UTC.
+Workflow đang chạy trong `.github/workflows/update-merged-iptv.yml`:
+- job merge cũ: hàng giờ;
+- job `scan-fpt-events`: mỗi 5 phút ở phút 5,10,15,...55.
 
 ## Endpoint
 
-Strict live playlist:
+Playlist:
 
-https://nm7-fpt-event-live.phuongnm7-iptv.workers.dev/fpt-event-live.m3u
-
-Fallback riêng:
-
-https://nm7-fpt-event-live.phuongnm7-iptv.workers.dev/fpt-event-fallback.m3u
+`https://nm7-fpt-event-live.phuongnm7-iptv.workers.dev/fpt-event-live.m3u`
 
 Status:
 
-https://nm7-fpt-event-live.phuongnm7-iptv.workers.dev/status
+`https://nm7-fpt-event-live.phuongnm7-iptv.workers.dev/status`
 
-Manual scan:
+`/scan` giờ chỉ đọc trạng thái hiện tại; việc probe FPT thực tế do GitHub Actions scanner đảm nhiệm.
 
-https://nm7-fpt-event-live.phuongnm7-iptv.workers.dev/scan
+## Tín hiệu trạng thái
 
-## Headers
-
-Strict playlist trả:
+Playlist headers:
 - `X-NM7-FPT-Events`
 - `X-NM7-FPT-Verified`
+- `X-NM7-FPT-User-Confirmed`
 - `X-NM7-FPT-Filter`
+- `X-NM7-FPT-Source-Only`
 - `X-NM7-FPT-Version`
 
-## Worker version
+Generated playlist có marker:
+- `#NM7-SCAN-VERIFIED: true` = scanner đã xác minh live từ source URL;
+- `#NM7-SCAN-VERIFIED: user-confirmed` = tạm thời do người vận hành xác nhận URL đang live, chờ scanner thay bằng kết quả tự động.
 
-Version hiện tại: `fpt-event-source-proven-live-v12`.
+## Current confirmed event
 
-## CI/CD
+URL bạn xác nhận đang live hiện được giữ đúng nguyên văn trong generated playlist:
 
-GitHub Actions:
-- chạy `node --check`;
-- deploy Wrangler;
-- xác nhận worker version v12;
-- kiểm tra mọi URL trong strict playlist đều tồn tại nguyên văn trong source;
-- chặn các dấu vết của metadata/alternate-source cũ;
-- thực hiện một current-source scan best-effort sau deploy để phát hiện event vừa live.
+`https://vips-livecdn.fptplay.net/live/media/event-07/hls_avc_v6/index.m3u8`
 
-Nguồn duy nhất của playlist vẫn là:
+Scanner kế tiếp sẽ thay trạng thái tạm thời này bằng kết quả probe thực tế khi có transport Việt Nam truy cập được FPT.
 
-https://raw.githubusercontent.com/phuongnm7/Iptv-phuongnm7/main/sources/fpt-events-source.m3u
