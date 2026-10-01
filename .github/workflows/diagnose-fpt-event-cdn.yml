@@ -136,6 +136,44 @@ jobs:
             rm -f /tmp/e07-direct /tmp/e07-direct.headers
           done
 
+      - name: Test transport-only relays for exact event-07
+        shell: bash
+        run: |
+          set -u
+          EVENT07="https://vips-livecdn.fptplay.net/live/media/event-07/hls_avc_v6/index.m3u8"
+          encoded="$(python3 - <<'PY'
+import urllib.parse
+print(urllib.parse.quote("https://vips-livecdn.fptplay.net/live/media/event-07/hls_avc_v6/index.m3u8", safe=""))
+PY
+)"
+          echo "Only the exact event-07 source URL is tested. No playlist/metadata source is used."
+
+          echo "=== allorigins raw transport ==="
+          curl -sS --max-time 30 -A "Mozilla/5.0"             "https://api.allorigins.win/raw?url=$encoded"             -o /tmp/relay1.body -D /tmp/relay1.headers             -w "status=%{http_code} type=%{content_type} size=%{size_download}\n" || true
+          head -c 500 /tmp/relay1.body 2>/dev/null | tr "\n" " " || true
+          echo
+
+          echo "=== corsproxy transport ==="
+          curl -sS --max-time 30 -A "Mozilla/5.0"             "https://corsproxy.io/?url=$encoded"             -o /tmp/relay2.body -D /tmp/relay2.headers             -w "status=%{http_code} type=%{content_type} size=%{size_download}\n" || true
+          head -c 500 /tmp/relay2.body 2>/dev/null | tr "\n" " " || true
+          echo
+
+          echo "=== cors.dev transport ==="
+          curl -sS --max-time 30 -A "Mozilla/5.0"             "https://proxy.cors.dev/$EVENT07"             -o /tmp/relay3.body -D /tmp/relay3.headers             -w "status=%{http_code} type=%{content_type} size=%{size_download}\n" || true
+          head -c 500 /tmp/relay3.body 2>/dev/null | tr "\n" " " || true
+          echo
+
+          for f in /tmp/relay1.body /tmp/relay2.body /tmp/relay3.body; do
+            echo "--- validate $f ---"
+            if grep -q "#EXTM3U" "$f" 2>/dev/null; then
+              echo "VALID_HLS_MANIFEST"
+            else
+              echo "NOT_HLS_MANIFEST"
+            fi
+          done
+
+          rm -f /tmp/relay1.body /tmp/relay1.headers /tmp/relay2.body /tmp/relay2.headers /tmp/relay3.body /tmp/relay3.headers
+
       - name: Check Worker status
         shell: bash
         run: |
