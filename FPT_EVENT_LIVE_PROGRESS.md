@@ -207,3 +207,40 @@ The metadata source tells us which FPT event streams are currently advertised by
 - GitHub Actions must validate `fpt-event-strict-live-v10`.
 - Cron remains `*/5 * * * *`.
 - No CI step should force a new 46-endpoint FPT scan.
+
+
+## 2026-10-01 — v12 fix: newly-live event was being skipped
+
+### Root cause
+
+The v11 Worker entered a low-frequency recovery path whenever the previous scan looked globally blocked by HTTP 403. That recovery path probed only a small rotating set of previously healthy channels.
+
+This created a real filtering blind spot: when FPT had a **new event live** whose URL was present in the official source M3U but was not in the historical last-known-good pool, the Worker never probed that URL during recovery. Therefore the event could be playable now while the strict playlist still showed no current event.
+
+### v12 behavior
+
+- Worker version: `fpt-event-source-proven-live-v12`.
+- Recovery shortcut based on `priorLooksBlocked` was removed.
+- Every 5-minute scan always loads the exact source M3U and probes all 46 source URLs.
+- The source URL is never replaced or supplemented by another playlist/metadata source.
+- A URL is added to the public playlist only when that exact URL returns a valid live HLS/DASH manifest in the current scan.
+- Partial scans are supported:
+  - some URLs may be 403/unreachable;
+  - any positively verified live URLs are still published;
+  - unverified URLs remain absent;
+  - `scanHealthy=false` and `partialScan=true` make the incomplete verification explicit.
+- If no URL is positively verified live, the strict playlist is empty. Historical channels are never copied into the strict result.
+- `recordFailure()` now explicitly clears `publishedFromCurrentScan` and the current-live counters so a failed source fetch cannot accidentally expose a previous playlist as current live.
+- Legacy v10 metadata-assisted status fields are sanitized without republishing those entries.
+
+### Current-source scan after deploy
+
+The deployment workflow now performs one best-effort `/scan` after a successful v12 deploy and prints the resulting strict playlist. Normal Cron remains `*/5 * * * *`.
+
+### Validation rule
+
+The CI source-only integrity test still requires every public playlist URL to be an exact URL from:
+
+`https://raw.githubusercontent.com/phuongnm7/Iptv-phuongnm7/main/sources/fpt-events-source.m3u`
+
+and rejects old metadata/alternate-source markers.
