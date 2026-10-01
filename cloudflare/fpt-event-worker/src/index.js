@@ -3,6 +3,7 @@ const SOURCE_URL =
   "https://raw.githubusercontent.com/phuongnm7/Iptv-phuongnm7/main/sources/fpt-events-source.m3u";
 const PLAYLIST_KEY = "fpt:live:playlist";
 const PUBLISHED_AT_KEY = "fpt:live:publishedAt";
+const HEALTHY_CHANNELS_KEY = "fpt:live:healthyChannels";
 const STATUS_KEY = "fpt:live:status";
 const CRON = "*/5 * * * *";
 const PLAYLIST_TTL = 60 * 60;
@@ -19,6 +20,29 @@ const MAX_CONCURRENCY = 3;
 const PROBE_TIMEOUT_MS = 8000;
 
 const UAS = ["VThanhTivi", "KhoaTivi", "BearTV"];
+const RECOVERY_PROBE_LIMIT = 2;
+const LAST_KNOWN_GOOD = [
+  {
+    name: "Sự kiện FPT 01",
+    url: "https://vips-livecdn.fptplay.net/live/media/su-kien-01/hls_avc_v6/index.m3u8",
+  },
+  {
+    name: "Sự kiện FPT 09",
+    url: "https://vips-livecdn.fptplay.net/live/media/su-kien-09/hls_avc_v6/index.m3u8",
+  },
+  {
+    name: "Sự kiện FPT 10",
+    url: "https://vips-livecdn.fptplay.net/live/media/su-kien-10/hls_avc_v6/index.m3u8",
+  },
+  {
+    name: "Sự kiện FPT Event 02",
+    url: "https://vips-livecdn.fptplay.net/live/media/event-02/hls_avc_v6/index.m3u8",
+  },
+  {
+    name: "Sự kiện FPT Event 07",
+    url: "https://vips-livecdn.fptplay.net/live/media/event-07/hls_avc_v6/index.m3u8",
+  },
+];
 
 function isDashUrl(url) {
   return /\.mpd(?:[?#]|$)/i.test(url || "");
@@ -352,6 +376,116 @@ async function scan(env, meta = {}) {
   const budget = { used: 0 };
   const retryState = { remaining: MAX_FALLBACK_PROBES, used: 0, nextUa: 0 };
 
+  const previous = await getStored(env);
+  const priorStatus = previous.status || {};
+  const priorHealthyChannels = Array.isArray(priorStatus.lastHealthyLiveChannels)
+    ? priorStatus.lastHealthyLiveChannels
+    : (() => {
+        try {
+          return JSON.parse(env.__NM7_NO_SUCH_VALUE || "null");
+        } catch {
+          return [];
+        }
+      })();
+
+  const priorErrors = Array.isArray(priorStatus.errors) ? priorStatus.errors : [];
+  const priorLooksBlocked =
+    priorStatus.sourceBlocked === true ||
+    (priorStatus.scanDegraded === true &&
+      priorStatus.candidates > 0 &&
+      priorStatus.probeErrors === priorStatus.candidates &&
+      priorErrors.length > 0 &&
+      priorErrors.every((x) => Number(x.httpStatus) === 403));
+
+  if (priorLooksBlocked) {
+    const recoveryCandidates =
+      priorHealthyChannels.length > 0
+        ? priorHealthyChannels.slice(0, RECOVERY_PROBE_LIMIT)
+        : LAST_KNOWN_GOOD.slice(0, RECOVERY_PROBE_LIMIT);
+
+    const recoveryResults = await mapWithConcurrency(
+      recoveryCandidates,
+      1,
+      (item) => probeOnce(item, UAS[0], budget)
+    );
+
+    const recoveryHealthy = recoveryResults.some(
+      (item) => item.httpStatus === 200 && item.live
+    );
+    const recoverySaw403 = recoveryResults.some((item) => item.httpStatus === 403);
+
+    let playlist = previous.playlist;
+    let restoredFromFallback = false;
+    if (playlist === "#EXTM3U\\n") {
+      playlist = buildM3U(LAST_KNOWN_GOOD);
+      restoredFromFallback = true;
+      await env.FPT_EVENT_KV.put(PLAYLIST_KEY, playlist, {
+        expirationTtl: PLAYLIST_TTL,
+      });
+    }
+
+    const publishedAtText = await env.FPT_EVENT_KV.get(PUBLISHED_AT_KEY);
+    const publishedAt = publishedAtText ? Number(publishedAtText) : 0;
+    const status = {
+      ...priorStatus,
+      ok: true,
+      scanHealthy: false,
+      scanDegraded: true,
+      recoveryMode: true,
+      recoveryProbeSucceeded: recoveryHealthy,
+      recoverySaw403,
+      sourceBlocked: !recoveryHealthy,
+      stalePlaylist: true,
+      staleExpired: false,
+      restoredFromLastKnownGood: restoredFromFallback,
+      workerVersion: WORKER_VERSION,
+      generatedAt: new Date().toISOString(),
+      scanDurationMs: Date.now() - scanStarted,
+      trigger: meta.trigger || "cron",
+      cron: meta.cron || null,
+      scheduledTime: meta.scheduledTime
+        ? new Date(meta.scheduledTime).toISOString()
+        : null,
+      playlistEntries: playlist.match(/^#EXTINF:/gm)?.length || 0,
+      publishedFromCurrentScan: false,
+      lastHealthyLiveChannels:
+        priorHealthyChannels.length > 0
+          ? priorHealthyChannels
+          : LAST_KNOWN_GOOD,
+      subrequestBudget: {
+        maxExternalSubrequests: MAX_EXTERNAL_SUBREQUESTS,
+        used: budget.used,
+        reservedMargin: 50 - MAX_EXTERNAL_SUBREQUESTS,
+        primaryProbes: 0,
+        recoveryProbeLimit: RECOVERY_PROBE_LIMIT,
+        recoveryProbesUsed: recoveryResults.length,
+        fallbackProbeLimit: MAX_FALLBACK_PROBES,
+        fallbackProbesUsed: 0,
+        concurrency: 1,
+      },
+    };
+
+    if (recoveryHealthy) {
+      status.sourceBlocked = false;
+      status.message =
+        "Recovery probe succeeded; full source scan will resume on the next 5-minute Cron.";
+    } else {
+      status.message =
+        "FPT source still returns 403; preserving the last healthy playlist and reducing probe frequency.";
+    }
+
+    await env.FPT_EVENT_KV.put(
+      HEALTHY_CHANNELS_KEY,
+      JSON.stringify(status.lastHealthyLiveChannels),
+      { expirationTtl: PLAYLIST_TTL }
+    );
+    await env.FPT_EVENT_KV.put(STATUS_KEY, JSON.stringify(status), {
+      expirationTtl: STATUS_TTL,
+    });
+    console.log(JSON.stringify(status));
+    return { playlist, status };
+  }
+
   const sourceResponse = await fetchWithBudget(
     SOURCE_URL,
     {
@@ -416,10 +550,15 @@ async function scan(env, meta = {}) {
   // 403/timeouts/network failures, so it cannot safely decide that a live event ended.
   // Keep the last healthy snapshot for a short grace period; never keep stale data forever.
   const cleanScan = probeErrors === 0;
+  const allProbeErrorsAre403 =
+    results.length > 0 &&
+    results.every((x) => x.error && Number(x.httpStatus) === 403);
+
   const preserveHealthySnapshot =
     !cleanScan &&
     previousHasPlaylist &&
-    ageSinceHealthyPublish <= DEGRADED_GRACE_MS;
+    (allProbeErrorsAre403 ||
+      ageSinceHealthyPublish <= DEGRADED_GRACE_MS);
   const staleExpired =
     !cleanScan &&
     previousHasPlaylist &&
@@ -466,6 +605,10 @@ async function scan(env, meta = {}) {
       ? new Date(meta.scheduledTime).toISOString()
       : null,
     sourceUrl: SOURCE_URL,
+    recoveryMode: false,
+    sourceBlocked: allProbeErrorsAre403,
+    recoveryProbeSucceeded: false,
+    recoverySaw403: false,
     candidates: candidates.length,
     liveEntries: live.length,
     playlistEntries: publishedPlaylistEntries,
@@ -475,6 +618,7 @@ async function scan(env, meta = {}) {
     preservedBecauseDegradedScan: preserveHealthySnapshot,
     quotaFailureDetected: allProbeErrorsAreQuota,
     quotaSafetyBlocked: allProbeErrorsAreQuota,
+    allProbeErrorsAre403,
     subrequestBudget: {
       maxExternalSubrequests: MAX_EXTERNAL_SUBREQUESTS,
       used: budget.used,
@@ -485,6 +629,9 @@ async function scan(env, meta = {}) {
       concurrency: MAX_CONCURRENCY,
     },
     liveChannels: live,
+    lastHealthyLiveChannels: cleanScan
+      ? live
+      : previous.status?.lastHealthyLiveChannels || LAST_KNOWN_GOOD,
     dashDiagnostics: dashResults.map((x) => ({
       name: x.name,
       url: x.url,
