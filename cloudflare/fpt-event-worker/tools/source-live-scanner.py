@@ -17,7 +17,7 @@ EVENT7_URL = "https://vips-livecdn.fptplay.net/live/media/event-07/hls_avc_v6/in
 VIETNAM_PROXY_LIST_URL = "https://raw.githubusercontent.com/hproxy-com/free-proxy-list/main/by-country/VN.txt"
 OUTPUT_M3U = os.environ.get("OUTPUT_M3U", "generated/fpt-event-live.m3u")
 OUTPUT_STATUS = os.environ.get("OUTPUT_STATUS", "generated/fpt-event-live.status.json")
-MAX_PROXY_TRIES = int(os.environ.get("MAX_PROXY_TRIES", "120"))
+MAX_PROXY_TRIES = int(os.environ.get("MAX_PROXY_TRIES", "24"))
 MAX_WORKERS = int(os.environ.get("MAX_WORKERS", "4"))
 PROBE_TIMEOUT = int(os.environ.get("PROBE_TIMEOUT", "6"))
 
@@ -181,39 +181,60 @@ def load_proxies():
     return list(dict.fromkeys(proxies))
 
 def probe_via_rotating_proxies(item, proxies, max_proxy_tries=8):
-    # Direct first: some FPT POPs may allow direct requests.
+    # Direct first: some FPT POPs may allow requests without a proxy.
     direct = curl_probe(item["url"])
     if direct["status"] == 200:
         return classify(item, direct), "direct"
     if direct["status"] in (404, 410):
         return classify(item, direct), "direct"
 
-    # FPT can rate-limit/kill a free proxy after a few requests. Each source URL
-    # therefore gets its own rotating proxy attempts instead of reusing one proxy
-    # for the whole 46-entry scan.
-    tried = set()
-    attempts = 0
-    for proxy in proxies:
-        if proxy in tried:
-            continue
-        tried.add(proxy)
-        attempts += 1
+    # Free proxies are volatile. Try a bounded set in parallel for THIS URL,
+    # then take the first definitive response. This avoids serially waiting on
+    # dead proxies and prevents one proxy from being reused across 46 URLs.
+    candidates = [p for p in proxies[:max_proxy_tries] if p]
+    if not candidates:
+        return {
+            "name": item["name"], "url": item["url"], "live": False,
+            "status": direct["status"], "content_type": direct["content_type"],
+            "error": direct["error"] or f"HTTP {direct['status']}",
+            "inactive_reason": None,
+        }, None
+
+    def test(proxy):
         result = curl_probe(item["url"], proxy)
         if result["status"] == 200:
-            classified = classify(item, result)
-            # Valid manifest is enough to accept the exact source URL.
-            if classified["live"]:
-                return classified, proxy
-            # A real HTTP 200 non-live manifest is still definitive for this URL.
-            if classified["content_type"] or result["body"]:
-                return classified, proxy
-        elif result["status"] in (404, 410):
-            return classify(item, result), proxy
+            return proxy, classify(item, result)
+        if result["status"] in (404, 410):
+            return proxy, classify(item, result)
+        return None
 
-        if attempts >= max_proxy_tries:
-            break
+    with concurrent.futures.ThreadPoolExecutor(max_workers=min(8, len(candidates))) as pool:
+        futures = [pool.submit(test, proxy) for proxy in candidates]
+        definitive = []
+        for future in concurrent.futures.as_completed(futures):
+            try:
+                found = future.result()
+                if not found:
+                    continue
+                proxy, classified = found
+                if classified["live"]:
+                    for other in futures:
+                        if not other.done():
+                            other.cancel()
+                    return classified, proxy
+                definitive.append((proxy, classified))
+            except Exception:
+                pass
 
-    fallback = {
+    if definitive:
+        # Prefer a non-error definitive response if every tested proxy missed live.
+        definitive.sort(key=lambda pair: (
+            pair[1]["error"] is not None,
+            pair[1]["status"] == 0,
+        ))
+        return definitive[0][1], definitive[0][0]
+
+    return {
         "name": item["name"],
         "url": item["url"],
         "live": False,
@@ -221,8 +242,8 @@ def probe_via_rotating_proxies(item, proxies, max_proxy_tries=8):
         "content_type": direct["content_type"],
         "error": direct["error"] or f"HTTP {direct['status']}",
         "inactive_reason": None,
-    }
-    return fallback, None
+    }, None
+
 
 def scan_all(candidates, proxies):
     results = []
