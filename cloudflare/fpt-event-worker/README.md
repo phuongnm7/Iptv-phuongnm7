@@ -12,7 +12,7 @@ Bản v7 được thiết kế để chạy an toàn trên Workers Free:
 - 1 probe chính cho mỗi endpoint.
 - Tối đa 2 probe fallback cho các trường hợp 401/403 hoặc redirect.
 - Tổng ngân sách do code tự giới hạn ở **49 external subrequests/invocation**, giữ 1 request dự phòng dưới giới hạn 50 của Workers Free.
-- Không còn Promise.all khởi chạy toàn bộ 46 probe cùng lúc; pool tối đa 5 probe đồng thời.
+- Không còn Promise.all khởi chạy toàn bộ 46 probe cùng lúc; pool tối đa 3 probe đồng thời.
 - Probe manifest dùng redirect: manual để redirect không âm thầm tiêu thêm subrequest.
 - Có timeout 8 giây cho từng probe.
 - Nếu source tăng vượt kích thước quét an toàn, Worker **fail rõ ràng** thay vì âm thầm bỏ qua endpoint.
@@ -71,7 +71,7 @@ https://nm7-fpt-event-live.phuongnm7-iptv.workers.dev/scan
 - scanHealthy
 - scanDegraded
 - stalePlaylist
-- preservedBecauseQuotaFailure
+- preservedBecauseDegradedScan
 - quotaFailureDetected
 - scanDurationMs
 - subrequestBudget.used
