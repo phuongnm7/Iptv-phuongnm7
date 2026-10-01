@@ -15,7 +15,12 @@ const CRON = "*/5 * * * *";
 const STATUS_TTL = 24 * 60 * 60;
 const MIN_MANUAL_SCAN_GAP_MS = 4 * 60 * 1000;
 const FALLBACK_MAX_AGE_MS = 30 * 60 * 1000;
-const WORKER_VERSION = "fpt-event-strict-live-v8";
+const WORKER_VERSION = "fpt-event-strict-live-v9";
+const ASSISTED_PLAYLIST_URL =
+  "https://raw.githubusercontent.com/vhd0/Stuff/main/m3u/listtivi.m3u";
+const ASSISTED_MAX_AGE_DAYS = 2;
+const ASSISTED_MAX_CANDIDATES = 20;
+const RECOVERY_ALTERNATE_PROBE_LIMIT = 40;
 
 // Cloudflare Workers Free: 50 external subrequests/invocation.
 // This worker needs 1 request for SOURCE_URL + 46 primary probes today.
@@ -94,6 +99,179 @@ function parseSource(text) {
     seen.add(item.url);
     return true;
   });
+}
+
+function extractFptEventKey(url) {
+  const match = String(url || "").match(
+    /\/live\/media\/((?:su-kien|event)-\d+(?:-4k)?)\/hls_avc_v6(?:\/|$)/i
+  );
+  return match ? match[1].toLowerCase() : null;
+}
+
+function parseExtinfLogo(line) {
+  const match = String(line || "").match(
+    /\btvg-logo="([^"]*)"/i
+  );
+  return match ? match[1] : "";
+}
+
+function extractPathDate(url) {
+  const match = String(url || "").match(
+    /\/(20\d{2})\/(\d{2})\/(\d{2})\//
+  );
+  if (!match) return null;
+  const value = Date.parse(
+    `${match[1]}-${match[2]}-${match[3]}T00:00:00Z`
+  );
+  return Number.isFinite(value) ? value : null;
+}
+
+function parseAssistedFptEvents(text) {
+  const lines = String(text || "").split(/\r?\n/);
+  const result = [];
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (!line.startsWith("#EXTINF")) continue;
+    const key = null;
+    let url = "";
+    for (let j = i + 1; j < lines.length; j++) {
+      const candidate = lines[j].trim();
+      if (!candidate) continue;
+      if (candidate.startsWith("#")) continue;
+      if (/^https?:\/\//i.test(candidate)) {
+        url = candidate;
+        i = j;
+      }
+      break;
+    }
+    const eventKey = extractFptEventKey(url);
+    if (!eventKey || !/\.m3u8(?:[?#]|$)/i.test(url)) continue;
+    result.push({
+      name:
+        (line.includes(",") ? line.slice(line.indexOf(",") + 1).trim() : "") ||
+        `FPT ${eventKey}`,
+      url,
+      eventKey,
+      logo: parseExtinfLogo(line),
+      logoDate: extractPathDate(parseExtinfLogo(line)),
+    });
+  }
+
+  const seen = new Set();
+  return result.filter((item) => {
+    const key = item.eventKey + "|" + item.url;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+function recoveryAlternateUrls(url) {
+  const key = extractFptEventKey(url);
+  if (!key) return [];
+
+  const urls = [];
+  urls.push(
+    `https://event-a.fptplay53.net/live/media/${key}/hls_avc_v6/${key}-avc1_5600000=10000.m3u8`
+  );
+
+  const suKien = key.match(/^su-kien-(\d{1,2})$/i);
+  if (suKien) {
+    const number = suKien[1].padStart(2, "0");
+    urls.push(
+      `https://livecdn.fptplay.net/schedule/sukien${number}_vhls.smil/chunklist_b5000000.m3u8`
+    );
+  } else {
+    urls.push(
+      `https://live.fptplay53.net/live/media/${key}/hls_avc_v6/index.m3u8`
+    );
+  }
+
+  return [...new Set(urls)];
+}
+
+async function getAssistedRecoveryCandidates(budget) {
+  const response = await fetchWithBudget(
+    ASSISTED_PLAYLIST_URL,
+    {
+      headers: {
+        "User-Agent": UAS[0],
+        "Cache-Control": "no-cache, no-store",
+        Pragma: "no-cache",
+      },
+      cache: "no-store",
+      redirect: "follow",
+    },
+    budget
+  );
+
+  if (!response.ok) {
+    throw new Error(`Assisted source HTTP ${response.status}`);
+  }
+
+  const text = await response.text();
+  const entries = parseAssistedFptEvents(text);
+  if (!entries.length) {
+    throw new Error("Assisted source contains no FPT event HLS entries");
+  }
+
+  const now = Date.now();
+  const freshnessCutoff = now - ASSISTED_MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
+  const freshEntries = entries.filter(
+    (entry) => entry.logoDate !== null && entry.logoDate >= freshnessCutoff
+  );
+
+  if (!freshEntries.length) {
+    throw new Error(
+      "Assisted source has FPT event entries but no recent event artwork metadata"
+    );
+  }
+
+  const byEvent = new Map();
+  for (const entry of freshEntries) {
+    const existing = byEvent.get(entry.eventKey);
+    if (!existing) {
+      byEvent.set(entry.eventKey, entry);
+    }
+  }
+
+  return [...byEvent.values()].slice(0, ASSISTED_MAX_CANDIDATES);
+}
+
+async function probeRecoveryCandidate(item, budget) {
+  const alternatives = recoveryAlternateUrls(item.url);
+  let lastResult = null;
+
+  for (const alternateUrl of alternatives) {
+    const result = await probeOnce(
+      item,
+      UAS[0],
+      budget,
+      alternateUrl
+    );
+    lastResult = {
+      ...result,
+      originalUrl: item.url,
+      url: alternateUrl,
+      assisted: true,
+      sourceEventKey: extractFptEventKey(item.url),
+    };
+
+    if (result.live) {
+      return lastResult;
+    }
+  }
+
+  return lastResult || {
+    ...item,
+    live: false,
+    error: "No alternate recovery URL",
+    httpStatus: null,
+    contentType: null,
+    protocol: protocolFor(item),
+    inactiveReason: "no-alternate-url",
+    userAgent: UAS[0],
+  };
 }
 
 function isLiveHls(text) {
@@ -325,10 +503,12 @@ function buildM3U(entries) {
   const lines = ["#EXTM3U", ""];
   for (const entry of entries) {
     lines.push(
-      `#EXTINF:-1 group-title="${GROUP}",${entry.name}`,
-      entry.url,
-      ""
+      `#EXTINF:-1 group-title="${GROUP}",${entry.name}`
     );
+    if (entry.userAgent) {
+      lines.push(`#EXTVLCOPT:http-user-agent=${entry.userAgent}`);
+    }
+    lines.push(entry.url, "");
   }
   return lines.join("\n");
 }
@@ -471,89 +651,103 @@ async function scan(env, meta = {}) {
       priorErrors.every((x) => Number(x.httpStatus) === 403));
 
   if (priorLooksBlocked) {
-    const recoveryStartIndex =
-      Number.isInteger(priorStatus.recoveryProbeIndex)
-        ? priorStatus.recoveryProbeIndex % priorHealthyChannels.length
-        : 0;
-    const recoveryCandidates = Array.from(
-      { length: Math.min(RECOVERY_PROBE_LIMIT, priorHealthyChannels.length) },
-      (_, offset) =>
-        priorHealthyChannels[
-          (recoveryStartIndex + offset) % priorHealthyChannels.length
-        ]
-    );
+    let assistedCandidates = [];
+    let assistedError = null;
 
-    const recoveryResults = await mapWithConcurrency(
-      recoveryCandidates,
-      1,
-      (item) => probeOnce(item, UAS[0], budget)
-    );
-
-    const recoveryHealthy = recoveryResults.some(
-      (item) => item.httpStatus === 200 && item.live
-    );
-    const recoverySaw403 = recoveryResults.some((item) => item.httpStatus === 403);
-    const recoverySawReachable = recoveryResults.some(
-      (item) =>
-        item.httpStatus !== null &&
-        item.httpStatus !== 403 &&
-        item.httpStatus !== 401
-    );
-    // Stay in low-frequency recovery until we have positive evidence that the
-    // upstream is reachable again. 403, 401, timeout and network failure are all
-    // treated as "not recovered yet"; 404/410/other HTTP responses count as reachable.
-    const recoveryLooksBlocked =
-      recoveryResults.length > 0 &&
-      !recoveryHealthy &&
-      !recoverySawReachable;
-
-    // Recovery never publishes stale entries through the strict live endpoint.
-    // The previous strict playlist stays stored for the next clean scan, while
-    // the separate fallback playlist remains available only at /fpt-event-fallback.m3u.
-    const playlist = previous.playlist;
-    const playlistEntries = 0;
-    let previousFallbackEntries =
-      previous.fallbackPlaylist.match(/^#EXTINF:/gm)?.length || 0;
-    let fallbackPublishedAtText = await env.FPT_EVENT_KV.get(
-      FALLBACK_PUBLISHED_AT_KEY
-    );
-    let fallbackPublishedAt = fallbackPublishedAtText
-      ? Number(fallbackPublishedAtText)
-      : 0;
-
-    // Migrate the persistent v7 last-known-good pool into the new separate
-    // fallback key the first time recovery mode is entered after v8 deploy.
-    if (previousFallbackEntries === 0 && priorHealthyChannels.length > 0) {
-      const migratedFallback = buildM3U(priorHealthyChannels);
-      await env.FPT_EVENT_KV.put(FALLBACK_PLAYLIST_KEY, migratedFallback);
-      fallbackPublishedAt = fallbackPublishedAt || Date.now();
-      await env.FPT_EVENT_KV.put(
-        FALLBACK_PUBLISHED_AT_KEY,
-        String(fallbackPublishedAt)
-      );
-      previousFallbackEntries = priorHealthyChannels.length;
-      fallbackPublishedAtText = String(fallbackPublishedAt);
+    try {
+      assistedCandidates = await getAssistedRecoveryCandidates(budget);
+    } catch (error) {
+      assistedError = error instanceof Error ? error.message : String(error);
     }
 
-    const publishedAtText = await env.FPT_EVENT_KV.get(PUBLISHED_AT_KEY);
-    const publishedAt = publishedAtText ? Number(publishedAtText) : 0;
+    if (!assistedCandidates.length) {
+      assistedCandidates = priorHealthyChannels
+        .filter((item) => extractFptEventKey(item.url))
+        .slice(0, Math.floor(RECOVERY_ALTERNATE_PROBE_LIMIT / 2));
+    }
+
+    const recoveryResults = [];
+    let recoveryProbeCount = 0;
+
+    for (const item of assistedCandidates) {
+      const alternatives = recoveryAlternateUrls(item.url);
+      const maxForItem = Math.min(alternatives.length, 2);
+      if (!maxForItem) continue;
+
+      const result = await probeRecoveryCandidate(item, budget);
+      recoveryResults.push(result);
+      recoveryProbeCount += alternatives.length;
+
+      if (budget.used >= MAX_EXTERNAL_SUBREQUESTS) break;
+      if (recoveryProbeCount >= RECOVERY_ALTERNATE_PROBE_LIMIT) break;
+    }
+
+    const alternateLive = recoveryResults
+      .filter((item) => item.live)
+      .map((item) => ({
+        name: item.name,
+        url: item.url,
+        userAgent: item.userAgent || UAS[0],
+      }));
+
+    const uniqueLive = [];
+    const seenLive = new Set();
+    for (const item of alternateLive) {
+      if (seenLive.has(item.url)) continue;
+      seenLive.add(item.url);
+      uniqueLive.push(item);
+    }
+
+    const alternateProbeErrors = recoveryResults.filter((x) => x.error).length;
+    const alternate403 = recoveryResults.filter(
+      (x) => Number(x.httpStatus) === 403
+    ).length;
+    const alternateReachable = recoveryResults.some(
+      (x) =>
+        x.httpStatus !== null &&
+        x.httpStatus !== 403 &&
+        x.httpStatus !== 401
+    );
+
+    const playlist =
+      uniqueLive.length > 0
+        ? buildM3U(uniqueLive)
+        : previous.playlist;
+
+    if (uniqueLive.length > 0) {
+      await env.FPT_EVENT_KV.put(PLAYLIST_KEY, playlist);
+      await env.FPT_EVENT_KV.put(PUBLISHED_AT_KEY, String(Date.now()));
+      await env.FPT_EVENT_KV.put(
+        FALLBACK_PLAYLIST_KEY,
+        playlist
+      );
+      await env.FPT_EVENT_KV.put(
+        FALLBACK_PUBLISHED_AT_KEY,
+        String(Date.now())
+      );
+      await env.FPT_EVENT_KV.put(
+        HEALTHY_CHANNELS_KEY,
+        JSON.stringify(uniqueLive)
+      );
+    }
+
+    const previousFallbackEntries =
+      previous.fallbackPlaylist.match(/^#EXTINF:/gm)?.length || 0;
+
     const status = {
       ...priorStatus,
       ok: true,
       scanHealthy: false,
       scanDegraded: true,
       recoveryMode: true,
-      recoveryProbeSucceeded: recoveryHealthy,
-      recoverySaw403,
-      sourceBlocked: recoveryLooksBlocked,
-      recoveryProbeIndex:
-        (recoveryStartIndex + recoveryResults.length) % priorHealthyChannels.length,
-      recoverySawReachable,
-      stalePlaylist: false,
-      staleExpired: false,
-      fallbackStale: true,
-      filteringUnavailable: true,
-      restoredFromLastKnownGood: false,
+      recoveryProbeSucceeded: uniqueLive.length > 0,
+      recoverySaw403:
+        alternate403 > 0 || priorStatus.recoverySaw403 === true,
+      sourceBlocked: true,
+      recoverySawReachable: alternateReachable,
+      alternatePathVerification: uniqueLive.length > 0,
+      strictVerificationMode:
+        uniqueLive.length > 0 ? "alternate-path" : "upstream-unverified",
       workerVersion: WORKER_VERSION,
       generatedAt: new Date().toISOString(),
       scanDurationMs: Date.now() - scanStarted,
@@ -562,63 +756,84 @@ async function scan(env, meta = {}) {
       scheduledTime: meta.scheduledTime
         ? new Date(meta.scheduledTime).toISOString()
         : null,
-      playlistEntries,
-      verifiedPlaylistEntries:
-        Array.isArray(priorStatus.lastCleanLiveChannels)
-          ? priorStatus.lastCleanLiveChannels.length
-          : 0,
-      fallbackPlaylistEntries:
-        previousFallbackEntries > 0
-          ? previousFallbackEntries
-          : LAST_KNOWN_GOOD.length,
+      sourceUrl: SOURCE_URL,
+      assistedSourceUrl: ASSISTED_PLAYLIST_URL,
+      assistedCandidates: assistedCandidates.length,
+      assistedError,
+      playlistEntries: uniqueLive.length,
+      verifiedPlaylistEntries: uniqueLive.length,
+      liveEntries: uniqueLive.length,
+      currentScanLiveEntries: uniqueLive.length,
       publishedFromCurrentScan: false,
-      fallbackPublishedAt: fallbackPublishedAt
-        ? new Date(fallbackPublishedAt).toISOString()
-        : null,
+      publishedFromAlternatePath: uniqueLive.length > 0,
+      filteringUnavailable: uniqueLive.length === 0,
+      stalePlaylist: false,
+      staleExpired: false,
+      fallbackStale: false,
+      fallbackPlaylistEntries:
+        uniqueLive.length > 0
+          ? uniqueLive.length
+          : previousFallbackEntries,
+      fallbackPublishedAt:
+        uniqueLive.length > 0
+          ? new Date().toISOString()
+          : priorStatus.fallbackPublishedAt || null,
       lastCleanLiveChannels:
-        Array.isArray(priorStatus.lastCleanLiveChannels) &&
-        priorStatus.lastCleanLiveChannels.length > 0
-          ? priorStatus.lastCleanLiveChannels
-          : priorHealthyChannels,
+        uniqueLive.length > 0
+          ? uniqueLive
+          : priorStatus.lastCleanLiveChannels || [],
       lastHealthyLiveChannels:
-        priorHealthyChannels.length > 0
-          ? priorHealthyChannels
-          : LAST_KNOWN_GOOD,
+        uniqueLive.length > 0
+          ? uniqueLive
+          : priorHealthyChannels,
+      recoveryProbeLimit: RECOVERY_ALTERNATE_PROBE_LIMIT,
+      recoveryProbesUsed: recoveryResults.length,
+      alternateProbeErrors,
+      alternateReachable,
+      allAlternateErrors403:
+        recoveryResults.length > 0 &&
+        recoveryResults.every(
+          (x) => x.error && Number(x.httpStatus) === 403
+        ),
       subrequestBudget: {
         maxExternalSubrequests: MAX_EXTERNAL_SUBREQUESTS,
         used: budget.used,
         reservedMargin: 50 - MAX_EXTERNAL_SUBREQUESTS,
         primaryProbes: 0,
-        recoveryProbeLimit: RECOVERY_PROBE_LIMIT,
+        recoveryProbeLimit: RECOVERY_ALTERNATE_PROBE_LIMIT,
         recoveryProbesUsed: recoveryResults.length,
         fallbackProbeLimit: MAX_FALLBACK_PROBES,
         fallbackProbesUsed: 0,
         concurrency: 1,
       },
+      liveChannels: uniqueLive,
+      errors: recoveryResults
+        .filter((x) => x.error)
+        .slice(0, 20)
+        .map((x) => ({
+          name: x.name,
+          url: x.url,
+          originalUrl: x.originalUrl || null,
+          protocol: x.protocol,
+          httpStatus: x.httpStatus || null,
+          error: x.error,
+          assisted: x.assisted || false,
+        })),
+      message:
+        uniqueLive.length > 0
+          ? "Primary FPT CDN is still blocked, but current FPT events were re-verified through alternate FPT playback paths. The strict playlist contains only streams that returned a live manifest."
+          : assistedError
+            ? "Primary FPT CDN is still blocked and the assisted event source could not provide fresh candidates; alternate recovery continues from the last known-good event keys."
+            : "Primary FPT CDN is still blocked; alternate FPT recovery probes found no currently verifiable live event stream."
     };
 
-    if (recoveryHealthy) {
-      status.sourceBlocked = false;
-      status.message =
-        "Recovery probe found a live FPT stream; full source scan will resume on the next 5-minute Cron.";
-    } else if (recoverySawReachable) {
-      status.sourceBlocked = false;
-      status.message =
-        "FPT source is reachable again but the sampled recovery streams are not live; full source scan will resume on the next 5-minute Cron.";
-    } else {
-      status.sourceBlocked = recoveryLooksBlocked;
-      status.message =
-        "FPT source still appears blocked; strict live playlist is intentionally empty until a clean scan verifies the current live set. Use /fpt-event-fallback.m3u only for temporary recovery playback.";
-    }
-
     await env.FPT_EVENT_KV.put(
-      HEALTHY_CHANNELS_KEY,
-      JSON.stringify(status.lastHealthyLiveChannels)
+      STATUS_KEY,
+      JSON.stringify(status),
+      { expirationTtl: STATUS_TTL }
     );
-    await env.FPT_EVENT_KV.put(STATUS_KEY, JSON.stringify(status), {
-      expirationTtl: STATUS_TTL,
-    });
     console.log(JSON.stringify(status));
+
     return { playlist, status };
   }
 
@@ -866,7 +1081,9 @@ export default {
     ) {
       const state = await getStored(env);
       const strictMode = url.pathname === "/fpt-event-live.m3u";
-      const cleanScan = state.status?.scanHealthy === true;
+      const cleanScan =
+        state.status?.scanHealthy === true ||
+        state.status?.strictVerificationMode === "alternate-path";
 
       let playlist = strictMode ? state.playlist : state.fallbackPlaylist;
       let fallbackAgeMs = null;
@@ -922,9 +1139,11 @@ export default {
           "X-NM7-FPT-Events": String(playlistEntries),
           "X-NM7-FPT-Verified": String(verified),
           "X-NM7-FPT-Filter": strictMode
-            ? cleanScan
-              ? "clean-scan-live-only"
-              : "upstream-unverified"
+            ? state.status?.strictVerificationMode === "alternate-path"
+              ? "alternate-live-verified"
+              : cleanScan
+                ? "clean-scan-live-only"
+                : "upstream-unverified"
             : "last-clean-fallback",
           "X-NM7-FPT-Version": WORKER_VERSION,
         },
