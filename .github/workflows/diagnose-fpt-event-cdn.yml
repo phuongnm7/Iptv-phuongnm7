@@ -81,6 +81,29 @@ jobs:
           echo
           rm -f /tmp/e07-range
 
+      - name: Inspect FPT Play session headers and client configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          HOME_URL="https://fptplay.vn/"
+          EVENT07="https://vips-livecdn.fptplay.net/live/media/event-07/hls_avc_v6/index.m3u8"
+          echo "=== FPT Play homepage headers/cookies ==="
+          curl -fsSL -D /tmp/fpt.headers -c /tmp/fpt.cookies --max-time 30 "$HOME_URL" -o /tmp/fpt.html
+          sed -n '1,120p' /tmp/fpt.headers
+          echo "Cookies:"
+          cat /tmp/fpt.cookies || true
+          echo "Script URLs:"
+          grep -oE '<script[^>]+src="[^"]+"' /tmp/fpt.html | head -80 || true
+          echo "Searching homepage for FPL-Custom/X_ID/player configuration:"
+          grep -oiE 'FPL-Custom|X_ID|FPLCustom|livecdn|api\.fptplay[^" ]*' /tmp/fpt.html | head -100 || true
+
+          echo "=== event-07 with FPT homepage cookies ==="
+          curl -sS --http1.1 --max-time 20             -A "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 Chrome/140.0 Mobile Safari/537.36"             -H "Referer: https://fptplay.vn/"             -H "Origin: https://fptplay.vn"             -H "Accept: application/vnd.apple.mpegurl,application/x-mpegURL,*/*"             -b /tmp/fpt.cookies             -o /tmp/e07-cookie             -D /tmp/e07-cookie.headers             -w "status=%{http_code} type=%{content_type} size=%{size_download}\n"             "$EVENT07" || true
+          cat /tmp/e07-cookie.headers
+          head -c 500 /tmp/e07-cookie | tr '\n' ' ' || true
+          echo
+          rm -f /tmp/fpt.headers /tmp/fpt.cookies /tmp/fpt.html /tmp/e07-cookie /tmp/e07-cookie.headers
+
       - name: Check Worker status
         shell: bash
         run: |
