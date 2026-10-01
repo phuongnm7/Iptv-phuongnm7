@@ -365,6 +365,14 @@ async function recordFailure(env, error, meta = {}) {
     ...meta,
   };
 
+  if (cleanScan) {
+    await env.FPT_EVENT_KV.put(
+      HEALTHY_CHANNELS_KEY,
+      JSON.stringify(live),
+      { expirationTtl: PLAYLIST_TTL }
+    );
+  }
+
   await env.FPT_EVENT_KV.put(STATUS_KEY, JSON.stringify(status), {
     expirationTtl: STATUS_TTL,
   });
@@ -378,15 +386,11 @@ async function scan(env, meta = {}) {
 
   const previous = await getStored(env);
   const priorStatus = previous.status || {};
-  const priorHealthyChannels = Array.isArray(priorStatus.lastHealthyLiveChannels)
-    ? priorStatus.lastHealthyLiveChannels
-    : (() => {
-        try {
-          return JSON.parse(env.__NM7_NO_SUCH_VALUE || "null");
-        } catch {
-          return [];
-        }
-      })();
+  const priorHealthyChannels =
+    Array.isArray(priorStatus.lastHealthyLiveChannels) &&
+    priorStatus.lastHealthyLiveChannels.length > 0
+      ? priorStatus.lastHealthyLiveChannels
+      : LAST_KNOWN_GOOD;
 
   const priorErrors = Array.isArray(priorStatus.errors) ? priorStatus.errors : [];
   const priorLooksBlocked =
@@ -398,10 +402,17 @@ async function scan(env, meta = {}) {
       priorErrors.every((x) => Number(x.httpStatus) === 403));
 
   if (priorLooksBlocked) {
-    const recoveryCandidates =
-      priorHealthyChannels.length > 0
-        ? priorHealthyChannels.slice(0, RECOVERY_PROBE_LIMIT)
-        : LAST_KNOWN_GOOD.slice(0, RECOVERY_PROBE_LIMIT);
+    const recoveryStartIndex =
+      Number.isInteger(priorStatus.recoveryProbeIndex)
+        ? priorStatus.recoveryProbeIndex % priorHealthyChannels.length
+        : 0;
+    const recoveryCandidates = Array.from(
+      { length: Math.min(RECOVERY_PROBE_LIMIT, priorHealthyChannels.length) },
+      (_, offset) =>
+        priorHealthyChannels[
+          (recoveryStartIndex + offset) % priorHealthyChannels.length
+        ]
+    );
 
     const recoveryResults = await mapWithConcurrency(
       recoveryCandidates,
@@ -413,6 +424,13 @@ async function scan(env, meta = {}) {
       (item) => item.httpStatus === 200 && item.live
     );
     const recoverySaw403 = recoveryResults.some((item) => item.httpStatus === 403);
+    const recoverySawReachable = recoveryResults.some(
+      (item) =>
+        item.httpStatus !== null &&
+        item.httpStatus !== 403 &&
+        item.httpStatus !== 401
+    );
+    const recoveryLooksBlocked = recoveryResults.length > 0 && !recoveryHealthy && !recoverySawReachable && recoverySaw403;
 
     let playlist = previous.playlist;
     let restoredFromFallback = false;
@@ -434,7 +452,10 @@ async function scan(env, meta = {}) {
       recoveryMode: true,
       recoveryProbeSucceeded: recoveryHealthy,
       recoverySaw403,
-      sourceBlocked: !recoveryHealthy,
+      sourceBlocked: recoveryLooksBlocked,
+      recoveryProbeIndex:
+        (recoveryStartIndex + recoveryResults.length) % priorHealthyChannels.length,
+      recoverySawReachable,
       stalePlaylist: true,
       staleExpired: false,
       restoredFromLastKnownGood: restoredFromFallback,
@@ -468,10 +489,15 @@ async function scan(env, meta = {}) {
     if (recoveryHealthy) {
       status.sourceBlocked = false;
       status.message =
-        "Recovery probe succeeded; full source scan will resume on the next 5-minute Cron.";
-    } else {
+        "Recovery probe found a live FPT stream; full source scan will resume on the next 5-minute Cron.";
+    } else if (recoverySawReachable) {
+      status.sourceBlocked = false;
       status.message =
-        "FPT source still returns 403; preserving the last healthy playlist and reducing probe frequency.";
+        "FPT source is reachable again but the sampled recovery streams are not live; full source scan will resume on the next 5-minute Cron.";
+    } else {
+      status.sourceBlocked = recoveryLooksBlocked;
+      status.message =
+        "FPT source still appears blocked; preserving the last healthy playlist and reducing probe frequency.";
     }
 
     await env.FPT_EVENT_KV.put(
