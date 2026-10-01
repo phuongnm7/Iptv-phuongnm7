@@ -75,5 +75,9 @@ jobs:
             and (.liveEntries + .inactiveEntries + .probeErrors == .candidates)
             and .workerVersion == "fpt-event-resilient-v7-subrequest-safe"
             and .subrequestBudget.used <= .subrequestBudget.maxExternalSubrequests
+            and (
+              .scanHealthy == true
+              or (.playlistEntries > 0 and .stalePlaylist == true)
+            )
           ' >/dev/null
-          echo "Verified: v7 quota-safe scan completed without exceeding its external subrequest safety budget."
+          echo "Verified: v7 scan completed within the subrequest budget and did not publish an unexplained empty playlist."
