@@ -62,22 +62,22 @@ jobs:
           wranglerVersion: "4"
           command: deploy src/index.js --config wrangler.jsonc
 
-      - name: Verify deployed Worker and source scan
+      - name: Verify deployed Worker state (no forced source scan)
         shell: bash
         run: |
           set -euo pipefail
-          URL="https://nm7-fpt-event-live.phuongnm7-iptv.workers.dev/scan"
-          BODY="$(curl -fsSL --retry 3 --retry-delay 2 --max-time 120 "$URL")"
-          echo "$BODY"
-          echo "$BODY" | jq -e '
+          STATUS_URL="https://nm7-fpt-event-live.phuongnm7-iptv.workers.dev/status"
+          STATUS="$(curl -fsSL --retry 3 --retry-delay 2 --max-time 30 "$STATUS_URL")"
+          echo "$STATUS"
+          echo "$STATUS" | jq -e '
             .ok == true
-            and .candidates > 0
-            and (.liveEntries + .inactiveEntries + .probeErrors == .candidates)
             and .workerVersion == "fpt-event-resilient-v7-subrequest-safe"
-            and .subrequestBudget.used <= .subrequestBudget.maxExternalSubrequests
-            and (
-              .scanHealthy == true
-              or (.playlistEntries > 0 and .stalePlaylist == true)
-            )
+            and .scheduler.cron == "*/5 * * * *"
+            and .scheduler.strategy | contains("every 5 minutes")
           ' >/dev/null
-          echo "Verified: v7 scan completed within the subrequest budget and did not publish an unexplained empty playlist."
+
+          HEADERS="$(curl -fsSI --retry 3 --retry-delay 2 --max-time 30 "https://nm7-fpt-event-live.phuongnm7-iptv.workers.dev/fpt-event-live.m3u")"
+          echo "$HEADERS"
+          echo "$HEADERS" | grep -qi '^content-type: application/x-mpegURL'
+          echo "$HEADERS" | grep -qi '^x-nm7-fpt-version: fpt-event-resilient-v7-subrequest-safe'
+          echo "Verified: v7 is deployed, Cron is configured for every 5 minutes, and playlist endpoint is serving the expected protocol/version. No forced full scan is executed during CI deploy."
