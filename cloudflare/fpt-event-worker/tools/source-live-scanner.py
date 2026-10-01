@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # ops(fpt): run source scanner
+# verified syntax trigger
 import concurrent.futures
 import json
 import os
