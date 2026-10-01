@@ -14,15 +14,12 @@ from datetime import datetime, timezone
 
 SOURCE_URL = "https://raw.githubusercontent.com/phuongnm7/Iptv-phuongnm7/main/sources/fpt-events-source.m3u"
 EVENT7_URL = "https://vips-livecdn.fptplay.net/live/media/event-07/hls_avc_v6/index.m3u8"
-HPROXY_URL = (
-    "https://hproxy.com/api/proxy-list"
-    "?format=json&country=VN&protocol=http&recent=true&sort=uptime&limit=100"
-)
+VIETNAM_PROXY_LIST_URL = "https://raw.githubusercontent.com/hproxy-com/free-proxy-list/main/by-country/VN.txt"
 OUTPUT_M3U = os.environ.get("OUTPUT_M3U", "generated/fpt-event-live.m3u")
 OUTPUT_STATUS = os.environ.get("OUTPUT_STATUS", "generated/fpt-event-live.status.json")
-MAX_PROXY_TRIES = int(os.environ.get("MAX_PROXY_TRIES", "40"))
+MAX_PROXY_TRIES = int(os.environ.get("MAX_PROXY_TRIES", "120"))
 MAX_WORKERS = int(os.environ.get("MAX_WORKERS", "4"))
-PROBE_TIMEOUT = int(os.environ.get("PROBE_TIMEOUT", "15"))
+PROBE_TIMEOUT = int(os.environ.get("PROBE_TIMEOUT", "6"))
 
 HEADERS = [
     ("User-Agent", "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 Chrome/140.0 Mobile Safari/537.36"),
@@ -170,53 +167,28 @@ def classify(item, result):
     }
 
 def load_proxies():
-    data = json.loads(get_text(HPROXY_URL))
+    text = get_text(VIETNAM_PROXY_LIST_URL)
     proxies = []
-    for row in data:
-        if not row.get("ip") or not row.get("port"):
+    for line in text.splitlines():
+        line = line.strip()
+        if not line or line.startswith("#"):
             continue
-        protocols = row.get("protocols") or []
-        protocol = row.get("protocol") or ""
-        if "http" not in protocols and protocol != "http":
-            continue
-        proxies.append(f'{row["ip"]}:{row["port"]}')
-    return proxies
+        if ":" in line:
+            host, port = line.rsplit(":", 1)
+            if host and port.isdigit():
+                proxies.append(line)
+    # De-duplicate while preserving the current public ordering.
+    return list(dict.fromkeys(proxies))
 
 def find_working_proxy(proxies, candidates):
     direct = curl_probe(EVENT7_URL)
     if direct["status"] == 200 and is_live_hls(direct["body"]):
         return None, "direct"
 
-    probe_urls = []
-    seen = set()
-    for url in [EVENT7_URL] + [x["url"] for x in candidates[:6]]:
-        if url in seen:
-            continue
-        seen.add(url)
-        probe_urls.append(url)
-
     def test(proxy):
-        saw_reachable = False
-        saw_event07_live = False
-        for url in probe_urls:
-            result = curl_probe(url, proxy)
-            if result["status"] == 200:
-                if url == EVENT7_URL and is_live_hls(result["body"]):
-                    saw_event07_live = True
-                # A valid HTTP 200 response means the proxy reaches this FPT endpoint.
-                if (url == EVENT7_URL and is_live_hls(result["body"])) or (
-                    url != EVENT7_URL and (
-                        is_live_hls(result["body"]) if not url.lower().split("?", 1)[0].endswith(".mpd")
-                        else is_live_dash(result["body"])
-                    )
-                ):
-                    saw_reachable = True
-            elif result["status"] in (404, 410):
-                saw_reachable = True
-            if saw_event07_live:
-                return proxy, "event-07-live"
-        if saw_reachable:
-            return proxy, "source-url-reachable"
+        result = curl_probe(EVENT7_URL, proxy)
+        if result["status"] == 200 and is_live_hls(result["body"]):
+            return proxy, "event-07-live"
         return None
 
     # Try many fresh Vietnam HTTP proxies concurrently. The media target URLs are
