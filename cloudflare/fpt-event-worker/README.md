@@ -63,9 +63,13 @@ Cron Triggers chạy theo UTC.
 
 ## Endpoint
 
-Playlist:
+Strict live playlist:
 
 https://nm7-fpt-event-live.phuongnm7-iptv.workers.dev/fpt-event-live.m3u
+
+Temporary fallback playlist (30 phút):
+
+https://nm7-fpt-event-live.phuongnm7-iptv.workers.dev/fpt-event-fallback.m3u
 
 Status:
 
