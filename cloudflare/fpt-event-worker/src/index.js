@@ -542,8 +542,7 @@ async function scan(env, meta = {}) {
 
     await env.FPT_EVENT_KV.put(
       HEALTHY_CHANNELS_KEY,
-      JSON.stringify(status.lastHealthyLiveChannels),
-      { expirationTtl: PLAYLIST_TTL }
+      JSON.stringify(status.lastHealthyLiveChannels)
     );
     await env.FPT_EVENT_KV.put(STATUS_KEY, JSON.stringify(status), {
       expirationTtl: STATUS_TTL,
