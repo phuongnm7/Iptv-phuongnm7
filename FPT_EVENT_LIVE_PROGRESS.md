@@ -178,3 +178,32 @@ The filtering bug was confirmed to be caused by mixing the persistent last-known
 ### Operational rule going forward
 
 A new clean scan is required before /fpt-event-live.m3u shows channels again. When FPT becomes reachable, the next 5-minute Cron resumes the full 46-endpoint scan; only channels whose current manifests pass the live checks are published.
+
+## 2026-10-01 — v10 metadata-assisted current-event recovery
+
+### Research result
+- Server-side probes to the 46 official FPT event endpoints and the previously tested alternate FPT CDN paths continue to return HTTP 403 from datacenter/GitHub execution.
+- A useful independent signal was identified in two public playlist generators:
+  - `vhd0/Stuff` regenerates `m3u/listtivi.m3u` hourly and currently carries the FPT event subset.
+  - `vuminhthanh12/vuminhthanh12` regenerates `vmttv` whenever its source state changes and its FPT event section tracks additions/removals.
+- On 2026-10-01, the current `vhd0/Stuff` snapshot was committed at 15:35:49 UTC and contained the FPT event set; the latest `vmttv` change was 13:57:50 UTC.
+
+### v10 implementation
+- Worker version: `fpt-event-strict-live-v10`.
+- When the primary FPT source is globally blocked by 403, the Worker first fetches a fresh current-event metadata source and checks its latest Git commit timestamp.
+- Metadata snapshots older than 3 hours are rejected.
+- Only FPT event URLs with current event artwork metadata are included.
+- The strict endpoint can now publish these current-event candidates with:
+  - `X-NM7-FPT-Verified: false`
+  - `X-NM7-FPT-Filter: metadata-assisted-current-events`
+- `verifiedPlaylistEntries` remains 0 because direct CDN probing is still blocked.
+- The old last-known-good five-channel pool is not used to populate the current strict playlist.
+- A clean direct scan automatically supersedes the metadata-assisted state when FPT server-side access recovers.
+
+### Important limitation
+The metadata source tells us which FPT event streams are currently advertised by an independently refreshed playlist. It does not prove that the FPT CDN will accept a request from every client/network. The Worker therefore exposes the distinction explicitly instead of mislabelling metadata-assisted entries as directly verified live streams.
+
+### Deployment target
+- GitHub Actions must validate `fpt-event-strict-live-v10`.
+- Cron remains `*/5 * * * *`.
+- No CI step should force a new 46-endpoint FPT scan.

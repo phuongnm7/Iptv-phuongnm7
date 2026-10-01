@@ -49,7 +49,7 @@ jobs:
           echo "$STATUS"
           echo "$STATUS" | jq -e '
             .ok == true
-            and .workerVersion == "fpt-event-strict-live-v9"
+            and .workerVersion == "fpt-event-strict-live-v10"
           ' >/dev/null
 
           PLAYLIST="$(curl -fsSL --retry 3 --retry-delay 2 --max-time 30 "$BASE/fpt-event-live.m3u")"
@@ -58,7 +58,7 @@ jobs:
           HEADERS="$(curl -fsS -D - -o /dev/null --retry 3 --retry-delay 2 --max-time 30 "$BASE/fpt-event-live.m3u")"
           echo "$HEADERS"
           echo "$HEADERS" | grep -qi '^x-nm7-fpt-verified: '
-          echo "Verified: deployment did not force a new FPT source scan; strict live filtering is only published after a clean scan."
+          echo "Verified: deployment did not force a new FPT source scan; strict live filtering uses clean verification when available and metadata-assisted current-event tracking during upstream 403."
 
           FALLBACK_HEADERS="$(curl -fsS -D - -o /dev/null --retry 3 --retry-delay 2 --max-time 30 "$BASE/fpt-event-fallback.m3u")"
           echo "$FALLBACK_HEADERS"
@@ -73,7 +73,7 @@ jobs:
           echo "$STATUS"
           echo "$STATUS" | jq -e '
             .ok == true
-            and .workerVersion == "fpt-event-strict-live-v9"
+            and .workerVersion == "fpt-event-strict-live-v10"
             and .scheduler.cron == "*/5 * * * *"
             and ((.scheduler.strategy // "") | contains("every 5 minutes"))
           ' >/dev/null
@@ -81,5 +81,5 @@ jobs:
           HEADERS="$(curl -fsS -D - -o /dev/null --retry 3 --retry-delay 2 --max-time 30 "https://nm7-fpt-event-live.phuongnm7-iptv.workers.dev/fpt-event-live.m3u")"
           echo "$HEADERS"
           echo "$HEADERS" | grep -qi '^content-type: application/x-mpegURL'
-          echo "$HEADERS" | grep -qi '^x-nm7-fpt-version: fpt-event-strict-live-v9'
-          echo "Verified: v8 is deployed, Cron is configured for every 5 minutes, and the strict live endpoint is exposing the expected version. No forced full scan is executed during CI deploy."
+          echo "$HEADERS" | grep -qi '^x-nm7-fpt-version: fpt-event-strict-live-v10'
+          echo "Verified: v10 is deployed, Cron is configured for every 5 minutes, and the strict live endpoint is exposing the expected version. No forced full scan is executed during CI deploy."

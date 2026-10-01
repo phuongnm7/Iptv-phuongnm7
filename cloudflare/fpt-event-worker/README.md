@@ -6,7 +6,7 @@ Worker tự động tạo playlist **SỰ KIỆN FPT** từ source M3U trên Git
 
 Source hiện có **46 endpoint**: **38 HLS + 8 DASH**. Worker quét toàn bộ 46 endpoint trong mỗi chu kỳ 5 phút.
 
-Bản v8 được thiết kế để chạy an toàn trên Workers Free:
+Bản v10 giữ kiến trúc v8/v9 an toàn để chạy an toàn trên Workers Free:
 
 - 1 request lấy source M3U.
 - 1 probe chính cho mỗi endpoint.
@@ -19,23 +19,22 @@ Bản v8 được thiết kế để chạy an toàn trên Workers Free:
 
 Cloudflare Workers Free hiện giới hạn **50 external subrequests mỗi invocation**; Workers Paid mặc định là 10.000 và có thể cấu hình cao hơn. Redirect chain cũng có thể làm tăng số subrequest.
 
-## Chế độ lọc live v8
+## Chế độ lọc live v10
 
-Worker tách hai mục đích thành hai endpoint hoàn toàn riêng:
+Worker vẫn ưu tiên xác minh trực tiếp từ 46 endpoint. Khi FPT CDN trả HTTP 403 trên toàn bộ nguồn và việc probe từ datacenter không thể thực hiện, Worker chuyển sang **metadata-assisted current events**:
 
-- `/fpt-event-live.m3u`: **strict live**. Chỉ trả playlist sau khi lần quét 46 endpoint hoàn tất mà không có probe error. Nếu upstream FPT đang 403/timeout/network error, endpoint này trả M3U rỗng thay vì dùng dữ liệu cũ để giả làm kênh đang live.
-- `/fpt-event-fallback.m3u`: playlist dự phòng từ lần clean scan gần nhất, được giới hạn tuổi tối đa 30 phút. Endpoint này chỉ dùng khi cần duy trì khả năng phát tạm thời trong lúc FPT CDN bị chặn.
+- Nguồn ưu tiên: `vhd0/Stuff/m3u/listtivi.m3u`, được cập nhật tự động theo giờ; nguồn phụ: `vuminhthanh12/vmttv`.
+- Worker kiểm tra thời điểm commit gần nhất của nguồn và chỉ nhận snapshot còn mới trong tối đa 3 giờ.
+- Chỉ các entry FPT Event có URL `/live/media/su-kien-XX/` hoặc `/live/media/event-XX/` và metadata ảnh sự kiện gần đây mới được nhận.
+- `/fpt-event-live.m3u` vẫn giữ `X-NM7-FPT-Verified: false` trong chế độ này. Header `X-NM7-FPT-Filter: metadata-assisted-current-events` cho biết playlist đang theo dõi danh sách sự kiện hiện tại qua metadata, không phải kết quả probe CDN trực tiếp.
+- Khi FPT cho phép server-side probe trở lại, Worker tự quay về clean 46-endpoint scan và chỉ khi đó `X-NM7-FPT-Verified` trở lại `true`.
 
-Các header mới của playlist strict:
-
-- `X-NM7-FPT-Verified: true|false`
-- `X-NM7-FPT-Filter: clean-scan-live-only|upstream-unverified`
-
-`/status` phân biệt rõ `liveEntries`, `verifiedPlaylistEntries`, `fallbackPlaylistEntries`, `filteringUnavailable` và `lastCleanLiveChannels`.
+Điểm này giải quyết việc playlist bị rỗng khi FPT chặn datacenter, đồng thời không quay lại lỗi cũ là lấy 5 kênh cũ rồi giả định chúng đang live.
 
 ## Mục tiêu playlist
 
-Chỉ những stream đã xác nhận là live mới được đưa vào playlist:
+
+Ở chế độ clean scan, chỉ những stream đã xác nhận là live mới được đưa vào playlist; khi FPT chặn probe server-side, metadata-assisted mode chỉ đưa các event hiện đang được nguồn cập nhật quảng bá.
 
 - HLS: phải là #EXTM3U, không có #EXT-X-ENDLIST, không phải VOD, và có segment/variant/media sequence.
 - DASH: phải là MPD hợp lệ, không phải type=static, và có tín hiệu live (dynamic, minimumUpdatePeriod, timeShiftBufferDepth, availabilityStartTime hoặc suggestedPresentationDelay) cùng cấu trúc media.
@@ -116,9 +115,15 @@ Deploy:
 
     npx wrangler deploy --config wrangler.jsonc
 
-Workflow GitHub Actions .github/workflows/deploy-fpt-event-worker.yml tự deploy khi có thay đổi trong Worker, chạy `node --check`, kiểm tra workerVersion v8, header trạng thái lọc và endpoint fallback mà không ép chạy `/scan`.
+Workflow GitHub Actions .github/workflows/deploy-fpt-event-worker.yml tự deploy khi có thay đổi trong Worker, chạy `node --check`, kiểm tra workerVersion v10, header trạng thái lọc và endpoint fallback mà không ép chạy `/scan`.
 
 ## Nguồn
+
+### Metadata recovery sources
+
+- `https://raw.githubusercontent.com/vhd0/Stuff/main/m3u/listtivi.m3u` — nguồn ưu tiên khi FPT server-side probe bị 403; được cập nhật định kỳ.
+- `https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/main/vmttv` — nguồn dự phòng current-event metadata.
+
 
 Worker lấy source từ:
 

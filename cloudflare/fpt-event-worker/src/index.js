@@ -15,10 +15,29 @@ const CRON = "*/5 * * * *";
 const STATUS_TTL = 24 * 60 * 60;
 const MIN_MANUAL_SCAN_GAP_MS = 4 * 60 * 1000;
 const FALLBACK_MAX_AGE_MS = 30 * 60 * 1000;
-const WORKER_VERSION = "fpt-event-strict-live-v9";
-const ASSISTED_PLAYLIST_URL =
-  "https://raw.githubusercontent.com/vhd0/Stuff/main/m3u/listtivi.m3u";
-const ASSISTED_MAX_AGE_DAYS = 2;
+const WORKER_VERSION = "fpt-event-strict-live-v10";
+
+// When FPT blocks datacenter probes with HTTP 403, use a public playlist that is
+// regenerated from current upstream sources as a metadata oracle. The resulting
+// entries are explicitly marked metadata-assisted and are never advertised as
+// directly CDN-verified by this Worker.
+const ASSISTED_SOURCES = [
+  {
+    name: "vhd0/Stuff",
+    playlistUrl:
+      "https://raw.githubusercontent.com/vhd0/Stuff/main/m3u/listtivi.m3u",
+    commitUrl:
+      "https://api.github.com/repos/vhd0/Stuff/commits?path=m3u/listtivi.m3u&per_page=1",
+  },
+  {
+    name: "vuminhthanh12/vmttv",
+    playlistUrl:
+      "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/main/vmttv",
+    commitUrl:
+      "https://api.github.com/repos/vuminhthanh12/vuminhthanh12/commits?path=vmttv&per_page=1",
+  },
+];
+const ASSISTED_MAX_COMMIT_AGE_MS = 3 * 60 * 60 * 1000;
 const ASSISTED_MAX_CANDIDATES = 20;
 const RECOVERY_ALTERNATE_PROBE_LIMIT = 40;
 
@@ -103,7 +122,7 @@ function parseSource(text) {
 
 function extractFptEventKey(url) {
   const match = String(url || "").match(
-    /\/live\/media\/((?:su-kien|event)-\d+(?:-4k)?)\/hls_avc_v6(?:\/|$)/i
+    /\/live\/media\/((?:su-kien|event)-\d+(?:-4k)?)(?:\/hls_avc_v6|\/dash_hvc)(?:\/|$)/i
   );
   return match ? match[1].toLowerCase() : null;
 }
@@ -145,7 +164,7 @@ function parseAssistedFptEvents(text) {
       break;
     }
     const eventKey = extractFptEventKey(url);
-    if (!eventKey || !/\.m3u8(?:[?#]|$)/i.test(url)) continue;
+    if (!eventKey || !/\.(?:m3u8|mpd)(?:[?#]|$)/i.test(url)) continue;
     result.push({
       name:
         (line.includes(",") ? line.slice(line.indexOf(",") + 1).trim() : "") ||
@@ -164,6 +183,146 @@ function parseAssistedFptEvents(text) {
     seen.add(key);
     return true;
   });
+}
+
+async function getCurrentAssistedEvents(budget) {
+  const failures = [];
+
+  for (const source of ASSISTED_SOURCES) {
+    try {
+      const response = await fetchWithBudget(
+        source.playlistUrl,
+        {
+          headers: {
+            "User-Agent": UAS[0],
+            "Cache-Control": "no-cache, no-store",
+            Pragma: "no-cache",
+          },
+          cache: "no-store",
+          redirect: "follow",
+        },
+        budget
+      );
+
+      if (!response.ok) {
+        throw new Error(`playlist HTTP ${response.status}`);
+      }
+
+      const text = await response.text();
+      const entries = parseAssistedFptEvents(text);
+
+      if (!entries.length) {
+        throw new Error("no current FPT event entries");
+      }
+
+      const commitResponse = await fetchWithBudget(
+        source.commitUrl,
+        {
+          headers: {
+            "User-Agent": UAS[0],
+            Accept: "application/vnd.github+json",
+            "Cache-Control": "no-cache, no-store",
+            Pragma: "no-cache",
+          },
+          cache: "no-store",
+          redirect: "follow",
+        },
+        budget
+      );
+
+      if (!commitResponse.ok) {
+        throw new Error(`commit API HTTP ${commitResponse.status}`);
+      }
+
+      const commits = await commitResponse.json();
+      const latestCommitDate =
+        commits?.[0]?.commit?.committer?.date ||
+        commits?.[0]?.commit?.author?.date ||
+        null;
+      const latestCommitAt = latestCommitDate
+        ? Date.parse(latestCommitDate)
+        : NaN;
+
+      if (!Number.isFinite(latestCommitAt)) {
+        throw new Error("assisted source has no usable update timestamp");
+      }
+
+      const ageMs = Date.now() - latestCommitAt;
+      if (ageMs < 0 || ageMs > ASSISTED_MAX_COMMIT_AGE_MS) {
+        throw new Error(
+          `assisted source is stale (${Math.round(ageMs / 60000)} minutes old)`
+        );
+      }
+
+      const now = Date.now();
+      const artworkCutoff =
+        now - 2 * 24 * 60 * 60 * 1000;
+
+      const freshEntries = entries.filter(
+        (entry) =>
+          entry.logoDate !== null &&
+          entry.logoDate >= artworkCutoff
+      );
+
+      if (!freshEntries.length) {
+        throw new Error(
+          "assisted source has no recent FPT event artwork metadata"
+        );
+      }
+
+      const byEvent = new Map();
+      for (const entry of freshEntries) {
+        // Prefer the highest-level stream representation for a given event key.
+        const existing = byEvent.get(entry.eventKey);
+        if (!existing) {
+          byEvent.set(entry.eventKey, {
+            ...entry,
+            source: source.name,
+            sourceUpdatedAt: new Date(latestCommitAt).toISOString(),
+            sourceAgeMs: ageMs,
+            verification: "metadata-assisted",
+          });
+        } else if (
+          existing.protocol !== "DASH" &&
+          protocolFor(entry) === "DASH"
+        ) {
+          byEvent.set(entry.eventKey, {
+            ...entry,
+            source: source.name,
+            sourceUpdatedAt: new Date(latestCommitAt).toISOString(),
+            sourceAgeMs: ageMs,
+            verification: "metadata-assisted",
+          });
+        }
+      }
+
+      const limited = [...byEvent.values()].slice(
+        0,
+        ASSISTED_MAX_CANDIDATES
+      );
+
+      if (!limited.length) {
+        throw new Error("assisted source produced no usable FPT events");
+      }
+
+      return {
+        entries: limited,
+        source: source.name,
+        sourceUpdatedAt: new Date(latestCommitAt).toISOString(),
+        sourceAgeMs: ageMs,
+      };
+    } catch (error) {
+      failures.push(
+        `${source.name}: ${error instanceof Error ? error.message : String(error)}`
+      );
+    }
+  }
+
+  throw new Error(
+    failures.length
+      ? `No fresh assisted FPT event source: ${failures.join(" | ")}`
+      : "No assisted FPT event source available"
+  );
 }
 
 function recoveryAlternateUrls(url) {
@@ -188,54 +347,6 @@ function recoveryAlternateUrls(url) {
   }
 
   return [...new Set(urls)];
-}
-
-async function getAssistedRecoveryCandidates(budget) {
-  const response = await fetchWithBudget(
-    ASSISTED_PLAYLIST_URL,
-    {
-      headers: {
-        "User-Agent": UAS[0],
-        "Cache-Control": "no-cache, no-store",
-        Pragma: "no-cache",
-      },
-      cache: "no-store",
-      redirect: "follow",
-    },
-    budget
-  );
-
-  if (!response.ok) {
-    throw new Error(`Assisted source HTTP ${response.status}`);
-  }
-
-  const text = await response.text();
-  const entries = parseAssistedFptEvents(text);
-  if (!entries.length) {
-    throw new Error("Assisted source contains no FPT event HLS entries");
-  }
-
-  const now = Date.now();
-  const freshnessCutoff = now - ASSISTED_MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
-  const freshEntries = entries.filter(
-    (entry) => entry.logoDate !== null && entry.logoDate >= freshnessCutoff
-  );
-
-  if (!freshEntries.length) {
-    throw new Error(
-      "Assisted source has FPT event entries but no recent event artwork metadata"
-    );
-  }
-
-  const byEvent = new Map();
-  for (const entry of freshEntries) {
-    const existing = byEvent.get(entry.eventKey);
-    if (!existing) {
-      byEvent.set(entry.eventKey, entry);
-    }
-  }
-
-  return [...byEvent.values()].slice(0, ASSISTED_MAX_CANDIDATES);
 }
 
 async function probeRecoveryCandidate(item, budget) {
@@ -502,8 +613,19 @@ async function mapWithConcurrency(items, limit, mapper) {
 function buildM3U(entries) {
   const lines = ["#EXTM3U", ""];
   for (const entry of entries) {
+    const attrs = [
+      `group-title="${GROUP}"`,
+      entry.tvgId ? `tvg-id="${String(entry.tvgId).replaceAll('"', "&quot;")}"` : "",
+      entry.tvgName
+        ? `tvg-name="${String(entry.tvgName).replaceAll('"', "&quot;")}"`
+        : "",
+      entry.logo
+        ? `tvg-logo="${String(entry.logo).replaceAll('"', "&quot;")}"`
+        : "",
+    ].filter(Boolean).join(" ");
+
     lines.push(
-      `#EXTINF:-1 group-title="${GROUP}",${entry.name}`
+      `#EXTINF:-1 ${attrs},${entry.name}`
     );
     if (entry.userAgent) {
       lines.push(`#EXTVLCOPT:http-user-agent=${entry.userAgent}`);
@@ -651,13 +773,122 @@ async function scan(env, meta = {}) {
       priorErrors.every((x) => Number(x.httpStatus) === 403));
 
   if (priorLooksBlocked) {
-    let assistedCandidates = [];
+    let assistedSnapshot = null;
     let assistedError = null;
 
     try {
-      assistedCandidates = await getAssistedRecoveryCandidates(budget);
+      assistedSnapshot = await getCurrentAssistedEvents(budget);
     } catch (error) {
       assistedError = error instanceof Error ? error.message : String(error);
+    }
+
+    // Primary FPT probes are globally blocked by 403. Before retrying alternate
+    // hostnames, prefer the newest current-event metadata source so the public
+    // playlist can still track additions/removals without claiming direct
+    // CDN verification.
+    if (assistedSnapshot?.entries?.length) {
+      const entries = assistedSnapshot.entries.map((entry) => ({
+        name: entry.name,
+        url: entry.url,
+        userAgent: UAS[0],
+        tvgId: entry.tvgId || "",
+        tvgName: entry.tvgName || entry.name,
+        logo: entry.logo || "",
+        verification: "metadata-assisted",
+      }));
+
+      const playlist = buildM3U(entries);
+      const publishedAt = new Date().toISOString();
+
+      await env.FPT_EVENT_KV.put(PLAYLIST_KEY, playlist);
+      await env.FPT_EVENT_KV.put(PUBLISHED_AT_KEY, String(Date.now()));
+
+      const previousFallbackEntries =
+        previous.fallbackPlaylist.match(/^#EXTINF:/gm)?.length || 0;
+
+      const status = {
+        ...priorStatus,
+        ok: true,
+        scanHealthy: false,
+        scanDegraded: true,
+        recoveryMode: true,
+        recoveryProbeSucceeded: false,
+        recoverySaw403: true,
+        sourceBlocked: true,
+        workerVersion: WORKER_VERSION,
+        strictVerificationMode: "metadata-assisted-current-events",
+        generatedAt: publishedAt,
+        scanDurationMs: Date.now() - scanStarted,
+        trigger: meta.trigger || "cron",
+        cron: meta.cron || null,
+        scheduledTime: meta.scheduledTime
+          ? new Date(meta.scheduledTime).toISOString()
+          : null,
+        sourceUrl: SOURCE_URL,
+        assistedSourceUrl: assistedSnapshot.source,
+        assistedSourceUpdatedAt: assistedSnapshot.sourceUpdatedAt,
+        assistedSourceAgeMs: assistedSnapshot.sourceAgeMs,
+        assistedCandidates: entries.length,
+        assistedError: null,
+        metadataAssistedEntries: entries.length,
+        playlistEntries: entries.length,
+        verifiedPlaylistEntries: 0,
+        liveEntries: entries.length,
+        currentScanLiveEntries: 0,
+        publishedFromCurrentScan: false,
+        publishedFromAlternatePath: false,
+        publishedFromMetadata: true,
+        filteringUnavailable: false,
+        stalePlaylist: false,
+        staleExpired: false,
+        fallbackStale: false,
+        fallbackPlaylistEntries: previousFallbackEntries,
+        fallbackPublishedAt: priorStatus.fallbackPublishedAt || null,
+        lastCleanLiveChannels:
+          Array.isArray(priorStatus.lastCleanLiveChannels) &&
+          priorStatus.lastCleanLiveChannels.length > 0
+            ? priorStatus.lastCleanLiveChannels
+            : priorHealthyChannels,
+        lastHealthyLiveChannels: priorHealthyChannels,
+        recoveryProbeLimit: RECOVERY_ALTERNATE_PROBE_LIMIT,
+        recoveryProbesUsed: 0,
+        alternateProbeErrors: 0,
+        alternateReachable: false,
+        allAlternateErrors403: false,
+        subrequestBudget: {
+          maxExternalSubrequests: MAX_EXTERNAL_SUBREQUESTS,
+          used: budget.used,
+          reservedMargin: 50 - MAX_EXTERNAL_SUBREQUESTS,
+          primaryProbes: 0,
+          recoveryProbeLimit: RECOVERY_ALTERNATE_PROBE_LIMIT,
+          recoveryProbesUsed: 0,
+          fallbackProbeLimit: MAX_FALLBACK_PROBES,
+          fallbackProbesUsed: 0,
+          concurrency: 1,
+        },
+        liveChannels: entries.map((entry) => ({
+          name: entry.name,
+          url: entry.url,
+          verification: "metadata-assisted",
+        })),
+        errors: [],
+        message:
+          "Primary FPT CDN probes are still blocked by HTTP 403. The strict endpoint is now following the freshest current-event metadata source. Entries are current-event candidates, not directly CDN-verified by this Worker; a clean scan will replace them as soon as FPT permits server-side probing."
+      };
+
+      await env.FPT_EVENT_KV.put(
+        STATUS_KEY,
+        JSON.stringify(status),
+        { expirationTtl: STATUS_TTL }
+      );
+
+      console.log(JSON.stringify(status));
+      return { playlist, status };
+    }
+
+    let assistedCandidates = [];
+    if (assistedError) {
+      console.warn(assistedError);
     }
 
     if (!assistedCandidates.length) {
@@ -1084,6 +1315,10 @@ export default {
       const cleanScan =
         state.status?.scanHealthy === true ||
         state.status?.strictVerificationMode === "alternate-path";
+      const metadataAssisted =
+        state.status?.strictVerificationMode ===
+        "metadata-assisted-current-events";
+      const strictUsable = cleanScan || metadataAssisted;
 
       let playlist = strictMode ? state.playlist : state.fallbackPlaylist;
       let fallbackAgeMs = null;
@@ -1121,9 +1356,9 @@ export default {
         ) {
           playlist = "#EXTM3U\n";
         }
-      } else if (!cleanScan) {
-        // The primary endpoint is strict: no degraded/recovery snapshot is ever
-        // exposed as "live".
+      } else if (strictMode && !strictUsable) {
+        // The endpoint remains empty only when neither a clean verification nor a
+        // fresh metadata-assisted current-event snapshot is available.
         playlist = "#EXTM3U\n";
       }
 
@@ -1139,11 +1374,13 @@ export default {
           "X-NM7-FPT-Events": String(playlistEntries),
           "X-NM7-FPT-Verified": String(verified),
           "X-NM7-FPT-Filter": strictMode
-            ? state.status?.strictVerificationMode === "alternate-path"
-              ? "alternate-live-verified"
-              : cleanScan
-                ? "clean-scan-live-only"
-                : "upstream-unverified"
+            ? metadataAssisted
+              ? "metadata-assisted-current-events"
+              : state.status?.strictVerificationMode === "alternate-path"
+                ? "alternate-live-verified"
+                : cleanScan
+                  ? "clean-scan-live-only"
+                  : "upstream-unverified"
             : "last-clean-fallback",
           "X-NM7-FPT-Version": WORKER_VERSION,
         },
@@ -1157,7 +1394,7 @@ export default {
         scheduler: {
           cron: CRON,
           strategy:
-            "full source scan every 5 minutes; blocked-source recovery uses fresh FPT event metadata plus alternate playback paths",
+            "full source scan every 5 minutes; blocked-source recovery follows fresh current-event metadata and keeps direct CDN verification status explicit",
         },
         ...(state.status || {
           ok: false,
