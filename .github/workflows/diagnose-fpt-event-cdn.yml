@@ -13,49 +13,68 @@ permissions:
 jobs:
   diagnose:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 8
     steps:
-      - name: Check representative FPT event endpoints
+      - name: Load source and test exact event-07 with multiple request profiles
+        shell: bash
+        run: |
+          set -euo pipefail
+          SOURCE="https://raw.githubusercontent.com/phuongnm7/Iptv-phuongnm7/main/sources/fpt-events-source.m3u"
+          EVENT07="https://vips-livecdn.fptplay.net/live/media/event-07/hls_avc_v6/index.m3u8"
+
+          echo "Checking that event-07 exists verbatim in the source..."
+          curl -fsSL --retry 3 --max-time 30 "$SOURCE" | grep -Fqx "$EVENT07"
+          echo "event-07 is present in source."
+
+          profiles=(
+            "browser-desktop|Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/140.0.0.0 Safari/537.36|https://fptplay.vn/|https://fptplay.vn"
+            "android|Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 Chrome/140.0 Mobile Safari/537.36|https://fptplay.vn/|https://fptplay.vn"
+            "vlc|VLC/3.0.21 LibVLC/3.0.21|https://fptplay.vn/|https://fptplay.vn"
+            "vthanh|VThanhTivi|https://fptplay.vn/|https://fptplay.vn"
+            "none|curl/8|https://fptplay.vn/|"
+          )
+
+          for p in "${profiles[@]}"; do
+            IFS='|' read -r name ua referer origin <<< "$p"
+            echo "=== PROFILE $name ==="
+            tmp="$(mktemp)"
+            extra=()
+            if [ -n "$origin" ]; then extra=(-H "Origin: $origin"); fi
+            status="$(curl --http1.1 -sS --max-time 20 \
+              -A "$ua" \
+              -H "Accept: application/vnd.apple.mpegurl,application/x-mpegURL,text/plain,*/*" \
+              -H "Cache-Control: no-cache, no-store" \
+              -H "Pragma: no-cache" \
+              -H "Referer: $referer" \
+              "${extra[@]}" \
+              -o "$tmp" -w "%{http_code} %{content_type} %{size_download}" \
+              "$EVENT07" 2>"$tmp.err")" || true
+            echo "status=$status"
+            echo "body_prefix=$(head -c 500 "$tmp" | tr "\n" " " | sed "s/[[:cntrl:]]/ /g")"
+            if [ -s "$tmp.err" ]; then cat "$tmp.err"; fi
+            rm -f "$tmp" "$tmp.err"
+
+            echo "--- ffprobe ---"
+            ffprobe -v error -rw_timeout 15000000 -user_agent "$ua" -referer "$referer" \
+              -show_entries format=format_name,duration,start_time \
+              -of default=nw=1 "$EVENT07" 2>&1 || true
+          done
+
+      - name: Compare GET, HEAD and Range for exact event-07
         shell: bash
         run: |
           set +e
-          urls=(
-            "https://vips-livecdn.fptplay.net/live/media/su-kien-01/hls_avc_v6/index.m3u8"
-            "https://vips-livecdn.fptplay.net/live/media/su-kien-09/hls_avc_v6/index.m3u8"
-            "https://vips-livecdn.fptplay.net/live/media/su-kien-10/hls_avc_v6/index.m3u8"
-            "https://vips-livecdn.fptplay.net/live/media/event-02/hls_avc_v6/index.m3u8"
-            "https://vips-livecdn.fptplay.net/live/media/event-07/hls_avc_v6/index.m3u8"
-            "https://vips-livecdn.fptplay.net/live/media/su-kien-01-4k/dash_hvc/index.mpd"
-            "https://vips-livecdn.fptplay.net/live/media/event-02-4k/dash_hvc/index.mpd"
-            "https://live.fptplay53.net/live/media/su-kien-01/hls_avc_v6/index.m3u8"
-            "https://live-a.fptplay53.net/live/media/su-kien-01/hls_avc_v6/index.m3u8"
-            "https://livecdn.fptplay.net/schedule/sukien01_vhls.smil/chunklist_b5000000.m3u8"
-            "https://livecdn.fptplay.net/schedule/sukien02_vhls.smil/chunklist_b5000000.m3u8"
-            "https://livecdn.fptplay.net/schedule/sukien03_vhls.smil/chunklist_b5000000.m3u8"
-            "https://livecdn.fptplay.net/schedule/sukien04_vhls.smil/chunklist_b5000000.m3u8"
-            "https://livecdn.fptplay.net/schedule/sukien05_vhls.smil/chunklist_b5000000.m3u8"
-            "https://livecdn.fptplay.net/schedule/sukien06_vhls.smil/chunklist_b5000000.m3u8"
-            "https://livecdn.fptplay.net/schedule/sukien07_vhls.smil/chunklist_b5000000.m3u8"
-            "https://livecdn.fptplay.net/schedule/sukien08_vhls.smil/chunklist_b5000000.m3u8"
-          )
+          URL="https://vips-livecdn.fptplay.net/live/media/event-07/hls_avc_v6/index.m3u8"
+          echo "=== HEAD ==="
+          curl -I -sS --max-time 20 -A "Mozilla/5.0" -H "Referer: https://fptplay.vn/" "$URL" 2>&1
+          echo "=== GET Range ==="
+          curl -sS --max-time 20 -A "Mozilla/5.0" -H "Referer: https://fptplay.vn/" -H "Range: bytes=0-8191" \
+            -o /tmp/e07-range -w "%{http_code} %{content_type} %{size_download}\n" "$URL" 2>&1
+          head -c 400 /tmp/e07-range 2>/dev/null | tr "\n" " " || true
+          echo
+          rm -f /tmp/e07-range
 
-          for url in "${urls[@]}"; do
-            echo "=== $url ==="
-            tmp="$(mktemp)"
-            status="$(curl -L -sS --max-time 20               -A "VThanhTivi"               -H "Referer: https://fptplay.vn/"               -H "Origin: https://fptplay.vn/"               -o "$tmp"               -w "%{http_code} %{content_type}"               "$url" 2>"$tmp.err")"
-            rc=$?
-            echo "curl_rc=$rc status=$status"
-            echo "body_prefix:"
-            head -c 240 "$tmp" | tr '\n' ' ' | sed 's/[[:cntrl:]]/ /g'
-            echo
-            if [ -s "$tmp.err" ]; then
-              echo "curl_error:"
-              cat "$tmp.err"
-            fi
-            rm -f "$tmp" "$tmp.err"
-          done
-
-      - name: Check Worker status without triggering a scan
+      - name: Check Worker status
         shell: bash
         run: |
           set -euo pipefail
