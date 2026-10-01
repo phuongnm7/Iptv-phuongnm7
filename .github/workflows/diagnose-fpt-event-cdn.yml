@@ -64,9 +64,16 @@ jobs:
         shell: bash
         run: |
           set +e
+          for URL in \
+            "https://vips-livecdn.fptplay.net/live/media/event-06/hls_avc_v6/index.m3u8" \
+            "https://vips-livecdn.fptplay.net/live/media/event-07/hls_avc_v6/index.m3u8" \
+            "https://vips-livecdn.fptplay.net/live/media/event-08/hls_avc_v6/index.m3u8"; do
+            echo "=== HEAD $URL ==="
+            curl -I -sS --max-time 20 -A "Mozilla/5.0" -H "Referer: https://fptplay.vn/" "$URL" 2>&1
+          done
           URL="https://vips-livecdn.fptplay.net/live/media/event-07/hls_avc_v6/index.m3u8"
-          echo "=== HEAD ==="
-          curl -I -sS --max-time 20 -A "Mozilla/5.0" -H "Referer: https://fptplay.vn/" "$URL" 2>&1
+          echo "=== GET Range ==="
+          curl -sS --max-time 20 -A "Mozilla/5.0" -H "Referer: https://fptplay.vn/" -H "Range: bytes=0-8191" \
           echo "=== GET Range ==="
           curl -sS --max-time 20 -A "Mozilla/5.0" -H "Referer: https://fptplay.vn/" -H "Range: bytes=0-8191" \
             -o /tmp/e07-range -w "%{http_code} %{content_type} %{size_download}\n" "$URL" 2>&1
