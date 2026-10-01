@@ -275,15 +275,17 @@ def main():
     os.makedirs(os.path.dirname(OUTPUT_M3U), exist_ok=True)
     os.makedirs(os.path.dirname(OUTPUT_STATUS), exist_ok=True)
 
-    # If the entire transport path is blocked, do not overwrite a previously
-    # valid generated playlist with a false empty result.
-    if not all_403 or live:
+    # Never replace a valid playlist with a false empty result while the current
+    # network vantage is degraded. Only a clean scan or a partial scan with at
+    # least one positively verified live URL may change the public live set.
+    can_publish = (len(errors) == 0) or (len(live) > 0)
+    if can_publish:
         with open(OUTPUT_M3U, "w", encoding="utf-8") as f:
             f.write(build_m3u(results))
-    else:
-        if not os.path.exists(OUTPUT_M3U):
-            with open(OUTPUT_M3U, "w", encoding="utf-8") as f:
-                f.write("#EXTM3U\n")
+    elif not os.path.exists(OUTPUT_M3U):
+        raise RuntimeError(
+            "No publishable live result: FPT/transport returned errors and no previous playlist exists"
+        )
 
     with open(OUTPUT_STATUS, "w", encoding="utf-8") as f:
         json.dump(status, f, ensure_ascii=False, indent=2)
@@ -298,6 +300,7 @@ def main():
         "proxyUsed": proxy is not None,
         "liveChannels": status["liveChannels"],
         "allProbeErrorsAre403": all_403,
+        "publishedCurrentScan": can_publish,
     }, ensure_ascii=False))
 
 if __name__ == "__main__":
