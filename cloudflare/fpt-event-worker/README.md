@@ -6,7 +6,7 @@ Worker tự động tạo playlist **SỰ KIỆN FPT** từ source M3U trên Git
 
 Source hiện có **46 endpoint**: **38 HLS + 8 DASH**. Worker quét toàn bộ 46 endpoint trong mỗi chu kỳ 5 phút.
 
-Bản v7 được thiết kế để chạy an toàn trên Workers Free:
+Bản v8 được thiết kế để chạy an toàn trên Workers Free:
 
 - 1 request lấy source M3U.
 - 1 probe chính cho mỗi endpoint.
@@ -19,6 +19,20 @@ Bản v7 được thiết kế để chạy an toàn trên Workers Free:
 
 Cloudflare Workers Free hiện giới hạn **50 external subrequests mỗi invocation**; Workers Paid mặc định là 10.000 và có thể cấu hình cao hơn. Redirect chain cũng có thể làm tăng số subrequest.
 
+## Chế độ lọc live v8
+
+Worker tách hai mục đích thành hai endpoint hoàn toàn riêng:
+
+- `/fpt-event-live.m3u`: **strict live**. Chỉ trả playlist sau khi lần quét 46 endpoint hoàn tất mà không có probe error. Nếu upstream FPT đang 403/timeout/network error, endpoint này trả M3U rỗng thay vì dùng dữ liệu cũ để giả làm kênh đang live.
+- `/fpt-event-fallback.m3u`: playlist dự phòng từ lần clean scan gần nhất, được giới hạn tuổi tối đa 30 phút. Endpoint này chỉ dùng khi cần duy trì khả năng phát tạm thời trong lúc FPT CDN bị chặn.
+
+Các header mới của playlist strict:
+
+- `X-NM7-FPT-Verified: true|false`
+- `X-NM7-FPT-Filter: clean-scan-live-only|upstream-unverified`
+
+`/status` phân biệt rõ `liveEntries`, `verifiedPlaylistEntries`, `fallbackPlaylistEntries`, `filteringUnavailable` và `lastCleanLiveChannels`.
+
 ## Mục tiêu playlist
 
 Chỉ những stream đã xác nhận là live mới được đưa vào playlist:
@@ -28,17 +42,14 @@ Chỉ những stream đã xác nhận là live mới được đưa vào playlis
 - 404/410 hoặc manifest kết thúc → loại khỏi playlist.
 - HTTP 200 nhưng trả HTML/không phải M3U/MPD → ghi nhận là probe error, không coi là inactive.
 
-## Chống playlist rỗng/stale
+## Chống stale nhưng không làm sai bộ lọc
 
-Worker không còn giữ nguyên toàn bộ playlist chỉ vì bất kỳ một probe nào lỗi.
+Bản v8 không còn trộn dữ liệu fallback vào playlist live.
 
-Chỉ trong tình huống toàn bộ probe bị chặn bởi lỗi giới hạn subrequest thì playlist tốt trước đó mới được giữ nguyên.
-
-Như vậy:
-
-- lỗi một nguồn → nguồn đó không được công bố, các nguồn live khác vẫn được cập nhật;
-- nguồn đã kết thúc → bị loại ở lần scan tiếp theo;
-- lỗi quota toàn cục → không ghi đè playlist tốt thành playlist rỗng.
+- Scan sạch → `/fpt-event-live.m3u` nhận đúng danh sách live hiện tại; các event đã kết thúc bị loại ngay.
+- Scan lỗi một hoặc nhiều endpoint → strict playlist không được cập nhật và endpoint live chuyển sang trạng thái **unverified**, không công bố snapshot cũ như đang live.
+- 403 toàn bộ upstream → Worker chuyển recovery mode để giảm áp lực lên FPT, nhưng recovery không làm kênh cũ xuất hiện trong strict playlist.
+- Playlist dự phòng tách riêng, tối đa 30 phút, để có đường lui mà không làm sai endpoint live chính.
 
 ## Cron
 
@@ -101,7 +112,7 @@ Deploy:
 
     npx wrangler deploy --config wrangler.jsonc
 
-Workflow GitHub Actions .github/workflows/deploy-fpt-event-worker.yml tự deploy khi có thay đổi trong Worker và kiểm tra đúng workerVersion v7 cùng ngân sách subrequest sau deploy.
+Workflow GitHub Actions .github/workflows/deploy-fpt-event-worker.yml tự deploy khi có thay đổi trong Worker, chạy `node --check`, kiểm tra workerVersion v8, header trạng thái lọc và endpoint fallback mà không ép chạy `/scan`.
 
 ## Nguồn
 
