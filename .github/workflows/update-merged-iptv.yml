@@ -238,6 +238,11 @@ jobs:
         with:
           ref: main
 
+      - name: Validate FPT scanner
+        run: |
+          set -euo pipefail
+          python3 -m py_compile cloudflare/fpt-event-worker/tools/source-live-scanner.py
+
       - name: Scan exact FPT source URLs
         env:
           OUTPUT_M3U: generated/fpt-event-live.m3u
