@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# ops(fpt): run source scanner
 import concurrent.futures
 import json
 import os
