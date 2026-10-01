@@ -564,7 +564,6 @@ async function scan(env, meta = {}) {
   const dashResults = results.filter((x) => x.protocol === "DASH");
   const hlsResults = results.filter((x) => x.protocol === "HLS");
 
-  const previous = await getStored(env);
   const previousHasPlaylist = previous.playlist !== "#EXTM3U\n";
   const publishedAtText = await env.FPT_EVENT_KV.get(PUBLISHED_AT_KEY);
   const publishedAt = publishedAtText ? Number(publishedAtText) : 0;
