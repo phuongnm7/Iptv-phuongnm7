@@ -15,125 +15,31 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
-      - name: Load source and test exact event-07 with multiple request profiles
+      - name: Verify exact source and direct event-07 access
         shell: bash
         run: |
           set -euo pipefail
           SOURCE="https://raw.githubusercontent.com/phuongnm7/Iptv-phuongnm7/main/sources/fpt-events-source.m3u"
           EVENT07="https://vips-livecdn.fptplay.net/live/media/event-07/hls_avc_v6/index.m3u8"
-
-          echo "Checking that event-07 exists verbatim in the source..."
           curl -fsSL --retry 3 --max-time 30 "$SOURCE" | grep -Fqx "$EVENT07"
-          echo "event-07 is present in source."
-
-          profiles=(
-            "browser-desktop|Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/140.0.0.0 Safari/537.36|https://fptplay.vn/|https://fptplay.vn"
-            "android|Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 Chrome/140.0 Mobile Safari/537.36|https://fptplay.vn/|https://fptplay.vn"
-            "vlc|VLC/3.0.21 LibVLC/3.0.21|https://fptplay.vn/|https://fptplay.vn"
-            "vthanh|VThanhTivi|https://fptplay.vn/|https://fptplay.vn"
-            "none|curl/8|https://fptplay.vn/|"
-          )
-
-          for p in "${profiles[@]}"; do
-            IFS='|' read -r name ua referer origin <<< "$p"
-            echo "=== PROFILE $name ==="
-            tmp="$(mktemp)"
-            extra=()
-            if [ -n "$origin" ]; then extra=(-H "Origin: $origin"); fi
-            status="$(curl --http1.1 -sS --max-time 20 \
-              -A "$ua" \
-              -H "Accept: application/vnd.apple.mpegurl,application/x-mpegURL,text/plain,*/*" \
-              -H "Cache-Control: no-cache, no-store" \
-              -H "Pragma: no-cache" \
-              -H "Referer: $referer" \
-              "${extra[@]}" \
-              -o "$tmp" -w "%{http_code} %{content_type} %{size_download}" \
-              "$EVENT07" 2>"$tmp.err")" || true
-            echo "status=$status"
-            echo "body_prefix=$(head -c 500 "$tmp" | tr "\n" " " | sed "s/[[:cntrl:]]/ /g")"
-            if [ -s "$tmp.err" ]; then cat "$tmp.err"; fi
-            rm -f "$tmp" "$tmp.err"
-
-            echo "--- ffprobe ---"
-            ffprobe -v error -rw_timeout 15000000 -user_agent "$ua" -referer "$referer" \
-              -show_entries format=format_name,duration,start_time \
-              -of default=nw=1 "$EVENT07" 2>&1 || true
-          done
-
-      - name: Compare GET, HEAD and Range for exact event-07
-        shell: bash
-        run: |
-          set +e
-          for URL in \
-            "https://vips-livecdn.fptplay.net/live/media/event-06/hls_avc_v6/index.m3u8" \
-            "https://vips-livecdn.fptplay.net/live/media/event-07/hls_avc_v6/index.m3u8" \
-            "https://vips-livecdn.fptplay.net/live/media/event-08/hls_avc_v6/index.m3u8"; do
-            echo "=== HEAD $URL ==="
-            curl -I -sS --max-time 20 -A "Mozilla/5.0" -H "Referer: https://fptplay.vn/" "$URL" 2>&1
-          done
-          URL="https://vips-livecdn.fptplay.net/live/media/event-07/hls_avc_v6/index.m3u8"
-          echo "=== GET Range ==="
-          curl -sS --max-time 20 -A "Mozilla/5.0" -H "Referer: https://fptplay.vn/" -H "Range: bytes=0-8191" \
-          echo "=== GET Range ==="
-          curl -sS --max-time 20 -A "Mozilla/5.0" -H "Referer: https://fptplay.vn/" -H "Range: bytes=0-8191" \
-            -o /tmp/e07-range -w "%{http_code} %{content_type} %{size_download}\n" "$URL" 2>&1
-          head -c 400 /tmp/e07-range 2>/dev/null | tr "\n" " " || true
+          echo "SOURCE_OK event-07 present verbatim"
+          curl -sS --http1.1 --max-time 20 -A "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 Chrome/140 Mobile Safari/537.36" -H "Referer: https://fptplay.vn/" -H "Origin: https://fptplay.vn" -H "Accept: application/vnd.apple.mpegurl,application/x-mpegURL,*/*" -o /tmp/e07 -D /tmp/e07.h -w "DIRECT status=%{http_code} type=%{content_type} size=%{size_download}\n" "$EVENT07" || true
+          grep -iE "^HTTP/|^content-type:|^x-srv:|^x-channel:|^ftel-server:|^cdn53:|^_ver:" /tmp/e07.h || true
+          head -c 300 /tmp/e07 | tr "\n" " " || true
           echo
-          rm -f /tmp/e07-range
 
-      - name: Test FPT client identity headers and inspect bundles
+      - name: Test FPT homepage identity headers
         shell: bash
         run: |
           set -euo pipefail
           EVENT07="https://vips-livecdn.fptplay.net/live/media/event-07/hls_avc_v6/index.m3u8"
-          curl -fsSL -D /tmp/fpt.headers -c /tmp/fpt.cookies --max-time 30 "https://fptplay.vn/" -o /tmp/fpt.html
-          DEVICE_ID="$(awk '$6=="device_id"{print $7}' /tmp/fpt.cookies | tail -1)"
-          echo "device_id=$DEVICE_ID"
-
-          echo "=== event-07 with device identity headers ==="
-          profiles=(
-            "x_id|-H|X_ID: $DEVICE_ID"
-            "x_dash_id|-H|X-ID: $DEVICE_ID"
-            "fpl_custom|-H|FPL-Custom: $DEVICE_ID"
-            "fpl_json|-H|FPL-Custom: {"device_id":"$DEVICE_ID"}"
-            "fpl_json_camel|-H|FPL-Custom: {"deviceId":"$DEVICE_ID"}"
-          )
-          for p in "${profiles[@]}"; do
-            IFS='|' read -r name kind header <<< "$p"
-            echo "--- $name ---"
-            curl -sS --http1.1 --max-time 20               -A "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 Chrome/140.0 Mobile Safari/537.36"               -H "Referer: https://fptplay.vn/"               -H "Origin: https://fptplay.vn"               -H "Accept: application/vnd.apple.mpegurl,application/x-mpegURL,*/*"               -H "Cache-Control: no-cache"               -H "$header"               -b "/tmp/fpt.cookies"               -o /tmp/e07-ident -D /tmp/e07-ident.headers               -w "status=%{http_code} type=%{content_type} size=%{size_download}\n"               "$EVENT07" || true
-            grep -iE 'HTTP/|x-srv:|x-channel:|content-type:|x-|ftel|cdn53|_ver:' /tmp/e07-ident.headers || true
-            rm -f /tmp/e07-ident /tmp/e07-ident.headers
-          done
-
-          echo "=== inspect FPT Play JS bundles for player header strings ==="
-          mkdir -p /tmp/fptjs
-          grep -oE '<script[^>]+src="[^"]+"' /tmp/fpt.html | sed -E 's/.*src="([^"]+)".*/\1/' | while read -r p; do
-            case "$p" in
-              http*) u="$p" ;;
-              /*) u="https://fptplay.vn$p" ;;
-              *) u="https://fptplay.vn/$p" ;;
-            esac
-            b="/tmp/fptjs/$(echo "$p" | tr '/:?=&' '_')"
-            curl -fsSL --max-time 30 "$u" -o "$b" || true
-          done
-          grep -RniE 'FPL-Custom|FPLCustom|X_ID|X-ID|device_id|livecdn|vips-livecdn|x-channel' /tmp/fptjs 2>/dev/null | head -120 || true
-          rm -rf /tmp/fptjs /tmp/fpt.headers /tmp/fpt.cookies /tmp/fpt.html
-
-          echo "=== direct event-07 test with X_ID and X-ID ==="
-          for h in "X_ID: $DEVICE_ID" "X-ID: $DEVICE_ID"; do
-            echo "--- $h ---"
-            curl -sS --http1.1 --max-time 20 \
-              -A "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 Chrome/140.0 Mobile Safari/537.36" \
-              -H "Referer: https://fptplay.vn/" \
-              -H "Origin: https://fptplay.vn" \
-              -H "$h" \
-              -H "Accept: application/vnd.apple.mpegurl,application/x-mpegURL,*/*" \
-              -o /tmp/e07-direct -D /tmp/e07-direct.headers \
-              -w "status=%{http_code} type=%{content_type} size=%{size_download}\n" \
-              "$EVENT07" || true
-            grep -iE 'HTTP/|x-srv:|x-channel:|content-type:|access-control|ftel|cdn53|_ver:' /tmp/e07-direct.headers || true
-            rm -f /tmp/e07-direct /tmp/e07-direct.headers
+          curl -fsSL --max-time 30 -c /tmp/fpt.cookies "https://fptplay.vn/" -o /tmp/fpt.html
+          DEVICE_ID="$(awk "$6==\"device_id\"{print $7}" /tmp/fpt.cookies | tail -1)"
+          echo "DEVICE_ID_PRESENT=$([ -n "$DEVICE_ID" ] && echo yes || echo no)"
+          for header in "X_ID: $DEVICE_ID" "X-ID: $DEVICE_ID" "FPL-Custom: $DEVICE_ID"; do
+            echo "=== $header ==="
+            curl -sS --http1.1 --max-time 20 -A "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 Chrome/140 Mobile Safari/537.36" -H "Referer: https://fptplay.vn/" -H "Origin: https://fptplay.vn" -H "$header" -H "Accept: application/vnd.apple.mpegurl,application/x-mpegURL,*/*" -b /tmp/fpt.cookies -o /tmp/e07-id -D /tmp/e07-id.h -w "status=%{http_code} type=%{content_type}\n" "$EVENT07" || true
+            grep -iE "^HTTP/|^content-type:|^x-srv:|^x-channel:" /tmp/e07-id.h || true
           done
 
       - name: Test transport-only relays for exact event-07
@@ -141,38 +47,21 @@ jobs:
         run: |
           set -u
           EVENT07="https://vips-livecdn.fptplay.net/live/media/event-07/hls_avc_v6/index.m3u8"
-          encoded="$(python3 - <<'PY'
-import urllib.parse
-print(urllib.parse.quote("https://vips-livecdn.fptplay.net/live/media/event-07/hls_avc_v6/index.m3u8", safe=""))
-PY
-)"
-          echo "Only the exact event-07 source URL is tested. No playlist/metadata source is used."
-
-          echo "=== allorigins raw transport ==="
-          curl -sS --max-time 30 -A "Mozilla/5.0"             "https://api.allorigins.win/raw?url=$encoded"             -o /tmp/relay1.body -D /tmp/relay1.headers             -w "status=%{http_code} type=%{content_type} size=%{size_download}\n" || true
-          head -c 500 /tmp/relay1.body 2>/dev/null | tr "\n" " " || true
-          echo
-
-          echo "=== corsproxy transport ==="
-          curl -sS --max-time 30 -A "Mozilla/5.0"             "https://corsproxy.io/?url=$encoded"             -o /tmp/relay2.body -D /tmp/relay2.headers             -w "status=%{http_code} type=%{content_type} size=%{size_download}\n" || true
-          head -c 500 /tmp/relay2.body 2>/dev/null | tr "\n" " " || true
-          echo
-
-          echo "=== cors.dev transport ==="
-          curl -sS --max-time 30 -A "Mozilla/5.0"             "https://proxy.cors.dev/$EVENT07"             -o /tmp/relay3.body -D /tmp/relay3.headers             -w "status=%{http_code} type=%{content_type} size=%{size_download}\n" || true
-          head -c 500 /tmp/relay3.body 2>/dev/null | tr "\n" " " || true
-          echo
-
-          for f in /tmp/relay1.body /tmp/relay2.body /tmp/relay3.body; do
-            echo "--- validate $f ---"
-            if grep -q "#EXTM3U" "$f" 2>/dev/null; then
-              echo "VALID_HLS_MANIFEST"
-            else
-              echo "NOT_HLS_MANIFEST"
-            fi
+          encoded="$(python3 -c "import urllib.parse; print(urllib.parse.quote(\"$EVENT07\", safe=\"\"))")"
+          for name_url in \
+            "allorigins|https://api.allorigins.win/raw?url=$encoded" \
+            "corsproxy|https://corsproxy.io/?url=$encoded" \
+            "corsdev|https://proxy.cors.dev/$EVENT07"; do
+            name="${name_url%%|*}"
+            url="${name_url#*|}"
+            echo "=== RELAY $name ==="
+            rm -f /tmp/relay.body /tmp/relay.h
+            curl -sS --max-time 30 -A "Mozilla/5.0" -o /tmp/relay.body -D /tmp/relay.h -w "status=%{http_code} type=%{content_type} size=%{size_download}\n" "$url" 2>&1 || true
+            grep -iE "^HTTP/|^content-type:|^location:" /tmp/relay.h 2>/dev/null || true
+            if grep -q "#EXTM3U" /tmp/relay.body 2>/dev/null; then echo "VALID_HLS_MANIFEST"; else echo "NOT_HLS_MANIFEST"; fi
+            head -c 350 /tmp/relay.body 2>/dev/null | tr "\n" " " || true
+            echo
           done
-
-          rm -f /tmp/relay1.body /tmp/relay1.headers /tmp/relay2.body /tmp/relay2.headers /tmp/relay3.body /tmp/relay3.headers
 
       - name: Check Worker status
         shell: bash
