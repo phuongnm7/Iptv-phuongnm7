@@ -471,7 +471,13 @@ async function scan(env, meta = {}) {
         item.httpStatus !== 403 &&
         item.httpStatus !== 401
     );
-    const recoveryLooksBlocked = recoveryResults.length > 0 && !recoveryHealthy && !recoverySawReachable && recoverySaw403;
+    // Stay in low-frequency recovery until we have positive evidence that the
+    // upstream is reachable again. 403, 401, timeout and network failure are all
+    // treated as "not recovered yet"; 404/410/other HTTP responses count as reachable.
+    const recoveryLooksBlocked =
+      recoveryResults.length > 0 &&
+      !recoveryHealthy &&
+      !recoverySawReachable;
 
     let playlist = previous.playlist;
     let restoredFromFallback = false;
