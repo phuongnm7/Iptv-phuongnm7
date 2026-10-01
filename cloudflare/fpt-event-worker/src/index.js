@@ -6,9 +6,10 @@ const PUBLISHED_AT_KEY = "fpt:live:publishedAt";
 const HEALTHY_CHANNELS_KEY = "fpt:live:healthyChannels";
 const STATUS_KEY = "fpt:live:status";
 const CRON = "*/5 * * * *";
-const PLAYLIST_TTL = 60 * 60;
-const DEGRADED_GRACE_MS = 15 * 60 * 1000;
-const STATUS_TTL = 60 * 60;
+// Published playlist and last-known-good channels are intentionally persistent.
+// A degraded upstream must never erase the last usable IPTV list merely because KV TTL elapsed.
+const STATUS_TTL = 24 * 60 * 60;
+const MIN_MANUAL_SCAN_GAP_MS = 4 * 60 * 1000;
 const WORKER_VERSION = "fpt-event-resilient-v7-subrequest-safe";
 
 // Cloudflare Workers Free: 50 external subrequests/invocation.
@@ -356,23 +357,41 @@ async function getStored(env) {
 
 async function recordFailure(env, error, meta = {}) {
   const previous = await getStored(env);
+  const previousPlaylistEntries =
+    previous.playlist.match(/^#EXTINF:/gm)?.length || 0;
+  const previousHealthy =
+    Array.isArray(previous.status?.lastHealthyLiveChannels) &&
+    previous.status.lastHealthyLiveChannels.length > 0
+      ? previous.status.lastHealthyLiveChannels
+      : LAST_KNOWN_GOOD;
+
+  // A failed invocation is never allowed to erase a previously published playlist.
+  // Keep the last-known-good state and mark only the scan status as failed.
+  if (previousPlaylistEntries === 0) {
+    const fallbackPlaylist = buildM3U(previousHealthy);
+    await env.FPT_EVENT_KV.put(PLAYLIST_KEY, fallbackPlaylist);
+  }
+
   const status = {
     ...(previous.status || {}),
     ok: false,
     scanHealthy: false,
+    scanDegraded: true,
+    stalePlaylist: true,
+    staleExpired: false,
+    recoveryMode: true,
+    sourceBlocked: previous.status?.sourceBlocked === true,
     generatedAt: new Date().toISOString(),
     lastError: error instanceof Error ? error.message : String(error),
+    playlistEntries:
+      previousPlaylistEntries > 0
+        ? previousPlaylistEntries
+        : previousHealthy.length,
+    lastHealthyLiveChannels: previousHealthy,
     ...meta,
   };
 
-  if (cleanScan) {
-    await env.FPT_EVENT_KV.put(
-      HEALTHY_CHANNELS_KEY,
-      JSON.stringify(live),
-      { expirationTtl: PLAYLIST_TTL }
-    );
-  }
-
+  await env.FPT_EVENT_KV.put(HEALTHY_CHANNELS_KEY, JSON.stringify(previousHealthy));
   await env.FPT_EVENT_KV.put(STATUS_KEY, JSON.stringify(status), {
     expirationTtl: STATUS_TTL,
   });
@@ -386,6 +405,28 @@ async function scan(env, meta = {}) {
 
   const previous = await getStored(env);
   const priorStatus = previous.status || {};
+
+  if (meta.trigger === "manual" && priorStatus.generatedAt) {
+    const lastScanAt = Date.parse(priorStatus.generatedAt);
+    if (
+      Number.isFinite(lastScanAt) &&
+      Date.now() - lastScanAt < MIN_MANUAL_SCAN_GAP_MS
+    ) {
+      return {
+        playlist: previous.playlist,
+        status: {
+          ...priorStatus,
+          ok: true,
+          skipped: true,
+          skipReason: "manual-scan-rate-limit",
+          message:
+            "Manual scan skipped to protect the FPT origin; normal 5-minute Cron continues.",
+          trigger: "manual",
+          generatedAt: new Date().toISOString(),
+        },
+      };
+    }
+  }
   const priorHealthyChannels =
     Array.isArray(priorStatus.lastHealthyLiveChannels) &&
     priorStatus.lastHealthyLiveChannels.length > 0
@@ -438,9 +479,7 @@ async function scan(env, meta = {}) {
     if (!playlistHasEntries) {
       playlist = buildM3U(LAST_KNOWN_GOOD);
       restoredFromFallback = true;
-      await env.FPT_EVENT_KV.put(PLAYLIST_KEY, playlist, {
-        expirationTtl: PLAYLIST_TTL,
-      });
+      await env.FPT_EVENT_KV.put(PLAYLIST_KEY, playlist);
     }
 
     const publishedAtText = await env.FPT_EVENT_KV.get(PUBLISHED_AT_KEY);
@@ -565,50 +604,34 @@ async function scan(env, meta = {}) {
   const dashResults = results.filter((x) => x.protocol === "DASH");
   const hlsResults = results.filter((x) => x.protocol === "HLS");
 
-  const previousHasPlaylist = previous.playlist !== "#EXTM3U\n";
+  const previousHasPlaylist =
+    /^#EXTINF:/m.test(previous.playlist);
   const publishedAtText = await env.FPT_EVENT_KV.get(PUBLISHED_AT_KEY);
   const publishedAt = publishedAtText ? Number(publishedAtText) : 0;
-  const ageSinceHealthyPublish = publishedAt
-    ? Date.now() - publishedAt
-    : Number.POSITIVE_INFINITY;
 
-  // Only a clean scan can change the published playlist. A degraded scan may contain
-  // 403/timeouts/network failures, so it cannot safely decide that a live event ended.
-  // Keep the last healthy snapshot for a short grace period; never keep stale data forever.
+  // Only a clean scan can change the published playlist. Any degraded scan means
+  // the upstream answer is uncertain, so preserve the last usable snapshot indefinitely.
+  // The next clean scan is what removes ended events.
   const cleanScan = probeErrors === 0;
   const allProbeErrorsAre403 =
     results.length > 0 &&
     results.every((x) => x.error && Number(x.httpStatus) === 403);
 
   const preserveHealthySnapshot =
-    !cleanScan &&
-    previousHasPlaylist &&
-    (allProbeErrorsAre403 ||
-      ageSinceHealthyPublish <= DEGRADED_GRACE_MS);
-  const staleExpired =
-    !cleanScan &&
-    previousHasPlaylist &&
-    ageSinceHealthyPublish > DEGRADED_GRACE_MS;
+    !cleanScan && previousHasPlaylist;
+  const staleExpired = false;
 
   let playlist;
   if (cleanScan) {
     playlist = buildM3U(live);
-    await env.FPT_EVENT_KV.put(PLAYLIST_KEY, playlist, {
-      expirationTtl: PLAYLIST_TTL,
-    });
-    await env.FPT_EVENT_KV.put(PUBLISHED_AT_KEY, String(Date.now()), {
-      expirationTtl: PLAYLIST_TTL,
-    });
+    await env.FPT_EVENT_KV.put(PLAYLIST_KEY, playlist);
+    await env.FPT_EVENT_KV.put(PUBLISHED_AT_KEY, String(Date.now()));
   } else if (preserveHealthySnapshot) {
     playlist = previous.playlist;
   } else {
     playlist = "#EXTM3U\n";
-    await env.FPT_EVENT_KV.put(PLAYLIST_KEY, playlist, {
-      expirationTtl: PLAYLIST_TTL,
-    });
-    await env.FPT_EVENT_KV.put(PUBLISHED_AT_KEY, String(Date.now()), {
-      expirationTtl: PLAYLIST_TTL,
-    });
+    await env.FPT_EVENT_KV.put(PLAYLIST_KEY, playlist);
+    await env.FPT_EVENT_KV.put(PUBLISHED_AT_KEY, String(Date.now()));
   }
 
   const publishedPlaylistEntries =
@@ -621,7 +644,7 @@ async function scan(env, meta = {}) {
     stalePlaylist: preserveHealthySnapshot,
     staleExpired,
     lastHealthyPublishAt: publishedAt ? new Date(publishedAt).toISOString() : null,
-    degradedGraceMinutes: DEGRADED_GRACE_MS / 60000,
+    persistentLastKnownGood: true,
     workerVersion: WORKER_VERSION,
     generatedAt: new Date().toISOString(),
     scanDurationMs: Date.now() - scanStarted,
@@ -655,9 +678,10 @@ async function scan(env, meta = {}) {
       concurrency: MAX_CONCURRENCY,
     },
     liveChannels: live,
-    lastHealthyLiveChannels: cleanScan
-      ? live
-      : previous.status?.lastHealthyLiveChannels || LAST_KNOWN_GOOD,
+    lastHealthyLiveChannels:
+      live.length > 0
+        ? live
+        : previous.status?.lastHealthyLiveChannels || LAST_KNOWN_GOOD,
     dashDiagnostics: dashResults.map((x) => ({
       name: x.name,
       url: x.url,
@@ -732,11 +756,11 @@ export default {
 
       // Never expose a header-only playlist while the upstream is known to be blocked.
       // Serve the last healthy snapshot (or the baked-in last-known-good snapshot)
-      // directly at the public endpoint. This prevents IPTV clients from seeing a
-      // momentarily empty list while FPT CDN access is recovering.
+      // directly at the public endpoint whenever the last scan is not clean. This
+      // prevents IPTV clients from seeing an empty list during FPT recovery/errors.
       if (
         !/^#EXTINF:/m.test(playlist) &&
-        state.status?.sourceBlocked === true
+        state.status?.scanHealthy !== true
       ) {
         const fallbackEntries =
           Array.isArray(state.status.lastHealthyLiveChannels) &&
@@ -744,9 +768,7 @@ export default {
             ? state.status.lastHealthyLiveChannels
             : LAST_KNOWN_GOOD;
         playlist = buildM3U(fallbackEntries);
-        await env.FPT_EVENT_KV.put(PLAYLIST_KEY, playlist, {
-          expirationTtl: PLAYLIST_TTL,
-        });
+        await env.FPT_EVENT_KV.put(PLAYLIST_KEY, playlist);
       }
 
       const playlistEntries = playlist.match(/^#EXTINF:/gm)?.length || 0;
