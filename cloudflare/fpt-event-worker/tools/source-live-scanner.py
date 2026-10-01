@@ -185,19 +185,26 @@ def find_working_proxy(proxies):
     if direct["status"] == 200 and is_live_hls(direct["body"]):
         return None, "direct"
 
-    for proxy in proxies[:MAX_PROXY_TRIES]:
+    def test(proxy):
         result = curl_probe(EVENT7_URL, proxy)
         if result["status"] == 200 and is_live_hls(result["body"]):
             return proxy, "event-07-live"
-        time.sleep(0.05)
-
-    # If event-07 later becomes inactive, 404/410 on the exact source URL proves
-    # the proxy can reach the FPT endpoint even though that event is no longer live.
-    for proxy in proxies[:MAX_PROXY_TRIES]:
-        result = curl_probe(EVENT7_URL, proxy)
         if result["status"] in (404, 410):
             return proxy, "event-07-reachable-inactive"
-        time.sleep(0.05)
+        return None
+
+    # Try many fresh Vietnam HTTP proxies concurrently. The target URL is always
+    # the exact event-07 source URL; the proxy is transport only.
+    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as pool:
+        futures = [pool.submit(test, p) for p in proxies[:MAX_PROXY_TRIES]]
+        for future in concurrent.futures.as_completed(futures):
+            try:
+                found = future.result()
+                if found:
+                    return found
+            except Exception:
+                pass
+
     return None, "no-working-proxy"
 
 def scan_all(candidates, proxy):
