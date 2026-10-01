@@ -44,7 +44,7 @@ jobs:
             .ok == true
             and .workerVersion == "fpt-event-resilient-v7-subrequest-safe"
             and .scheduler.cron == "*/5 * * * *"
-            and .scheduler.strategy | contains("every 5 minutes")
+            and ((.scheduler.strategy // "") | contains("every 5 minutes"))
           ' >/dev/null
 
           HEADERS="$(curl -fsS -D - -o /dev/null --retry 3 --retry-delay 2 --max-time 30 "https://nm7-fpt-event-live.phuongnm7-iptv.workers.dev/fpt-event-live.m3u")"
