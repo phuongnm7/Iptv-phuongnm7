@@ -91,7 +91,7 @@ def is_live_dash(body):
     live_signal = any(
         token in upper
         for token in (
-            "TYPE="DYNAMIC"",
+            'TYPE="DYNAMIC"',
             "TYPE='DYNAMIC'",
             "MINIMUMUPDATEPERIOD=",
             "TIMESHIFTBUFFERDEPTH=",
