@@ -34,7 +34,7 @@ jobs:
           set -euo pipefail
           EVENT07="https://vips-livecdn.fptplay.net/live/media/event-07/hls_avc_v6/index.m3u8"
           curl -fsSL --max-time 30 -c /tmp/fpt.cookies "https://fptplay.vn/" -o /tmp/fpt.html
-          DEVICE_ID="$(awk "$6==\"device_id\"{print $7}" /tmp/fpt.cookies | tail -1)"
+          DEVICE_ID="$(awk '$6=="device_id"{print $7}' /tmp/fpt.cookies | tail -1)"
           echo "DEVICE_ID_PRESENT=$([ -n "$DEVICE_ID" ] && echo yes || echo no)"
           for header in "X_ID: $DEVICE_ID" "X-ID: $DEVICE_ID" "FPL-Custom: $DEVICE_ID"; do
             echo "=== $header ==="
