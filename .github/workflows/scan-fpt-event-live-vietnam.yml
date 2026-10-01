@@ -1,6 +1,12 @@
 name: Scan FPT Event Live From Vietnam
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - "cloudflare/fpt-event-worker/tools/source-live-scanner.py"
+      - ".github/workflows/scan-fpt-event-live-vietnam.yml"
+      - "sources/fpt-events-source.m3u"
   schedule:
     - cron: "*/5 * * * *"
   workflow_dispatch:
