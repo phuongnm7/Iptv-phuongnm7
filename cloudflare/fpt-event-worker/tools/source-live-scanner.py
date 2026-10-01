@@ -180,21 +180,45 @@ def load_proxies():
         proxies.append(f'{row["ip"]}:{row["port"]}')
     return proxies
 
-def find_working_proxy(proxies):
+def find_working_proxy(proxies, candidates):
     direct = curl_probe(EVENT7_URL)
     if direct["status"] == 200 and is_live_hls(direct["body"]):
         return None, "direct"
 
+    probe_urls = []
+    seen = set()
+    for url in [EVENT7_URL] + [x["url"] for x in candidates[:6]]:
+        if url in seen:
+            continue
+        seen.add(url)
+        probe_urls.append(url)
+
     def test(proxy):
-        result = curl_probe(EVENT7_URL, proxy)
-        if result["status"] == 200 and is_live_hls(result["body"]):
-            return proxy, "event-07-live"
-        if result["status"] in (404, 410):
-            return proxy, "event-07-reachable-inactive"
+        saw_reachable = False
+        saw_event07_live = False
+        for url in probe_urls:
+            result = curl_probe(url, proxy)
+            if result["status"] == 200:
+                if url == EVENT7_URL and is_live_hls(result["body"]):
+                    saw_event07_live = True
+                # A valid HTTP 200 response means the proxy reaches this FPT endpoint.
+                if (url == EVENT7_URL and is_live_hls(result["body"])) or (
+                    url != EVENT7_URL and (
+                        is_live_hls(result["body"]) if not url.lower().split("?", 1)[0].endswith(".mpd")
+                        else is_live_dash(result["body"])
+                    )
+                ):
+                    saw_reachable = True
+            elif result["status"] in (404, 410):
+                saw_reachable = True
+            if saw_event07_live:
+                return proxy, "event-07-live"
+        if saw_reachable:
+            return proxy, "source-url-reachable"
         return None
 
-    # Try many fresh Vietnam HTTP proxies concurrently. The target URL is always
-    # the exact event-07 source URL; the proxy is transport only.
+    # Try many fresh Vietnam HTTP proxies concurrently. The media target URLs are
+    # always taken verbatim from the user's source M3U; the proxy is transport only.
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as pool:
         futures = [pool.submit(test, p) for p in proxies[:MAX_PROXY_TRIES]]
         for future in concurrent.futures.as_completed(futures):
@@ -240,11 +264,11 @@ def build_m3u(results):
 def main():
     source = get_text(SOURCE_URL)
     candidates = parse_source(source)
-    if len(candidates) != 46:
-        raise RuntimeError(f"Expected 46 exact source endpoints, got {len(candidates)}")
+    if not candidates:
+        raise RuntimeError("Source M3U contains no valid HTTP(S) endpoints")
 
     proxies = load_proxies()
-    proxy, selection = find_working_proxy(proxies)
+    proxy, selection = find_working_proxy(proxies, candidates)
     if selection == "no-working-proxy" and proxy is None:
         raise RuntimeError("FPT source cannot be reached from direct path or fresh Vietnam HTTP proxies")
 
