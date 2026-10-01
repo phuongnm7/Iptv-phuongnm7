@@ -625,6 +625,13 @@ async function scan(env, meta = {}) {
     playlist = buildM3U(live);
     await env.FPT_EVENT_KV.put(PLAYLIST_KEY, playlist);
     await env.FPT_EVENT_KV.put(PUBLISHED_AT_KEY, String(Date.now()));
+
+    // Persist a recovery pool from the newest known-good non-empty scan.
+    const healthySnapshot = live.length > 0 ? live : priorHealthyChannels;
+    await env.FPT_EVENT_KV.put(
+      HEALTHY_CHANNELS_KEY,
+      JSON.stringify(healthySnapshot)
+    );
   } else if (preserveHealthySnapshot) {
     playlist = previous.playlist;
   } else {
@@ -789,7 +796,7 @@ export default {
         service: "NM7 FPT Event Live",
         scheduler: {
           cron: CRON,
-          strategy: "full source scan every 5 minutes; quota-safe sequential pool",
+          strategy: "full source scan every 5 minutes; adaptive 403 recovery with persistent last-known-good playlist",
         },
         ...(state.status || {
           ok: false,
