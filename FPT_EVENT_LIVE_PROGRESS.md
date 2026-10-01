@@ -62,3 +62,29 @@ After the GitHub Actions deployment completes, /status should show:
 - /fpt-event-live.m3u containing only the entries accepted by the current scan
 
 If the FPT CDN itself changes its response format or starts requiring additional authorization/signatures, that is a separate source-access issue and will be visible in the per-endpoint diagnostics rather than being masked as a quota failure.
+
+### 2026-10-01 — Production verification after v7 deployment
+
+- Production deployment version observed: e3d305bb-6404-416b-9d9f-c3fe08658179.
+- Cron trigger is active at */5 * * * *.
+- First full production verification after v7 succeeded cleanly:
+  - candidates: 46
+  - HLS: 38 candidates, 5 live, 33 inactive, 0 errors
+  - DASH: 8 candidates, 0 live, 8 inactive, 0 errors
+  - external subrequests used: 47/49 safety budget
+  - live channels confirmed:
+    1. Sự kiện FPT 01
+    2. Sự kiện FPT 09
+    3. Sự kiện FPT 10
+    4. Sự kiện FPT Event 02
+    5. Sự kiện FPT Event 07
+- All eight current DASH event URLs in the source returned clean HTTP 404 during that healthy scan; they are treated as inactive, not as probe errors.
+- A second full scan only about 30 seconds later received HTTP 403 from all 46 endpoints. This was traced to repeated manual scans during consecutive CI deployments, not to the original subrequest-limit defect.
+- The Worker therefore now:
+  - does not force a full /scan during every CI deployment;
+  - runs the real scan through Cloudflare Cron every 5 minutes;
+  - preserves the last healthy playlist for up to 15 minutes during a degraded scan;
+  - does not overwrite a healthy playlist with an empty playlist just because FPT temporarily returns 403/timeouts;
+  - expires degraded snapshots after the grace period instead of keeping stale events indefinitely.
+- CI deployment verification now checks /status and the playlist endpoint without triggering another full scan.
+- Manual FPT CDN diagnostics were separated into .github/workflows/diagnose-fpt-event-cdn.yml.
