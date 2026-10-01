@@ -2,9 +2,11 @@ const GROUP = "SỰ KIỆN FPT";
 const SOURCE_URL =
   "https://raw.githubusercontent.com/phuongnm7/Iptv-phuongnm7/main/sources/fpt-events-source.m3u";
 const PLAYLIST_KEY = "fpt:live:playlist";
+const PUBLISHED_AT_KEY = "fpt:live:publishedAt";
 const STATUS_KEY = "fpt:live:status";
 const CRON = "*/5 * * * *";
 const PLAYLIST_TTL = 60 * 60;
+const DEGRADED_GRACE_MS = 15 * 60 * 1000;
 const STATUS_TTL = 60 * 60;
 const WORKER_VERSION = "fpt-event-resilient-v7-subrequest-safe";
 
@@ -405,26 +407,57 @@ async function scan(env, meta = {}) {
 
   const previous = await getStored(env);
   const previousHasPlaylist = previous.playlist !== "#EXTM3U\n";
+  const publishedAtText = await env.FPT_EVENT_KV.get(PUBLISHED_AT_KEY);
+  const publishedAt = publishedAtText ? Number(publishedAtText) : 0;
+  const ageSinceHealthyPublish = publishedAt
+    ? Date.now() - publishedAt
+    : Number.POSITIVE_INFINITY;
 
-  // Only preserve the last good playlist when the scan itself is globally blocked by
-  // the Worker subrequest limit. Individual endpoint errors are not allowed to keep
-  // old/stale channels alive; only cleanly confirmed live entries are published.
-  const preservePrevious = allProbeErrorsAreQuota && previousHasPlaylist;
-  const playlist = preservePrevious ? previous.playlist : buildM3U(live);
-  const previousPlaylistEntries =
-    previous.playlist.match(/^#EXTINF:/gm)?.length || 0;
+  // Only a clean scan can change the published playlist. A degraded scan may contain
+  // 403/timeouts/network failures, so it cannot safely decide that a live event ended.
+  // Keep the last healthy snapshot for a short grace period; never keep stale data forever.
+  const cleanScan = probeErrors === 0;
+  const preserveHealthySnapshot =
+    !cleanScan &&
+    previousHasPlaylist &&
+    ageSinceHealthyPublish <= DEGRADED_GRACE_MS;
+  const staleExpired =
+    !cleanScan &&
+    previousHasPlaylist &&
+    ageSinceHealthyPublish > DEGRADED_GRACE_MS;
 
-  if (!preservePrevious) {
+  let playlist;
+  if (cleanScan) {
+    playlist = buildM3U(live);
     await env.FPT_EVENT_KV.put(PLAYLIST_KEY, playlist, {
       expirationTtl: PLAYLIST_TTL,
     });
+    await env.FPT_EVENT_KV.put(PUBLISHED_AT_KEY, String(Date.now()), {
+      expirationTtl: PLAYLIST_TTL,
+    });
+  } else if (preserveHealthySnapshot) {
+    playlist = previous.playlist;
+  } else {
+    playlist = "#EXTM3U\n";
+    await env.FPT_EVENT_KV.put(PLAYLIST_KEY, playlist, {
+      expirationTtl: PLAYLIST_TTL,
+    });
+    await env.FPT_EVENT_KV.put(PUBLISHED_AT_KEY, String(Date.now()), {
+      expirationTtl: PLAYLIST_TTL,
+    });
   }
+
+  const publishedPlaylistEntries =
+    playlist.match(/^#EXTINF:/gm)?.length || 0;
 
   const status = {
     ok: true,
     scanHealthy: probeErrors === 0,
     scanDegraded: probeErrors > 0,
-    stalePlaylist: preservePrevious,
+    stalePlaylist: preserveHealthySnapshot,
+    staleExpired,
+    lastHealthyPublishAt: publishedAt ? new Date(publishedAt).toISOString() : null,
+    degradedGraceMinutes: DEGRADED_GRACE_MS / 60000,
     workerVersion: WORKER_VERSION,
     generatedAt: new Date().toISOString(),
     scanDurationMs: Date.now() - scanStarted,
@@ -436,11 +469,13 @@ async function scan(env, meta = {}) {
     sourceUrl: SOURCE_URL,
     candidates: candidates.length,
     liveEntries: live.length,
-    playlistEntries: preservePrevious ? previousPlaylistEntries : live.length,
+    playlistEntries: publishedPlaylistEntries,
+    publishedFromCurrentScan: cleanScan,
     inactiveEntries: results.filter((x) => !x.live && !x.error).length,
     probeErrors,
-    preservedBecauseQuotaFailure: preservePrevious,
+    preservedBecauseDegradedScan: preserveHealthySnapshot,
     quotaFailureDetected: allProbeErrorsAreQuota,
+    quotaSafetyBlocked: allProbeErrorsAreQuota,
     subrequestBudget: {
       maxExternalSubrequests: MAX_EXTERNAL_SUBREQUESTS,
       used: budget.used,
