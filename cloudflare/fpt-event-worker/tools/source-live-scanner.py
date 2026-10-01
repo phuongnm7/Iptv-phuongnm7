@@ -17,7 +17,7 @@ EVENT7_URL = "https://vips-livecdn.fptplay.net/live/media/event-07/hls_avc_v6/in
 VIETNAM_PROXY_LIST_URL = "https://raw.githubusercontent.com/hproxy-com/free-proxy-list/main/by-country/VN.txt"
 OUTPUT_M3U = os.environ.get("OUTPUT_M3U", "generated/fpt-event-live.m3u")
 OUTPUT_STATUS = os.environ.get("OUTPUT_STATUS", "generated/fpt-event-live.status.json")
-MAX_PROXY_TRIES = int(os.environ.get("MAX_PROXY_TRIES", "24"))
+MAX_PROXY_TRIES = int(os.environ.get("MAX_PROXY_TRIES", "48"))
 MAX_WORKERS = int(os.environ.get("MAX_WORKERS", "4"))
 PROBE_TIMEOUT = int(os.environ.get("PROBE_TIMEOUT", "6"))
 
@@ -191,7 +191,21 @@ def probe_via_rotating_proxies(item, proxies, max_proxy_tries=8):
     # Free proxies are volatile. Try a bounded set in parallel for THIS URL,
     # then take the first definitive response. This avoids serially waiting on
     # dead proxies and prevents one proxy from being reused across 46 URLs.
-    candidates = [p for p in proxies[:max_proxy_tries] if p]
+    # Spread attempts across the full fresh Vietnam proxy list instead of
+    # trusting only the first few entries, which are often dead/overloaded.
+    candidates = []
+    usable = [p for p in proxies if p]
+    if len(usable) <= max_proxy_tries:
+        candidates = usable
+    elif usable:
+        step = (len(usable) - 1) / float(max_proxy_tries - 1)
+        seen = set()
+        for i in range(max_proxy_tries):
+            idx = int(round(i * step))
+            proxy = usable[idx]
+            if proxy not in seen:
+                candidates.append(proxy)
+                seen.add(proxy)
     if not candidates:
         return {
             "name": item["name"], "url": item["url"], "live": False,
@@ -208,7 +222,7 @@ def probe_via_rotating_proxies(item, proxies, max_proxy_tries=8):
             return proxy, classify(item, result)
         return None
 
-    with concurrent.futures.ThreadPoolExecutor(max_workers=min(8, len(candidates))) as pool:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=min(12, len(candidates))) as pool:
         futures = [pool.submit(test, proxy) for proxy in candidates]
         definitive = []
         for future in concurrent.futures.as_completed(futures):
