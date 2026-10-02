@@ -77,7 +77,8 @@ async function check(env) {
   const scanAgeMinutes = ageMinutes(scan?.generatedAt);
   const scanFresh = scanAgeMinutes !== null && scanAgeMinutes < 8;
   const validCandidateCount = Number(scan?.candidates) === 46;
-  const validPublishedScan = Boolean(scan?.scanHealthy === true || (scan?.partialScan === true && Number(scan?.liveEntries) > 0));
+  const sourceOnly = scan?.sourceOnly === true;
+  const validPublishedScan = Boolean(sourceOnly && (scan?.scanHealthy === true || (scan?.partialScan === true && Number(scan?.liveEntries) > 0)));
   const activeRun = Boolean(run && ACTIVE.has(run.status));
 
   const diagnostics = {
