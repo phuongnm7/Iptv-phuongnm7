@@ -5,17 +5,6 @@
   "observability": {
     "enabled": true
   },
-  "kv_namespaces": [
-    {
-      "binding": "FPT_EVENT_KV",
-      "id": "4cfdab00c15241ea84239b5910e1bb12"
-    }
-  ],
-  "triggers": {
-    "crons": [
-      "*/5 * * * *"
-    ]
-  },
   "workers_dev": true,
   "preview_urls": false
 }
