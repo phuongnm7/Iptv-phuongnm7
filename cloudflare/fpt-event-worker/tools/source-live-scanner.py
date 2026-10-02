@@ -2,7 +2,7 @@
 # ops(fpt): run source scanner
 # verified syntax trigger
 # spread proxy trigger
-# dedicated FPT workflow activation check
+# dedicated FPT scanner activation trigger
 import concurrent.futures
 import json
 import os
