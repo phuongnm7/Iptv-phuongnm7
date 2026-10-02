@@ -2,7 +2,7 @@ name: FPT Event Scanner
 
 on:
   schedule:
-    - cron: "2-59/5 * * * *"
+    - cron: "*/5 * * * *"
   workflow_dispatch:
   push:
     branches:
@@ -17,12 +17,12 @@ permissions:
 
 concurrency:
   group: nm7-fpt-event-scan
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   scan:
-    runs-on: ubuntu-latest
-    timeout-minutes: 8
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
 
     steps:
       - name: Checkout
@@ -105,11 +105,15 @@ jobs:
 
           for attempt in 1 2 3 4 5; do
             git fetch origin main
-            git rebase origin/main
+            if ! git rebase origin/main; then
+              git rebase --abort || true
+              echo "::error::Could not rebase FPT result onto latest main."
+              exit 1
+            fi
             if git push origin HEAD:main; then
               exit 0
             fi
-            git rebase --abort || true
+            echo "Push race detected (attempt $attempt/5); retrying..."
             sleep $((attempt * 2))
           done
 
