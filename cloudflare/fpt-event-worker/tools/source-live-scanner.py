@@ -313,6 +313,27 @@ def main():
     # Every exact source URL gets its own direct+rotating-proxy decision.
     # This avoids reusing one unstable free proxy across the whole 46-entry scan.
     results, transports = scan_all(candidates, proxies)
+
+    # Retry only failed endpoints with the reverse proxy order. This gives
+    # transient/dead-proxy failures an independent second chance without
+    # doubling the scan cost for healthy endpoints.
+    first_errors = [x for x in results if x["error"]]
+    if first_errors and proxies:
+        retry_candidates = [
+            {"name": x["name"], "url": x["url"]}
+            for x in first_errors
+        ]
+        retry_results, retry_transports = scan_all(
+            retry_candidates,
+            list(reversed(proxies)),
+        )
+        retry_by_url = {x["url"]: x for x in retry_results}
+        for idx, row in enumerate(results):
+            replacement = retry_by_url.get(row["url"])
+            if replacement and not replacement["error"]:
+                results[idx] = replacement
+                transports[row["url"]] = retry_transports.get(row["url"])
+
     live = [x for x in results if x["live"]]
     errors = [x for x in results if x["error"]]
     all_403 = len(results) > 0 and all(x["status"] == 403 for x in results)
@@ -340,12 +361,10 @@ def main():
     os.makedirs(os.path.dirname(OUTPUT_M3U), exist_ok=True)
     os.makedirs(os.path.dirname(OUTPUT_STATUS), exist_ok=True)
 
-    # Never replace a valid playlist with a false empty result while the current
-    # network vantage is degraded. Only a clean scan or a partial scan with at
-    # least one positively verified live URL may change the public live set.
-    # Publish only a clean, complete scan. A partial scan must never replace
-    # the current playlist with an incomplete set.
-    can_publish = len(errors) == 0
+    # Publish positively verified live URLs even when a small number of
+    # endpoints remain unreachable after two probe passes. Unverified URLs are
+    # never added to the output, so the public playlist remains live-only.
+    can_publish = (len(errors) == 0) or (len(live) > 0)
     if can_publish:
         with open(OUTPUT_M3U, "w", encoding="utf-8") as f:
             f.write(build_m3u(results))
