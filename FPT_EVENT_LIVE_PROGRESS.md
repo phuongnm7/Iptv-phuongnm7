@@ -244,3 +244,41 @@ The CI source-only integrity test still requires every public playlist URL to be
 `https://raw.githubusercontent.com/phuongnm7/Iptv-phuongnm7/main/sources/fpt-events-source.m3u`
 
 and rejects old metadata/alternate-source markers.
+
+
+## 2026-10-02 — Independent GitHub Actions watchdog
+
+### Mô hình mới
+- Giữ nguyên GitHub Actions `.github/workflows/fpt-event-scan.yml` là scanner chính.
+- Giữ nguyên `nm7-fpt-event-live` là delivery Worker v15.
+- Bổ sung Cloudflare Worker riêng: `nm7-fpt-event-watchdog`.
+- Watchdog Cron: `*/5 * * * *`.
+- Watchdog kiểm tra run gần nhất của `fpt-event-scan.yml`.
+- Nếu run mới hơn 8 phút: không làm gì.
+- Nếu run vẫn queued/in_progress/requested/waiting/pending: không dispatch trùng.
+- Nếu không có run hoặc run mới nhất quá 8 phút: gọi GitHub `workflow_dispatch` trên `main` để khởi động scanner.
+
+### Files
+- `tools/cloudflare-fpt-watchdog/src/index.js`
+- `tools/cloudflare-fpt-watchdog/wrangler.toml`
+- `tools/cloudflare-fpt-watchdog/README.md`
+- `.github/workflows/deploy-fpt-event-watchdog.yml`
+
+### GitHub
+- Scanner cron đã được chuẩn hóa về `*/5 * * * *`.
+- Scanner concurrency đã chuyển sang `cancel-in-progress: false` để run mới không hủy run đang xử lý.
+- Watchdog deploy workflow dùng lại `CLOUDFLARE_API_TOKEN` và `CLOUDFLARE_ACCOUNT_ID` hiện có.
+
+### Secret cần có trên Cloudflare watchdog
+- `GITHUB_TOKEN`: GitHub fine-grained token có quyền Actions Read and write cho `phuongnm7/Iptv-phuongnm7`.
+
+### Commit
+- Scanner schedule/concurrency fix: `c92f5a96f5e7bade0ef63083c1f70eba18e34025`.
+- Watchdog source: `926580abfaa339b0d13a31ce36952d7fa69071fa`.
+- Watchdog config: `720623c22a2932adac7e0845203f516b99be5358`.
+- Watchdog README: `acc85298dc5c3a708aef912cb29f8915febd9ef8`.
+- Watchdog deploy workflow: `b26afab25c720e6f9af544db4de03acc82d64d2d`.
+
+### Lưu ý triển khai
+- Việc thêm code/deploy workflow đã hoàn tất trong repository.
+- Để watchdog thực sự dispatch được GitHub Actions, Cloudflare Worker phải được deploy và Secret `GITHUB_TOKEN` phải được cấu hình trên Worker.
