@@ -18,7 +18,7 @@ Watchdog độc lập cho GitHub Actions scanner của NM7 FPT Event Live.
 
 ## GitHub API
 
-Worker cần Cloudflare Secret `GITHUB_TOKEN` với quyền GitHub Actions Read and write trên `phuongnm7/Iptv-phuongnm7`.
+Worker cần secret `GITHUB_TOKEN` với quyền GitHub Actions Read and write trên `phuongnm7/Iptv-phuongnm7`. Deployment lấy giá trị từ GitHub Actions repository secret `FPT_WATCHDOG_GITHUB_TOKEN` và đồng bộ secret đó vào Worker.
 GitHub REST API dùng phiên bản `2026-03-10`.
 
 ## Endpoints
