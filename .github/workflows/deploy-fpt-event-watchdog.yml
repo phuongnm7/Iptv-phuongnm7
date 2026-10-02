@@ -44,8 +44,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          npx wrangler secret list --config wrangler.toml --json | tee /tmp/watchdog-secrets.json
-          jq -e 'any(.[]; .name == "GITHUB_TOKEN")' /tmp/watchdog-secrets.json >/dev/null
+          npx wrangler secret list --config wrangler.toml | tee /tmp/watchdog-secrets.txt
+          grep -q "GITHUB_TOKEN" /tmp/watchdog-secrets.txt
 
       - name: Verify watchdog health
         run: |
