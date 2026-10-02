@@ -71,7 +71,13 @@ function ageMinutes(iso) {
 async function check(env) {
   if (!env.GITHUB_TOKEN) throw new Error("Missing Cloudflare secret GITHUB_TOKEN");
 
-  const [run, scan] = await Promise.all([latestRun(env.GITHUB_TOKEN), latestScanStatus()]);
+  const [runResult, scanResult] = await Promise.allSettled([latestRun(env.GITHUB_TOKEN), latestScanStatus()]);
+  if (runResult.status === "rejected") throw runResult.reason;
+  const run = runResult.value;
+  const scan = scanResult.status === "fulfilled" ? scanResult.value : null;
+  const scanStatusError = scanResult.status === "rejected"
+    ? (scanResult.reason instanceof Error ? scanResult.reason.message : String(scanResult.reason))
+    : null;
   const runAgeMs = run?.created_at ? Date.now() - Date.parse(run.created_at) : Infinity;
   const runAgeMinutes = Number.isFinite(runAgeMs) ? Math.max(0, Math.round(runAgeMs / 60000)) : null;
   const scanAgeMinutes = ageMinutes(scan?.generatedAt);
@@ -94,6 +100,7 @@ async function check(env) {
     live_entries: Number(scan?.liveEntries ?? 0),
     probe_errors: Number(scan?.probeErrors ?? 0),
     source_only: scan?.sourceOnly ?? null,
+    scan_status_error: scanStatusError,
   };
 
   if (activeRun && runAgeMs < STALE_AFTER_MS && scanFresh && validCandidateCount && validPublishedScan) {
@@ -111,7 +118,7 @@ async function check(env) {
   await dispatch(env.GITHUB_TOKEN);
   return {
     action: "dispatch",
-    reason: !run ? "no_previous_run" : (!scanFresh ? "scanner_output_stale" : (!validCandidateCount ? "unexpected_candidate_count" : (!validPublishedScan ? "invalid_scan_state" : "latest_run_older_than_8_minutes"))),
+    reason: !run ? "no_previous_run" : (scanStatusError ? "scanner_status_unavailable" : (!scanFresh ? "scanner_output_stale" : (!validCandidateCount ? "unexpected_candidate_count" : (!validPublishedScan ? "invalid_scan_state" : "latest_run_older_than_8_minutes")))),
     previous_run_id: run?.id ?? null,
     previous_status: run?.status ?? null,
     previous_conclusion: run?.conclusion ?? null,
