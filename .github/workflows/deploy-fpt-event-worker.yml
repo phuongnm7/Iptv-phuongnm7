@@ -32,17 +32,6 @@ jobs:
           set -euo pipefail
           node --check src/index.js
 
-      - name: Deploy Worker
-        uses: cloudflare/wrangler-action@v4
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          workingDirectory: cloudflare/fpt-event-worker
-          wranglerVersion: "4"
-          command: |
-            deploy src/index.js --config wrangler.jsonc
-            triggers deploy --config wrangler.jsonc
-
       - name: Reconcile Cloudflare Cron schedules
         shell: bash
         run: |
@@ -57,6 +46,17 @@ jobs:
           echo "Schedules after reconcile:"
           echo "$AFTER"
           echo "$AFTER" | jq -e '.success == true and (.result.schedules | length) == 0' >/dev/null
+      - name: Deploy Worker
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: cloudflare/fpt-event-worker
+          wranglerVersion: "4"
+          command: |
+            deploy src/index.js --config wrangler.jsonc
+            triggers deploy --config wrangler.jsonc
+
       - name: Verify delivery Worker
         shell: bash
         run: |
