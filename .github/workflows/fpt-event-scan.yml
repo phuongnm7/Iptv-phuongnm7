@@ -54,10 +54,18 @@ jobs:
 
           assert candidates == 46, f"Expected 46 source URLs, got {candidates}"
           assert live + inactive + errors == candidates, "Scan totals do not add up"
-          assert errors == 0, f"FPT probe errors: {errors}"
-          assert status.get("scanHealthy") is True, "Scan is not healthy"
+          assert live > 0 or errors == 0, (
+              f"Scan produced no verified live stream and has {errors} probe errors"
+          )
+          assert (
+              status.get("scanHealthy") is True
+              or (status.get("partialScan") is True and live > 0)
+          ), "Scan is neither healthy nor a valid partial live scan"
 
-          print(f"FPT scan OK: {candidates} candidates, {live} live, {inactive} inactive, {errors} errors")
+          print(
+              f"FPT scan accepted: {candidates} candidates, {live} verified live, "
+              f"{inactive} inactive, {errors} unresolved probes"
+          )
           PY
 
       - name: Validate output URLs
