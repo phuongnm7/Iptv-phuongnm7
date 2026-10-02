@@ -37,8 +37,6 @@ jobs:
           secrets: |
             GITHUB_TOKEN
           command: deploy --config wrangler.toml
-        env:
-          GITHUB_TOKEN: ${{ secrets.FPT_WATCHDOG_GITHUB_TOKEN }}
       - name: Verify watchdog health
         run: |
           set -euo pipefail
