@@ -208,4 +208,3 @@ export default {
   },
 };
 
-// deployment verification marker: 2026-10-02T23:35+07:00
