@@ -60,4 +60,3 @@ Sau khi secret đã tồn tại trong **Production**, chạy lại workflow depl
 Không dán token vào source code, README, workflow file hoặc chat.
 
 
-<!-- runtime-secret-rebind-check: 2026-10-02 -->
