@@ -9,6 +9,9 @@ on:
       - ".github/workflows/deploy-fpt-event-watchdog.yml"
   workflow_dispatch:
 
+
+# Runtime secret rebinding verification: 2026-10-02
+
 permissions:
   contents: read
 
