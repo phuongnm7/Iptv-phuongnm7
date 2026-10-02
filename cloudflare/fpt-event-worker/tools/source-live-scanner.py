@@ -18,7 +18,7 @@ EVENT7_URL = "https://vips-livecdn.fptplay.net/live/media/event-07/hls_avc_v6/in
 VIETNAM_PROXY_LIST_URL = "https://raw.githubusercontent.com/hproxy-com/free-proxy-list/main/by-country/VN.txt"
 OUTPUT_M3U = os.environ.get("OUTPUT_M3U", "generated/fpt-event-live.m3u")
 OUTPUT_STATUS = os.environ.get("OUTPUT_STATUS", "generated/fpt-event-live.status.json")
-MAX_PROXY_TRIES = int(os.environ.get("MAX_PROXY_TRIES", "48"))
+MAX_PROXY_TRIES = int(os.environ.get("MAX_PROXY_TRIES", "32"))
 MAX_WORKERS = int(os.environ.get("MAX_WORKERS", "4"))
 PROBE_TIMEOUT = int(os.environ.get("PROBE_TIMEOUT", "6"))
 
@@ -265,7 +265,7 @@ def scan_all(candidates, proxies):
     details = {}
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as pool:
         futures = {
-            pool.submit(probe_via_rotating_proxies, item, proxies, 8): item
+            pool.submit(probe_via_rotating_proxies, item, proxies, MAX_PROXY_TRIES): item
             for item in candidates
         }
         for future in concurrent.futures.as_completed(futures):
@@ -301,9 +301,13 @@ def main():
     if not candidates:
         raise RuntimeError("Source M3U contains no valid HTTP(S) endpoints")
 
-    proxies = load_proxies()
-    if not proxies:
-        raise RuntimeError("No fresh Vietnam HTTP proxies available")
+    try:
+        proxies = load_proxies()
+    except Exception as exc:
+        # Direct probes remain useful even if the public Vietnam proxy list
+        # is temporarily unavailable. The scan will still report real errors.
+        print(f"PROXY_LIST_WARNING {type(exc).__name__}: {exc}")
+        proxies = []
 
     # Every exact source URL gets its own direct+rotating-proxy decision.
     # This avoids reusing one unstable free proxy across the whole 46-entry scan.
@@ -338,7 +342,9 @@ def main():
     # Never replace a valid playlist with a false empty result while the current
     # network vantage is degraded. Only a clean scan or a partial scan with at
     # least one positively verified live URL may change the public live set.
-    can_publish = (len(errors) == 0) or (len(live) > 0)
+    # Publish only a clean, complete scan. A partial scan must never replace
+    # the current playlist with an incomplete set.
+    can_publish = len(errors) == 0
     if can_publish:
         with open(OUTPUT_M3U, "w", encoding="utf-8") as f:
             f.write(build_m3u(results))
