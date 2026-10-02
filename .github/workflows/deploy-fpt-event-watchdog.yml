@@ -27,6 +27,17 @@ jobs:
       - name: Validate Worker JavaScript
         working-directory: tools/cloudflare-fpt-watchdog
         run: node --check src/index.js
+      - name: Validate watchdog GitHub token secret
+        shell: bash
+        env:
+          FPT_WATCHDOG_GITHUB_TOKEN: ${{ secrets.FPT_WATCHDOG_GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "$FPT_WATCHDOG_GITHUB_TOKEN" || {
+            echo "::error::Missing repository secret FPT_WATCHDOG_GITHUB_TOKEN"
+            exit 1
+          }
+
       - name: Deploy Worker
         uses: cloudflare/wrangler-action@v4
         with:
@@ -34,7 +45,11 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: tools/cloudflare-fpt-watchdog
           wranglerVersion: "4"
+          secrets: |
+            GITHUB_TOKEN
           command: deploy --config wrangler.toml
+        env:
+          GITHUB_TOKEN: ${{ secrets.FPT_WATCHDOG_GITHUB_TOKEN }}
       - name: Verify watchdog health
         run: |
           set -euo pipefail
