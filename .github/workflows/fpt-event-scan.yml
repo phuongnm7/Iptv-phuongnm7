@@ -15,6 +15,7 @@ on:
 permissions:
   contents: write
 
+# Scanner trigger probe: 2026-10-02
 concurrency:
   group: nm7-fpt-event-scan
   cancel-in-progress: false
