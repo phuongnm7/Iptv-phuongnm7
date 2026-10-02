@@ -5,10 +5,15 @@ const GENERATED_PLAYLIST_URL =
 const PLAYLIST_KEY = "fpt:live:playlist";
 const GENERATED_AT_KEY = "fpt:live:generatedAt";
 const STATUS_KEY = "fpt:live:status";
+const SCANNER_HEALTH_KEY = "fpt:live:scanner-health";
 const GROUP = "SỰ KIỆN FPT";
 const CRON = "*/5 * * * *";
-const WORKER_VERSION = "fpt-event-source-mirror-v13";
+const WORKER_VERSION = "fpt-event-source-mirror-v14";
 const CACHE_TTL = 24 * 60 * 60;
+const REQUEST_REFRESH_AFTER = 4 * 60;
+const SCANNER_HEALTH_TTL = 60;
+const SCANNER_WORKFLOW_URL =
+  "https://api.github.com/repos/phuongnm7/Iptv-phuongnm7/actions/workflows/scan-fpt-events.yml/runs?branch=main&per_page=10";
 
 function countEntries(text) {
   return text.match(/^#EXTINF:/gm)?.length || 0;
@@ -21,43 +26,33 @@ function extractUrls(text) {
     .filter((line) => /^https?:\/\//i.test(line));
 }
 
-function hasManifestUrls(text) {
-  return countEntries(text) > 0;
-}
-
 function buildEmpty() {
   return "#EXTM3U\n";
 }
 
 async function fetchGeneratedPlaylist() {
   const bust = Date.now();
-  return fetch(
-    `${GENERATED_PLAYLIST_URL}?_=${bust}`,
-    {
-      method: "GET",
-      headers: {
-        "User-Agent": "NM7-FPT-Event-Worker/13",
-        "Cache-Control": "no-cache, no-store",
-        Pragma: "no-cache",
-        Accept: "application/x-mpegURL,text/plain,*/*",
-      },
-      cache: "no-store",
-    }
-  );
+  return fetch(`${GENERATED_PLAYLIST_URL}?_=${bust}`, {
+    method: "GET",
+    headers: {
+      "User-Agent": "NM7-FPT-Event-Worker/14",
+      "Cache-Control": "no-cache, no-store",
+      Pragma: "no-cache",
+      Accept: "application/x-mpegURL,text/plain,*/*",
+    },
+    cache: "no-store",
+  });
 }
 
 async function validateAgainstSource(playlistText) {
-  const sourceResponse = await fetch(
-    `${SOURCE_URL}?_=${Date.now()}`,
-    {
-      headers: {
-        "User-Agent": "NM7-FPT-Event-Worker/13",
-        "Cache-Control": "no-cache, no-store",
-        Pragma: "no-cache",
-      },
-      cache: "no-store",
-    }
-  );
+  const sourceResponse = await fetch(`${SOURCE_URL}?_=${Date.now()}`, {
+    headers: {
+      "User-Agent": "NM7-FPT-Event-Worker/14",
+      "Cache-Control": "no-cache, no-store",
+      Pragma: "no-cache",
+    },
+    cache: "no-store",
+  });
 
   if (!sourceResponse.ok) {
     return {
@@ -82,6 +77,104 @@ async function validateAgainstSource(playlistText) {
   };
 }
 
+async function fetchScannerHealth(env, force = false) {
+  if (!force) {
+    const cached = await env.FPT_EVENT_KV.get(SCANNER_HEALTH_KEY);
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        const age = (Date.now() - Date.parse(parsed.checkedAt || 0)) / 1000;
+        if (Number.isFinite(age) && age < SCANNER_HEALTH_TTL) {
+          return parsed;
+        }
+      } catch {
+        // Refresh below.
+      }
+    }
+  }
+
+  try {
+    const response = await fetch(SCANNER_WORKFLOW_URL, {
+      headers: {
+        Accept: "application/vnd.github+json",
+        "User-Agent": "NM7-FPT-Event-Worker/14",
+        "Cache-Control": "no-cache",
+      },
+      cache: "no-store",
+    });
+    if (!response.ok) {
+      throw new Error(`github-actions-http-${response.status}`);
+    }
+
+    const data = await response.json();
+    const runs = Array.isArray(data.workflow_runs) ? data.workflow_runs : [];
+    const latest = runs[0] || null;
+    const lastSuccess =
+      runs.find((run) => run.conclusion === "success") || null;
+    const checkedAt = new Date().toISOString();
+    const lastRunAt = latest?.updated_at || latest?.run_started_at || null;
+    const lastSuccessAt =
+      lastSuccess?.updated_at || lastSuccess?.run_started_at || null;
+    const ageSeconds = lastSuccessAt
+      ? Math.max(0, (Date.now() - Date.parse(lastSuccessAt)) / 1000)
+      : null;
+
+    const result = {
+      available: true,
+      workflow: "scan-fpt-events.yml",
+      workflowUrl: SCANNER_WORKFLOW_URL,
+      checkedAt,
+      latestRun: latest
+        ? {
+            id: latest.id,
+            status: latest.status,
+            conclusion: latest.conclusion,
+            event: latest.event,
+            createdAt: latest.created_at,
+            updatedAt: latest.updated_at,
+          }
+        : null,
+      lastSuccessfulRun: lastSuccess
+        ? {
+            id: lastSuccess.id,
+            status: lastSuccess.status,
+            conclusion: lastSuccess.conclusion,
+            createdAt: lastSuccess.created_at,
+            updatedAt: lastSuccess.updated_at,
+          }
+        : null,
+      lastRunAt,
+      lastSuccessAt,
+      lastSuccessAgeSeconds: ageSeconds,
+      healthy:
+        Boolean(lastSuccessAt) &&
+        Number.isFinite(ageSeconds) &&
+        ageSeconds <= 15 * 60 &&
+        latest?.conclusion !== "failure",
+    };
+
+    await env.FPT_EVENT_KV.put(
+      SCANNER_HEALTH_KEY,
+      JSON.stringify(result),
+      { expirationTtl: SCANNER_HEALTH_TTL + 30 }
+    );
+    return result;
+  } catch (error) {
+    const fallback = {
+      available: false,
+      checkedAt: new Date().toISOString(),
+      healthy: false,
+      error: error instanceof Error ? error.message : String(error),
+    };
+    await env.FPT_EVENT_KV.put(
+      SCANNER_HEALTH_KEY,
+      JSON.stringify(fallback),
+      { expirationTtl: SCANNER_HEALTH_TTL }
+    );
+    return fallback;
+  }
+}
+
 async function refreshCache(env, trigger = "cron") {
   const response = await fetchGeneratedPlaylist();
   if (!response.ok) {
@@ -95,19 +188,14 @@ async function refreshCache(env, trigger = "cron") {
 
   const validation = await validateAgainstSource(text);
   if (!validation.ok) {
-    throw new Error(
-      `source-integrity-failed:${validation.reason}`
-    );
+    throw new Error(`source-integrity-failed:${validation.reason}`);
   }
 
-  const generatedAt = new Date().toISOString();
+  const cacheRefreshedAt = new Date().toISOString();
   await env.FPT_EVENT_KV.put(PLAYLIST_KEY, text);
-  await env.FPT_EVENT_KV.put(GENERATED_AT_KEY, generatedAt);
+  await env.FPT_EVENT_KV.put(GENERATED_AT_KEY, cacheRefreshedAt);
 
-  const verifiedMarker =
-    /#NM7-SCAN-VERIFIED:\s*true/i.test(text);
-  const userConfirmedMarker =
-    /#NM7-SCAN-VERIFIED:\s*user-confirmed/i.test(text);
+  const scannerHealth = await fetchScannerHealth(env, true);
 
   const status = {
     service: "NM7 FPT Event Live",
@@ -118,16 +206,16 @@ async function refreshCache(env, trigger = "cron") {
     scheduler: {
       cron: CRON,
       strategy:
-        "GitHub Actions scans exact source URLs through a Vietnam transport path every 5 minutes; Worker only mirrors the generated exact-source live set",
+        "Dedicated GitHub Actions Vietnam scanner runs every 5 minutes; Cloudflare Worker mirrors the exact-source live set",
     },
-    generatedAt,
+    workerCacheRefreshedAt: cacheRefreshedAt,
     trigger,
     candidates: validation.sourceUrlCount,
     liveEntries: countEntries(text),
     playlistEntries: countEntries(text),
-    verified: verifiedMarker,
-    userConfirmed: userConfirmedMarker,
     validation,
+    scannerHealth,
+    playlistVerified: /#NM7-SCAN-VERIFIED:\s*true/i.test(text),
   };
 
   await env.FPT_EVENT_KV.put(STATUS_KEY, JSON.stringify(status), {
@@ -138,7 +226,7 @@ async function refreshCache(env, trigger = "cron") {
 }
 
 async function getCached(env) {
-  const [playlist, generatedAt, statusText] = await Promise.all([
+  const [playlist, refreshedAt, statusText] = await Promise.all([
     env.FPT_EVENT_KV.get(PLAYLIST_KEY),
     env.FPT_EVENT_KV.get(GENERATED_AT_KEY),
     env.FPT_EVENT_KV.get(STATUS_KEY),
@@ -155,15 +243,48 @@ async function getCached(env) {
 
   return {
     playlist: playlist || buildEmpty(),
-    generatedAt,
+    refreshedAt,
     status,
   };
 }
 
-function playlistResponse(text, status, source = "github-generated") {
+async function getCurrent(env, trigger = "http") {
+  const cached = await getCached(env);
+  const age = cached.refreshedAt
+    ? Math.max(0, (Date.now() - Date.parse(cached.refreshedAt)) / 1000)
+    : Infinity;
+
+  if (cached.refreshedAt && age < REQUEST_REFRESH_AFTER) {
+    return cached;
+  }
+
+  try {
+    const current = await refreshCache(env, trigger);
+    return {
+      playlist: current.text,
+      refreshedAt: current.status.workerCacheRefreshedAt,
+      status: current.status,
+    };
+  } catch (error) {
+    if (cached.status) {
+      return {
+        ...cached,
+        status: {
+          ...cached.status,
+          cacheOnly: true,
+          lastRefreshError:
+            error instanceof Error ? error.message : String(error),
+        },
+      };
+    }
+    throw error;
+  }
+}
+
+function playlistResponse(text, status, source = "kv-cache") {
   const verified = /#NM7-SCAN-VERIFIED:\s*true/i.test(text);
-  const userConfirmed = /#NM7-SCAN-VERIFIED:\s*user-confirmed/i.test(text);
   const entries = countEntries(text);
+  const scanner = status?.scannerHealth || {};
 
   return new Response(text, {
     headers: {
@@ -173,18 +294,14 @@ function playlistResponse(text, status, source = "github-generated") {
       "Access-Control-Allow-Origin": "*",
       "X-NM7-FPT-Events": String(entries),
       "X-NM7-FPT-Verified": String(verified),
-      "X-NM7-FPT-User-Confirmed": String(userConfirmed),
-      "X-NM7-FPT-Filter":
-        verified
-          ? "source-current-live-only"
-          : userConfirmed
-          ? "source-user-confirmed-awaiting-scan"
-          : "source-current-scan-unverified",
       "X-NM7-FPT-Source-Only": "true",
       "X-NM7-FPT-Version": WORKER_VERSION,
       "X-NM7-FPT-Source": source,
-      "X-NM7-FPT-Generated-At":
-        status?.generatedAt || new Date().toISOString(),
+      "X-NM7-FPT-Scanner-Healthy": String(Boolean(scanner.healthy)),
+      "X-NM7-FPT-Scanner-Last-Success":
+        scanner.lastSuccessAt || "",
+      "X-NM7-FPT-Worker-Cache":
+        status?.workerCacheRefreshedAt || "",
     },
   });
 }
@@ -195,19 +312,19 @@ export default {
       await refreshCache(env, "cron");
     } catch (error) {
       const cached = await getCached(env);
+      const scannerHealth = await fetchScannerHealth(env, true);
       const status = {
         ...(cached.status || {}),
         service: "NM7 FPT Event Live",
         workerVersion: WORKER_VERSION,
         sourceOnly: true,
-        sourceUrl: SOURCE_URL,
-        generatedPlaylistUrl: GENERATED_PLAYLIST_URL,
         scheduler: { cron: CRON },
-        generatedAt: cached.generatedAt,
-        lastError: error instanceof Error ? error.message : String(error),
         trigger: "cron",
-        cachedEntries: countEntries(cached.playlist),
+        scannerHealth,
         cacheOnly: true,
+        cachedEntries: countEntries(cached.playlist),
+        lastRefreshError:
+          error instanceof Error ? error.message : String(error),
       };
       await env.FPT_EVENT_KV.put(STATUS_KEY, JSON.stringify(status), {
         expirationTtl: CACHE_TTL,
@@ -218,19 +335,26 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
-    if (
-      url.pathname === "/fpt-event-live.m3u" ||
-      url.pathname === "/fpt-event-fallback.m3u"
-    ) {
+    if (url.pathname === "/fpt-event-live.m3u") {
       try {
-        const current = await refreshCache(env, "http");
-        return playlistResponse(current.text, current.status);
-      } catch {
-        const cached = await getCached(env);
+        const current = await getCurrent(env, "http-playlist");
         return playlistResponse(
-          cached.playlist,
-          cached.status,
-          "kv-cache"
+          current.playlist,
+          current.status,
+          current.status?.cacheOnly ? "kv-cache" : "worker-refresh"
+        );
+      } catch (error) {
+        return new Response(
+          `#EXTM3U\n# NM7 FPT Worker error: ${error instanceof Error ? error.message : String(error)}\n`,
+          {
+            status: 502,
+            headers: {
+              "Content-Type": "application/x-mpegURL; charset=utf-8",
+              "Cache-Control": "no-store",
+              "Access-Control-Allow-Origin": "*",
+              "X-NM7-FPT-Version": WORKER_VERSION,
+            },
+          }
         );
       }
     }
@@ -241,25 +365,24 @@ export default {
         return Response.json(current.status);
       } catch (error) {
         const cached = await getCached(env);
+        const scannerHealth = await fetchScannerHealth(env, true);
         return Response.json({
           ...(cached.status || {}),
           service: "NM7 FPT Event Live",
           workerVersion: WORKER_VERSION,
           sourceOnly: true,
-          generatedPlaylistUrl: GENERATED_PLAYLIST_URL,
+          scheduler: { cron: CRON },
+          scannerHealth,
           cacheOnly: true,
-          lastError: error instanceof Error ? error.message : String(error),
+          lastRefreshError:
+            error instanceof Error ? error.message : String(error),
           cachedEntries: countEntries(cached.playlist),
-          scheduler: {
-            cron: CRON,
-            strategy:
-              "GitHub Actions scans exact source URLs through a Vietnam transport path every 5 minutes; Worker mirrors the resulting exact-source set",
-          },
         });
       }
     }
 
     if (url.pathname === "/scan") {
+      const scannerHealth = await fetchScannerHealth(env, true);
       const cached = await getCached(env);
       return Response.json({
         ...(cached.status || {}),
@@ -268,18 +391,15 @@ export default {
         sourceOnly: true,
         requested: true,
         message:
-          "Direct FPT scanning is intentionally performed by the GitHub Actions Vietnam scanner. The next scheduled scan runs every 5 minutes.",
+          "FPT source scanning is performed by the dedicated GitHub Actions Vietnam scanner every 5 minutes; this endpoint reports scanner state and cached live set.",
+        scannerHealth,
         cachedEntries: countEntries(cached.playlist),
       });
     }
 
     return new Response(
       "NM7 FPT Event Live\n\n/fpt-event-live.m3u\n/status\n/scan\n",
-      {
-        headers: {
-          "Content-Type": "text/plain; charset=utf-8",
-        },
-      }
+      { headers: { "Content-Type": "text/plain; charset=utf-8" } }
     );
   },
 };
