@@ -4,7 +4,8 @@ on:
   push:
     branches: [main]
     paths:
-      - "tools/cloudflare-fpt-watchdog/**"
+      - "tools/cloudflare-fpt-watchdog/src/**"
+      - "tools/cloudflare-fpt-watchdog/wrangler.toml"
       - ".github/workflows/deploy-fpt-event-watchdog.yml"
   workflow_dispatch:
 
