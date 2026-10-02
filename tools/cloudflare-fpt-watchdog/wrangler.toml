@@ -1,3 +1,4 @@
+# Cloudflare deployment trigger probe: 2026-10-02
 name = "nm7-fpt-event-watchdog"
 main = "src/index.js"
 compatibility_date = "2026-09-25"
