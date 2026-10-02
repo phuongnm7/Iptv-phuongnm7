@@ -76,12 +76,12 @@ jobs:
           echo "$FALLBACK_HEADERS"
           echo "$FALLBACK_HEADERS" | grep -qi '^content-type: application/x-mpegURL'
 
-      - name: Probe current source after deploy (best effort)
+      - name: Check current FPT scanner state after deploy
         shell: bash
         run: |
           set -euo pipefail
           BASE="https://nm7-fpt-event-live.phuongnm7-iptv.workers.dev"
-          echo "Running one current-source scan so a newly live event can be detected immediately when FPT accepts server-side probes..."
+          echo "Reading the dedicated Vietnam scanner state; actual source probing is performed by the 5-minute scanner workflow."
           curl -fsSL --max-time 120 "$BASE/scan" || true
           echo "Current strict playlist:"
           curl -fsSL --max-time 30 "$BASE/fpt-event-live.m3u" || true
@@ -136,4 +136,4 @@ jobs:
           echo "$HEADERS"
           echo "$HEADERS" | grep -qi '^content-type: application/x-mpegURL'
           echo "$HEADERS" | grep -qi '^x-nm7-fpt-version: fpt-event-source-mirror-v14'
-          echo "Verified: v12 is deployed, Cron is configured for every 5 minutes, and the strict live endpoint is exposing the expected version. The live set is supplied by the Vietnam scanner; CI deploy does not probe FPT directly."
+          echo "Verified: FPT Worker v14 is deployed, Cron is configured for every 5 minutes, and the strict live endpoint exposes the expected version. Live detection is supplied by the dedicated Vietnam scanner."
