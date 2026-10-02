@@ -38,11 +38,11 @@ DASH:
 
 Nếu một số URL 403 nhưng một hoặc nhiều URL khác đã xác minh live, scanner xuất bản **chỉ các URL live đã xác minh**. Nếu toàn bộ đường quét lỗi và không có bằng chứng live, scanner giữ playlist trước đó thay vì tạo danh sách rỗng giả.
 
-## Worker
+## Delivery Worker
 
-Worker hiện tại: `fpt-event-source-mirror-v13`.
+Worker production: `fpt-event-delivery-v15`.
 
-Worker **không còn probe trực tiếp FPT CDN**. Nó:
+Worker **không probe trực tiếp FPT CDN và không có Cron Trigger**. Nó:
 1. lấy file `generated/fpt-event-live.m3u`;
 2. kiểm tra mọi URL trong file vẫn nằm nguyên văn trong source M3U;
 3. phục vụ file cho NM7/IPTV app;
@@ -80,11 +80,8 @@ Generated playlist có marker:
 - `#NM7-SCAN-VERIFIED: true` = scanner đã xác minh live từ source URL;
 - `#NM7-SCAN-VERIFIED: user-confirmed` = tạm thời do người vận hành xác nhận URL đang live, chờ scanner thay bằng kết quả tự động.
 
-## Current confirmed event
+## Cron ownership
 
-URL bạn xác nhận đang live hiện được giữ đúng nguyên văn trong generated playlist:
+`nm7-fpt-event-live` phải giữ `triggers.crons = []`. Lịch `*/5 * * * *` chỉ thuộc `nm7-fpt-event-watchdog` và lịch scanner `.github/workflows/fpt-event-scan.yml`.
 
-`https://vips-livecdn.fptplay.net/live/media/event-07/hls_avc_v6/index.m3u8`
-
-Scanner kế tiếp sẽ thay trạng thái tạm thời này bằng kết quả probe thực tế khi có transport Việt Nam truy cập được FPT.
-
+Workflow deploy của delivery Worker có bước reconcile trực tiếp Cloudflare Workers Scripts Schedules và xác nhận sau deploy rằng danh sách schedule vẫn rỗng.
