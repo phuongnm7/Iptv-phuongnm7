@@ -39,6 +39,14 @@ jobs:
           workingDirectory: tools/cloudflare-fpt-watchdog
           wranglerVersion: "4"
           command: deploy --config wrangler.toml
+      - name: Verify Worker secret binding
+        working-directory: tools/cloudflare-fpt-watchdog
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx wrangler secret list --config wrangler.toml --json | tee /tmp/watchdog-secrets.json
+          jq -e 'any(.[]; .name == "GITHUB_TOKEN")' /tmp/watchdog-secrets.json >/dev/null
+
       - name: Verify watchdog health
         run: |
           set -euo pipefail
