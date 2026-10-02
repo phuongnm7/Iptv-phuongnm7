@@ -13,7 +13,7 @@ permissions:
 
 concurrency:
   group: deploy-nm7-fpt-event-watchdog
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   deploy:
@@ -41,4 +41,12 @@ jobs:
           BASE="https://nm7-fpt-event-watchdog.phuongnm7-iptv.workers.dev"
           BODY="$(curl -fsSL --retry 3 --retry-delay 2 --max-time 30 "$BASE/health")"
           echo "$BODY"
-          echo "$BODY" | jq -e '.ok == true and .service == "nm7-fpt-event-watchdog" and .schedule == "*/5 * * * *" and .targetWorkflow == "fpt-event-scan.yml"' >/dev/null
+          echo "$BODY" | jq -e '.ok == true and .service == "nm7-fpt-event-watchdog" and .schedule == "*/5 * * * *" and .targetWorkflow == "fpt-event-scan.yml" and .tokenConfigured == true' >/dev/null
+
+      - name: Verify GitHub dispatch path
+        run: |
+          set -euo pipefail
+          BASE="https://nm7-fpt-event-watchdog.phuongnm7-iptv.workers.dev"
+          BODY="$(curl -fsSL --retry 3 --retry-delay 2 --max-time 30 -X POST "$BASE/run")"
+          echo "$BODY"
+          echo "$BODY" | jq -e '.ok == true and (.action == "noop" or .action == "dispatch") and .service == "nm7-fpt-event-watchdog" and .candidates == 46 and .source_only == true' >/dev/null
