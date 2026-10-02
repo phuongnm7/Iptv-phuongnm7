@@ -34,8 +34,6 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: tools/cloudflare-fpt-watchdog
           wranglerVersion: "4"
-          secrets: |
-            GITHUB_TOKEN
           command: deploy --config wrangler.toml
       - name: Verify watchdog health
         run: |
