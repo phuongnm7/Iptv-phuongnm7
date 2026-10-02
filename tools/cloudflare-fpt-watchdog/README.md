@@ -43,3 +43,18 @@ Workflow deploy watchdog kiểm tra:
 - scanner status có `candidates=46` và `source_only=true`.
 
 Không ghi token vào repository.
+
+
+## Troubleshooting triển khai
+
+Nếu workflow **Deploy NM7 FPT Event Watchdog** báo:
+
+`tokenConfigured=false`
+
+thì Worker đã deploy nhưng **Production secret `GITHUB_TOKEN` chưa được bind vào runtime**. Đặt secret tại:
+
+**Cloudflare → Workers & Pages → nm7-fpt-event-watchdog → Settings → Variables and Secrets → Production → Secret → GITHUB_TOKEN**
+
+Sau khi secret đã tồn tại trong **Production**, chạy lại workflow deploy. Bước `Verify watchdog health` phải trả `tokenConfigured=true`, sau đó bước `Verify GitHub dispatch path` phải trả `ok=true` và `action=noop` hoặc `action=dispatch`.
+
+Không dán token vào source code, README, workflow file hoặc chat.
