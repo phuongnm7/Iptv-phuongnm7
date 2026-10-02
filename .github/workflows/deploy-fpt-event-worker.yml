@@ -46,13 +46,17 @@ jobs:
         run: |
           set -euo pipefail
           BASE="https://nm7-fpt-event-live.phuongnm7-iptv.workers.dev"
-          BODY="$(curl -fsSL --retry 3 --retry-delay 2 --max-time 30 "$BASE/status")"
+          BODY="$(curl -fsSL --retry 3 --retry-delay 2 --max-time 30 "$BASE/scan")"
           echo "$BODY"
           echo "$BODY" | jq -e '
-            .ok == true
-            and .workerVersion == "fpt-event-delivery-v15"
+            .workerVersion == "fpt-event-delivery-v15"
             and .scannerOwner == "GitHub Actions"
             and .deliveryOwner == "Cloudflare Worker"
             and .schedule == "*/5 * * * *"
           ' >/dev/null
+
+          PLAYLIST_HEADERS="$(curl -fsS -D - -o /dev/null --retry 3 --retry-delay 2 --max-time 30 "$BASE/fpt-event-live.m3u")"
+          echo "$PLAYLIST_HEADERS"
+          echo "$PLAYLIST_HEADERS" | grep -qi '^content-type: application/x-mpegURL'
+          echo "$PLAYLIST_HEADERS" | grep -qi '^x-nm7-fpt-version: fpt-event-delivery-v15'
           echo "Verified: Worker is delivery-only; GitHub Actions owns the 5-minute FPT scan."
