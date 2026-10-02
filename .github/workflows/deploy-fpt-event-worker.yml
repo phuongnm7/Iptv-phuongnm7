@@ -13,7 +13,7 @@ permissions:
 
 concurrency:
   group: deploy-nm7-fpt-event-worker
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   deploy:
@@ -43,6 +43,20 @@ jobs:
             deploy src/index.js --config wrangler.jsonc
             triggers deploy --config wrangler.jsonc
 
+      - name: Reconcile Cloudflare Cron schedules
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE="https://api.cloudflare.com/client/v4/accounts/${{ secrets.CLOUDFLARE_ACCOUNT_ID }}/workers/scripts/nm7-fpt-event-live/schedules"
+          AUTH="Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}"
+          BEFORE="$(curl -fsSL --retry 3 --retry-delay 2 --max-time 30 -H "$AUTH" "$BASE")"
+          echo "Schedules before reconcile:"
+          echo "$BEFORE"
+          curl -fsSL --retry 3 --retry-delay 2 --max-time 30 -X PUT -H "$AUTH" -H "Content-Type: application/json" "$BASE" --data "[]"
+          AFTER="$(curl -fsSL --retry 3 --retry-delay 2 --max-time 30 -H "$AUTH" "$BASE")"
+          echo "Schedules after reconcile:"
+          echo "$AFTER"
+          echo "$AFTER" | jq -e '.success == true and (.result.schedules | length) == 0' >/dev/null
       - name: Verify delivery Worker
         shell: bash
         run: |
