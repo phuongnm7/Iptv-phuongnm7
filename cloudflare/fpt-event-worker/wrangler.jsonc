@@ -6,5 +6,8 @@
     "enabled": true
   },
   "workers_dev": true,
-  "preview_urls": false
+  "preview_urls": false,
+  "triggers": {
+    "crons": []
+  }
 }
