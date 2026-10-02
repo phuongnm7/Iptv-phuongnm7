@@ -57,6 +57,16 @@ jobs:
             deploy src/index.js --config wrangler.jsonc
             triggers deploy --config wrangler.jsonc
 
+      - name: Verify Cloudflare Cron schedules after deploy
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE="https://api.cloudflare.com/client/v4/accounts/${{ secrets.CLOUDFLARE_ACCOUNT_ID }}/workers/scripts/nm7-fpt-event-live/schedules"
+          AUTH="Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}"
+          AFTER="$(curl -fsSL --retry 3 --retry-delay 2 --max-time 30 -H "$AUTH" "$BASE")"
+          echo "Schedules after Worker deploy:"
+          echo "$AFTER"
+          echo "$AFTER" | jq -e '.success == true and (.result.schedules | length) == 0' >/dev/null
       - name: Verify delivery Worker
         shell: bash
         run: |
