@@ -39,7 +39,9 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: cloudflare/fpt-event-worker
           wranglerVersion: "4"
-          command: deploy src/index.js --config wrangler.jsonc
+          command: |
+            deploy src/index.js --config wrangler.jsonc
+            triggers deploy --config wrangler.jsonc
 
       - name: Verify delivery Worker
         shell: bash
