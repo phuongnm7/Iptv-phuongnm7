@@ -1,0 +1,109 @@
+name: FPT Event Scanner
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "cloudflare/fpt-event-worker/tools/source-live-scanner.py"
+      - "sources/fpt-events-source.m3u"
+      - ".github/workflows/fpt-event-scan.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: nm7-fpt-event-scan
+  cancel-in-progress: true
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Validate scanner
+        run: python3 -m py_compile cloudflare/fpt-event-worker/tools/source-live-scanner.py
+
+      - name: Scan FPT source
+        env:
+          OUTPUT_M3U: generated/fpt-event-live.m3u
+          OUTPUT_STATUS: generated/fpt-event-live.status.json
+          MAX_PROXY_TRIES: "24"
+          MAX_WORKERS: "6"
+          PROBE_TIMEOUT: "10"
+        run: python3 cloudflare/fpt-event-worker/tools/source-live-scanner.py
+
+      - name: Validate scan
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          status = json.loads(Path("generated/fpt-event-live.status.json").read_text(encoding="utf-8"))
+          candidates = int(status["candidates"])
+          live = int(status["liveEntries"])
+          inactive = int(status["inactiveEntries"])
+          errors = int(status["probeErrors"])
+
+          assert candidates == 46, f"Expected 46 source URLs, got {candidates}"
+          assert live + inactive + errors == candidates, "Scan totals do not add up"
+          assert errors == 0, f"FPT probe errors: {errors}"
+          assert status.get("scanHealthy") is True, "Scan is not healthy"
+
+          print(f"FPT scan OK: {candidates} candidates, {live} live, {inactive} inactive, {errors} errors")
+          PY
+
+      - name: Validate output URLs
+        run: |
+          set -euo pipefail
+          SOURCE="sources/fpt-events-source.m3u"
+          PLAYLIST="generated/fpt-event-live.m3u"
+
+          grep -q '^#EXTM3U' "$PLAYLIST"
+
+          while IFS= read -r url; do
+            test -z "$url" && continue
+            grep -Fqx "$url" "$SOURCE" || {
+              echo "Output URL is not present in source: $url"
+              exit 1
+            }
+          done < <(grep -E '^https?://' "$PLAYLIST")
+
+          if grep -Eq 'livecdn\.fptplay\.net/schedule|vhd0/Stuff|vuminhthanh12|metadata-assisted' "$PLAYLIST"; then
+            echo "Forbidden legacy/non-source URL detected"
+            exit 1
+          fi
+
+      - name: Publish changed result
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add generated/fpt-event-live.m3u generated/fpt-event-live.status.json
+          if git diff --cached --quiet; then
+            echo "FPT playlist and status unchanged"
+            exit 0
+          fi
+
+          git commit -m "data(fpt): update current live event set"
+
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git rebase origin/main
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            git rebase --abort || true
+            sleep $((attempt * 2))
+          done
+
+          echo "Could not publish FPT result"
+          exit 1
