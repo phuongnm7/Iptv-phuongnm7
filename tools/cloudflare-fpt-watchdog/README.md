@@ -58,3 +58,6 @@ thì Worker đã deploy nhưng **Production secret `GITHUB_TOKEN` chưa được
 Sau khi secret đã tồn tại trong **Production**, chạy lại workflow deploy. Bước `Verify watchdog health` phải trả `tokenConfigured=true`, sau đó bước `Verify GitHub dispatch path` phải trả `ok=true` và `action=noop` hoặc `action=dispatch`.
 
 Không dán token vào source code, README, workflow file hoặc chat.
+
+
+<!-- runtime-secret-rebind-check: 2026-10-02 -->
