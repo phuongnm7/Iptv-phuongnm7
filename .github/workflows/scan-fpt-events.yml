@@ -1,0 +1,132 @@
+name: Scan FPT Event Live
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "cloudflare/fpt-event-worker/tools/source-live-scanner.py"
+      - "sources/fpt-events-source.m3u"
+      - ".github/workflows/scan-fpt-events.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: nm7-fpt-event-source-scan
+  cancel-in-progress: true
+
+jobs:
+  scan:
+    name: Scan exact FPT source URLs
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+        with:
+          ref: main
+
+      - name: Validate FPT scanner
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile cloudflare/fpt-event-worker/tools/source-live-scanner.py
+
+      - name: Run complete FPT source scan
+        env:
+          OUTPUT_M3U: generated/fpt-event-live.m3u
+          OUTPUT_STATUS: generated/fpt-event-live.status.json
+          MAX_PROXY_TRIES: "24"
+          MAX_WORKERS: "6"
+          PROBE_TIMEOUT: "10"
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 cloudflare/fpt-event-worker/tools/source-live-scanner.py
+
+      - name: Validate scan result
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          status = json.loads(Path("generated/fpt-event-live.status.json").read_text(encoding="utf-8"))
+          candidates = int(status["candidates"])
+          live = int(status["liveEntries"])
+          inactive = int(status["inactiveEntries"])
+          errors = int(status["probeErrors"])
+
+          assert candidates > 0, "No FPT source candidates were parsed"
+          assert live + inactive + errors == candidates, (
+              f"Totals do not match: candidates={candidates}, live={live}, "
+              f"inactive={inactive}, errors={errors}"
+          )
+          assert errors == 0, f"FPT scan has {errors} probe errors"
+          assert status.get("scanHealthy") is True, "Scanner did not report a healthy scan"
+
+          print(
+              f"Verified FPT scan: {candidates} candidates, "
+              f"{live} live, {inactive} inactive, {errors} errors."
+          )
+          PY
+
+      - name: Validate generated playlist contains source URLs only
+        shell: bash
+        run: |
+          set -euo pipefail
+          SOURCE_URL="https://raw.githubusercontent.com/phuongnm7/Iptv-phuongnm7/main/sources/fpt-events-source.m3u"
+          SOURCE="$(curl -fsSL --retry 3 --retry-delay 2 --max-time 30 "$SOURCE_URL")"
+          PLAYLIST="$(cat generated/fpt-event-live.m3u)"
+
+          printf '%s
+' "$PLAYLIST" | awk '/^https?:///{print}' | while read -r url; do
+            grep -Fqx "$url" <<< "$SOURCE" || {
+              echo "ERROR: playlist URL is not an exact member of source: $url"
+              exit 1
+            }
+          done
+
+          ! grep -qE 'livecdn\.fptplay\.net/schedule|vhd0/Stuff|vuminhthanh12|metadata-assisted' <<< "$PLAYLIST"
+
+          echo "=== CURRENT FPT LIVE PLAYLIST ==="
+          cat generated/fpt-event-live.m3u
+
+      - name: Commit live playlist only when it changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add generated/fpt-event-live.m3u
+          if git diff --cached --quiet; then
+            echo "FPT live set unchanged; no commit required."
+            exit 0
+          fi
+
+          git commit -m "data(fpt): update current live event set"
+
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            if ! git rebase origin/main; then
+              git rebase --abort || true
+              echo "::error::Could not rebase generated FPT playlist onto latest main."
+              exit 1
+            fi
+
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+
+            echo "Push race detected (attempt $attempt/5); retrying..."
+            sleep $((attempt * 2))
+          done
+
+          echo "::error::Failed to push generated FPT playlist after 5 attempts."
+          exit 1
