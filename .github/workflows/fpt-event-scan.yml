@@ -90,6 +90,33 @@ jobs:
             exit 1
           fi
 
+      - name: Validate playlist matches scanner result
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          status = json.loads(Path("generated/fpt-event-live.status.json").read_text(encoding="utf-8"))
+          playlist = Path("generated/fpt-event-live.m3u").read_text(encoding="utf-8")
+
+          expected = [row["url"] for row in status.get("liveChannels", [])]
+          actual = [line.strip() for line in playlist.splitlines() if line.strip().startswith(("http://", "https://"))]
+
+          assert len(actual) == len(set(actual)), "Generated playlist contains duplicate URLs"
+          assert actual == expected, "Generated playlist URLs do not exactly match scanner liveChannels"
+          assert status.get("sourceOnly") is True, "Scanner status is not source-only"
+
+          source_lines = {
+              line.strip()
+              for line in Path("sources/fpt-events-source.m3u").read_text(encoding="utf-8").splitlines()
+              if line.strip().startswith(("http://", "https://"))
+          }
+          assert set(actual).issubset(source_lines), "Generated playlist contains a URL outside source M3U"
+
+          print(f"Playlist/scanner exact-match verified: {len(actual)} live URLs")
+          PY
+
       - name: Publish changed result
         run: |
           set -euo pipefail
