@@ -141,14 +141,14 @@ jobs:
             git fetch origin main
             REMOTE_TS="$(git show origin/main:generated/fpt-event-live.status.json 2>/dev/null | python3 -c 'import json,sys; print(json.load(sys.stdin).get("generatedAt",""))' || true)"
 
-            python3 - "$LOCAL_TS" "$REMOTE_TS" <<'PY'
+            if ! python3 - "$LOCAL_TS" "$REMOTE_TS" <<'PY'
           import sys
           from datetime import datetime
           local, remote = sys.argv[1], sys.argv[2]
           if remote and local and datetime.fromisoformat(remote) > datetime.fromisoformat(local):
-              raise SystemExit("REMOTE_NEWER")
+              raise SystemExit(1)
           PY
-            if [ "$?" -ne 0 ]; then
+            then
               echo "Remote FPT result is newer; this scan will not overwrite it."
               exit 0
             fi
