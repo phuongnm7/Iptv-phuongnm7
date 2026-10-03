@@ -32,6 +32,22 @@ HEADERS = [
     ("Pragma", "no-cache"),
 ]
 
+HEADER_PROFILES = [
+    HEADERS,
+    HEADERS + [
+        ("Sec-Fetch-Site", "same-site"),
+        ("Sec-Fetch-Mode", "cors"),
+        ("Sec-Fetch-Dest", "empty"),
+        ("Accept-Language", "vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7"),
+    ],
+    HEADERS + [
+        ("Sec-Fetch-Site", "cross-site"),
+        ("Sec-Fetch-Mode", "cors"),
+        ("Sec-Fetch-Dest", "empty"),
+        ("Accept-Language", "vi,en-US;q=0.9,en;q=0.8"),
+    ],
+]
+
 def get_text(url):
     req = urllib.request.Request(url, headers={
         "User-Agent": HEADERS[0][1],
@@ -110,14 +126,14 @@ def is_live_dash(body):
     )
     return live_signal and media_signal
 
-def curl_probe(url, proxy=None):
+def curl_probe(url, proxy=None, headers=None):
     cmd = [
-        "curl", "-sS", "--http1.1", "--max-time", str(PROBE_TIMEOUT),
+        "curl", "-sS", "-L", "--http1.1", "--max-time", str(PROBE_TIMEOUT),
         "-o", "-", "-D", "-", "-w", "\n__NM7_STATUS__:%{http_code}|%{content_type}|%{size_download}\n",
     ]
     if proxy:
         cmd += ["-x", f"http://{proxy}"]
-    for key, value in HEADERS:
+    for key, value in (headers or HEADERS):
         cmd += ["-H", f"{key}: {value}"]
     cmd += [url]
     try:
@@ -184,11 +200,20 @@ def load_proxies():
 
 def probe_via_rotating_proxies(item, proxies, max_proxy_tries=8):
     # Direct first: some FPT POPs may allow requests without a proxy.
-    direct = curl_probe(item["url"])
+    direct = curl_probe(item["url"], headers=HEADER_PROFILES[0])
     if direct["status"] == 200:
         return classify(item, direct), "direct"
     if direct["status"] in (404, 410):
         return classify(item, direct), "direct"
+
+    # A 403 is an access-control result, not proof that the event is offline.
+    # Re-test unresolved 403s with alternate browser request profiles before
+    # leaving them as probe errors.
+    if direct["status"] == 403:
+        for profile in HEADER_PROFILES[1:]:
+            alt = curl_probe(item["url"], headers=profile)
+            if alt["status"] in (200, 404, 410):
+                return classify(item, alt), "direct-profile"
 
     # Free proxies are volatile. Try a bounded set in parallel for THIS URL,
     # then take the first definitive response. This avoids serially waiting on
@@ -217,7 +242,7 @@ def probe_via_rotating_proxies(item, proxies, max_proxy_tries=8):
         }, None
 
     def test(proxy):
-        result = curl_probe(item["url"], proxy)
+        result = curl_probe(item["url"], proxy, headers=HEADER_PROFILES[0])
         if result["status"] == 200:
             return proxy, classify(item, result)
         if result["status"] in (404, 410):
