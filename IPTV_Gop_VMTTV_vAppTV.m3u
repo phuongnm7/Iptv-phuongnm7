@@ -36,6 +36,10 @@ https://tglmp01.akamaized.net/out/v1/d43dbc5da1334ec088ed9eb5796eee7c/manifest.m
 #KODIPROP:inputstream.adaptive.license_type=clearkey
 #KODIPROP:inputstream.adaptive.license_key=593abb95b362434f812e42e7780779b0:dd7e80e1d618d69631f21d04423dcab7
 https://tglmp02.akamaized.net/out/v1/3b1dd652def14c0d88ad4d65b8a63103/manifest.mpd
+#EXTINF:-1 group-title="Asian Games Aichi-Nagoya 2026" tvg-logo="https://thumb.vtvdigital.org/transform?url=https://vtvgo-assets.vtvdigital.vn/assets/images/v2/metadata/20261002/2026100221/Dmjq9uYvwG-Sang3.10Luong1.webp&width=1080", TRỰC TIẾP | ASIAD 20 - Ngày thi đấu 3/10 | Luồng 1
+https://vtvgoliveapp1-aws-plus-tn.vtvdigital.vn/aws-sk/asiad_1_paid/live/asiad_1_1080p/chunks.m3u8
+#EXTINF:-1 group-title="Asian Games Aichi-Nagoya 2026" tvg-logo="https://thumb.vtvdigital.org/transform?url=https://vtvgo-assets.vtvdigital.vn/assets/images/v2/metadata/20261002/2026100221/vH04le0Kch-Sang3.10Luong2.webp&width=1080", TRỰC TIẾP | ASIAD 20 - Ngày thi đấu 3/10 | Luồng 2
+https://vtvgoliveapp1-aws-plus-tn.vtvdigital.vn/aws-sk/asiad_2_paid/live/asiad_2_1080p/chunks.m3u8
 #EXTINF:-1 tvg-id="tv360plus1" group-title="Sự Kiện TV360" tvg-logo="https://img-zlr1.tv360.vn/image1/2026/04/15/22/1776266760359/ba1ca843cd06_480_270.png", TV360+1
 #EXTVLCOPT:http-user-agent=Dalvik/2.1.0
 #KODIPROP:inputstream.adaptive.manifest_type=mpd
@@ -488,6 +492,8 @@ https://playback.livetl004.com/live/69be75e0a0a45974afb67776.flv
 https://playback.livetl006.com/live/6a5df755b89dded67b39b8bc.flv
 #EXTINF:-1 group-title="🔴 ⚽ 🏐 GÀ VÀNG 24h" tvg-logo="https://cdn.gavangtv2026c.com/2026/07/cropped-gavangtv-logo.webp", BLV NGƯỜI KIẾN
 https://playback.livetl004.com/live/6a439a7fb89dded67b208b87.flv
+#EXTINF:-1 group-title="🔴 ⚽ 🏐 GÀ VÀNG 24h" tvg-logo="https://cdn.gavangtv2026c.com/2026/07/cropped-gavangtv-logo.webp", BLV Titan
+https://playback.livetl006.com/live/69d37c3a4da3e15776b6db56.flv
 
 #EXTINF:-1 tvg-id="VTV1.vn" group-title="Truyền hình Việt Nam",VTV1 HD
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
