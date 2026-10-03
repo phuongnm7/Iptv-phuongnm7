@@ -123,27 +123,58 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          git add generated/fpt-event-live.m3u generated/fpt-event-live.status.json
-          if git diff --cached --quiet; then
-            echo "FPT playlist and status unchanged"
-            exit 0
-          fi
+          # Keep this scan result isolated from concurrent main-branch changes.
+          # On each retry, compare generatedAt and publish only if this scan is
+          # newer than the currently published FPT result.
+          WORK="$(mktemp -d)"
+          cp generated/fpt-event-live.m3u "$WORK/fpt-event-live.m3u"
+          cp generated/fpt-event-live.status.json "$WORK/fpt-event-live.status.json"
 
-          git commit -m "data(fpt): update current live event set"
+          LOCAL_TS="$(python3 - <<'PY'
+          import json
+          from pathlib import Path
+          print(json.loads(Path("generated/fpt-event-live.status.json").read_text())["generatedAt"])
+          PY
+          )"
 
           for attempt in 1 2 3 4 5; do
             git fetch origin main
-            if ! git rebase origin/main; then
-              git rebase --abort || true
-              echo "::error::Could not rebase FPT result onto latest main."
-              exit 1
-            fi
-            if git push origin HEAD:main; then
+            REMOTE_TS="$(git show origin/main:generated/fpt-event-live.status.json 2>/dev/null | python3 -c 'import json,sys; print(json.load(sys.stdin).get("generatedAt",""))' || true)"
+
+            python3 - "$LOCAL_TS" "$REMOTE_TS" <<'PY'
+          import sys
+          from datetime import datetime
+          local, remote = sys.argv[1], sys.argv[2]
+          if remote and local and datetime.fromisoformat(remote) > datetime.fromisoformat(local):
+              raise SystemExit("REMOTE_NEWER")
+          PY
+            if [ "$?" -ne 0 ]; then
+              echo "Remote FPT result is newer; this scan will not overwrite it."
               exit 0
             fi
+
+            git reset --hard origin/main
+            cp "$WORK/fpt-event-live.m3u" generated/fpt-event-live.m3u
+            cp "$WORK/fpt-event-live.status.json" generated/fpt-event-live.status.json
+
+            if git diff --quiet -- generated/fpt-event-live.m3u generated/fpt-event-live.status.json; then
+              echo "FPT playlist and status unchanged after rebase."
+              exit 0
+            fi
+
+            git add generated/fpt-event-live.m3u generated/fpt-event-live.status.json
+            git commit -m "data(fpt): update current live event set"
+
+            if git push origin HEAD:main; then
+              echo "Published FPT result successfully."
+              exit 0
+            fi
+
             echo "Push race detected (attempt $attempt/5); retrying..."
+            git reset --hard origin/main
             sleep $((attempt * 2))
           done
 
-          echo "Could not publish FPT result"
+          echo "Could not publish FPT result after 5 attempts."
           exit 1
+
