@@ -1,19 +1,19 @@
 {
   "service": "NM7 FPT Event Live Scanner",
   "scannerVersion": "source-probe-v1",
-  "generatedAt": "2026-10-06T20:37:37.695476+00:00",
+  "generatedAt": "2026-10-06T20:47:38.453830+00:00",
   "sourceUrl": "https://raw.githubusercontent.com/phuongnm7/Iptv-phuongnm7/main/sources/fpt-events-source.m3u",
   "sourceOnly": true,
   "candidates": 46,
   "liveEntries": 3,
-  "inactiveEntries": 40,
-  "probeErrors": 3,
+  "inactiveEntries": 43,
+  "probeErrors": 0,
   "allProbeErrorsAre403": false,
-  "scanHealthy": false,
-  "partialScan": true,
+  "scanHealthy": true,
+  "partialScan": false,
   "transport": "per-url-rotating-vietnam-proxy",
-  "transportCount": 43,
-  "event07Transport": "203.205.49.2:10054",
+  "transportCount": 46,
+  "event07Transport": "27.79.149.201:8080",
   "liveChannels": [
     {
       "name": "Sự kiện FPT 01",
@@ -159,10 +159,10 @@
       "name": "Sự kiện FPT 15",
       "url": "https://vips-livecdn.fptplay.net/live/media/su-kien-15/hls_avc_v6/index.m3u8",
       "live": false,
-      "status": 403,
-      "content_type": "text/html",
-      "error": "HTTP 403",
-      "inactive_reason": null
+      "status": 404,
+      "content_type": "text/html; charset=iso-8859-1",
+      "error": null,
+      "inactive_reason": "HTTP 404"
     },
     {
       "name": "Sự kiện FPT 4K 01",
@@ -339,10 +339,10 @@
       "name": "Sự kiện FPT Event 05",
       "url": "https://vips-livecdn.fptplay.net/live/media/event-05/hls_avc_v6/index.m3u8",
       "live": false,
-      "status": 403,
-      "content_type": "text/html",
-      "error": "HTTP 403",
-      "inactive_reason": null
+      "status": 404,
+      "content_type": "text/html; charset=iso-8859-1",
+      "error": null,
+      "inactive_reason": "HTTP 404"
     },
     {
       "name": "Sự kiện FPT Event 05 4K",
@@ -438,10 +438,10 @@
       "name": "Sự kiện FPT Event 10 4K",
       "url": "https://vips-livecdn.fptplay.net/live/media/event-10-4k/hls_avc_v6/index.m3u8",
       "live": false,
-      "status": 403,
+      "status": 404,
       "content_type": "text/html",
-      "error": "HTTP 403",
-      "inactive_reason": null
+      "error": null,
+      "inactive_reason": "HTTP 404"
     }
   ]
 }
