@@ -1,19 +1,19 @@
 {
   "service": "NM7 FPT Event Live Scanner",
   "scannerVersion": "source-probe-v1",
-  "generatedAt": "2026-10-07T03:03:03.211381+00:00",
+  "generatedAt": "2026-10-07T03:07:20.819916+00:00",
   "sourceUrl": "https://raw.githubusercontent.com/phuongnm7/Iptv-phuongnm7/main/sources/fpt-events-source.m3u",
   "sourceOnly": true,
   "candidates": 46,
-  "liveEntries": 4,
-  "inactiveEntries": 42,
+  "liveEntries": 6,
+  "inactiveEntries": 40,
   "probeErrors": 0,
   "allProbeErrorsAre403": false,
   "scanHealthy": true,
   "partialScan": false,
   "transport": "per-url-rotating-vietnam-proxy",
   "transportCount": 46,
-  "event07Transport": "203.205.49.2:10216",
+  "event07Transport": "103.82.20.76:8080",
   "liveChannels": [
     {
       "name": "Sự kiện FPT 01",
@@ -22,6 +22,14 @@
     {
       "name": "Sự kiện FPT 02",
       "url": "https://vips-livecdn.fptplay.net/live/media/su-kien-02/hls_avc_v6/index.m3u8"
+    },
+    {
+      "name": "Sự kiện FPT 03",
+      "url": "https://vips-livecdn.fptplay.net/live/media/su-kien-03/hls_avc_v6/index.m3u8"
+    },
+    {
+      "name": "Sự kiện FPT 05",
+      "url": "https://vips-livecdn.fptplay.net/live/media/su-kien-05/hls_avc_v6/index.m3u8"
     },
     {
       "name": "Sự kiện FPT Event 01",
@@ -54,11 +62,11 @@
     {
       "name": "Sự kiện FPT 03",
       "url": "https://vips-livecdn.fptplay.net/live/media/su-kien-03/hls_avc_v6/index.m3u8",
-      "live": false,
-      "status": 404,
-      "content_type": "text/html; charset=iso-8859-1",
+      "live": true,
+      "status": 200,
+      "content_type": "application/vnd.apple.mpegurl",
       "error": null,
-      "inactive_reason": "HTTP 404"
+      "inactive_reason": null
     },
     {
       "name": "Sự kiện FPT 04",
@@ -72,11 +80,11 @@
     {
       "name": "Sự kiện FPT 05",
       "url": "https://vips-livecdn.fptplay.net/live/media/su-kien-05/hls_avc_v6/index.m3u8",
-      "live": false,
-      "status": 404,
-      "content_type": "text/html; charset=iso-8859-1",
+      "live": true,
+      "status": 200,
+      "content_type": "application/vnd.apple.mpegurl",
       "error": null,
-      "inactive_reason": "HTTP 404"
+      "inactive_reason": null
     },
     {
       "name": "Sự kiện FPT 06",
