@@ -1,0 +1,35 @@
+name: Build TV365 playlist
+
+on:
+  push:
+    paths:
+      - tv365-source.gz.b64
+      - .github/workflows/build-tv365.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Decode M3U
+        run: |
+          base64 -d tv365-source.gz.b64 | gzip -d > tv365.m3u
+          test -s tv365.m3u
+
+      - name: Commit generated playlist
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tv365.m3u
+          if git diff --cached --quiet; then
+            echo "No playlist changes."
+          else
+            git commit -m "Build TV365 dynamic playlist"
+            git push
+          fi
