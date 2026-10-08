@@ -1,10 +1,10 @@
 {
   "source": "https://freem3u.xyz/api/channels/x_1.0.1/app.json",
   "api_index": "505",
-  "generated_utc": "2026-10-08T02:02:16.988451+00:00",
+  "generated_utc": "2026-10-08T02:04:38.988918+00:00",
   "channel_objects": 245,
-  "resolved_channels": 241,
-  "unresolved_channels": 4,
+  "resolved_channels": 242,
+  "unresolved_channels": 3,
   "playable_variants_found": 436,
   "channels_with_clearkey_variant": 102,
   "groups": [
@@ -32,10 +32,6 @@
     "Radio Miền Nam"
   ],
   "unresolved": [
-    {
-      "id": "htv5-bchannel",
-      "title": "HTV5 | BChannel"
-    },
     {
       "id": "thanh-hoa-fm",
       "title": "THANH HOA RADIO (FM92.3MHz)"

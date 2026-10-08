@@ -1,4 +1,4 @@
-#EXTM3U x-tvg-url="https://epg.pw/api/epg.xml?lang=en&amp;channel_id=105835,https://epg.pw/api/epg.xml?lang=en&amp;channel_id=403926,https://epg.pw/api/epg.xml?lang=en&amp;channel_id=403783,https://epg.pw/api/epg.xml?lang=en&amp;channel_id=403522,https://epg.pw/api/epg.xml?lang=en&amp;channel_id=412093,https://epg.pw/api/epg.xml?lang=en&amp;channel_id=403527,https://epg.pw/api/epg.xml?lang=en&amp;channel_id=369813,https://freem3u.xyz/static/epg/epg.xml"
+#EXTM3U x-tvg-url="https://epg.pw/api/epg.xml?lang=en&channel_id=105835,https://epg.pw/api/epg.xml?lang=en&channel_id=403926,https://epg.pw/api/epg.xml?lang=en&channel_id=403783,https://epg.pw/api/epg.xml?lang=en&channel_id=403522,https://epg.pw/api/epg.xml?lang=en&channel_id=412093,https://epg.pw/api/epg.xml?lang=en&channel_id=403527,https://epg.pw/api/epg.xml?lang=en&channel_id=369813,https://freem3u.xyz/static/epg/epg.xml"
 #EXTINF:-1 tvg-id="onsports.VN" tvg-name="VTVCab 3 - ON Sports HD" tvg-chno="14" tvg-logo="https://freem3u.xyz/static/images/vtvcab/vtvcab3.png" group-title="Thể Thao",VTVCab 3 - ON Sports HD
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=mpd
@@ -402,7 +402,7 @@ https://s7771.cdn.mytvnet.vn/pkg20/live_dzones/bbcearth.smil/manifest.mpd
 https://s935.cdn.mytvnet.vn/pkg20/live_dzones/aplus.smil/manifest.mpd
 #EXTINF:-1 tvg-id="bloomberg-tieng-anh" tvg-name="BLOOMBERG - Tiếng Anh" tvg-chno="306" tvg-logo="https://github.com/tv-logo/tv-logos/blob/main/countries/united-states/bloomberg-television-us.png?raw=true" group-title="Tin Tức",BLOOMBERG - Tiếng Anh
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://dai.google.com/linear/hls/pa/event/PwTJe4aZRvSBjbWY7_VSzA/stream/893a388d-d7e8-4bef-a753-084b0b3db6ab:TUL/master.m3u8
+https://dai.google.com/linear/hls/pa/event/PwTJe4aZRvSBjbWY7_VSzA/stream/e78eac99-817c-4c2c-846b-a8b9ff145078:DLS/master.m3u8
 #EXTINF:-1 tvg-id="cnn.VN" tvg-name="CNN - Việt Nam" tvg-chno="499" tvg-logo="https://freem3u.xyz/static/images/global/cnn.png" group-title="Tin Tức",CNN - Việt Nam
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=mpd
@@ -880,12 +880,15 @@ https://livecdn-global-vnd.vieon.vn/htv_drm/live_event/trailer_vieon_tvc/playlis
 #EXTVLCOPT:http-referrer=https://vieon.vn/
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
 https://livecdn-global-vnd.vieon.vn/htv_drm/live_event/trailer_vieon_tvc/playlist.m3u8
+#EXTINF:-1 tvg-id="anvienhd.VN" tvg-name="HTV5 | BChannel" tvg-chno="88" tvg-logo="https://freem3u.xyz/static/images/hplus/htv5.png" group-title="HTV - TP.HCM",HTV5 | BChannel
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
+https://fo-hlc.tv360.vn/bpk-tv/246/output/index.m3u8?auth=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJtZXRob2QiOiJHRVQiLCJleHAiOjE3OTE0NDE4MTksInVyaSI6Ii9icGstdHYvMjQ2L291dHB1dC9pbmRleC5tM3U4In0.ci6s5gjgdt4JGr2JPJx_o9XzD21OT2-AGw6enu82T8M&minrate=0&maxrate=12000000&uid=64230292
 #EXTINF:-1 tvg-id="thvl1hd.VN" tvg-name="THVL1 | TH Vĩnh Long" tvg-chno="76" tvg-logo="https://freem3u.xyz/static/images/diaphuong/vinhlong1.png" group-title="THVL",THVL1 | TH Vĩnh Long
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
 https://freem3u.xyz/api/live/play.m3u8?vid=25
 #EXTINF:-1 tvg-id="thvl2hd.VN" tvg-name="THVL2 | TH Vĩnh Long" tvg-chno="77" tvg-logo="https://freem3u.xyz/static/images/diaphuong/vinhlong2.png" group-title="THVL",THVL2 | TH Vĩnh Long
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://live.thvli.vn/thvl2/playlist.m3u8?app=141214&sig=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2ZXIiOjIsInVpZCI6IjhlYmVjZmI3LWVlZTktNDMyZC04OTM4LTA1MzEyZWZkMjYwNiIsImFwcCI6MTQxMjE0LCJkZXYiOiJNb3ppbGxhLzUuMCAoTGludXg7IEFuZHJvaWQgMTA7IEspIEFwcGxlV2ViS2l0LzUzNy4zNiAoS0hUTUwsIGxpa2UgR2Vja28pIENocm9tZS8xNTQuMC4wLjAgTW9iaWxlIFNhZmFyaS81MzcuMzYiLCJjaXAiOiIxMTMuMTY1LjEyOC4xODIiLCJwbGEiOiJ3ZWIiLCJpYXQiOjE3OTE0MjQ4MDV9.V9jvmh4LVnPGG-VGHoX7p3HbM4GaYhsf8v5VsAidR5w
+https://live.thvli.vn/thvl2/playlist.m3u8?app=141214&sig=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2ZXIiOjIsInVpZCI6IjMzZDcxNzI5LTMyOWYtNDA2OS1hOTBjLTFmZWJlNjE1ZDA0OCIsImFwcCI6MTQxMjE0LCJkZXYiOiJNb3ppbGxhLzUuMCAoTGludXg7IEFuZHJvaWQgMTU7IFNNLVM5MThCIEJ1aWxkL0FQM0EuMjQwOTA1LjAxNS5BMjsgd3YpIEFwcGxlV2ViS2l0LzUzNy4zNiAoS0hUTUwsIGxpa2UgR2Vja28pIFZlcnNpb24vNC4wIENocm9tZS8xMzUuMC43MDQ5LjExMSBNb2JpbGUgU2FmYXJpLzUzNy4zNiB2QXBwVFYvMS4wLjIiLCJjaXAiOiI0Mi4xMTIuNDYuNTMiLCJwbGEiOiJ3ZWIiLCJpYXQiOjE3OTE0MjUwMDl9.i6PQNbUESmI4GhZvDL00et6DykYWt5cVLD8adFSr1WQ
 #EXTINF:-1 tvg-id="thvl3hd.VN" tvg-name="THVL3 | TH Vĩnh Long" tvg-chno="78" tvg-logo="https://freem3u.xyz/static/images/diaphuong/vinhlong3.png" group-title="THVL",THVL3 | TH Vĩnh Long
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
 https://freem3u.xyz/api/live/play.m3u8?vid=219
@@ -1144,7 +1147,7 @@ https://s7771.cdn.mytvnet.vn/pkg20/live_dzones/bbcearth.smil/manifest.mpd
 https://s935.cdn.mytvnet.vn/pkg20/live_dzones/aplus.smil/manifest.mpd
 #EXTINF:-1 tvg-id="bloomberg-tieng-anh" tvg-name="BLOOMBERG - Tiếng Anh" tvg-chno="306" tvg-logo="https://github.com/tv-logo/tv-logos/blob/main/countries/united-states/bloomberg-television-us.png?raw=true" group-title="Quốc Tế",BLOOMBERG - Tiếng Anh
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://dai.google.com/linear/hls/pa/event/PwTJe4aZRvSBjbWY7_VSzA/stream/893a388d-d7e8-4bef-a753-084b0b3db6ab:TUL/master.m3u8
+https://dai.google.com/linear/hls/pa/event/PwTJe4aZRvSBjbWY7_VSzA/stream/e78eac99-817c-4c2c-846b-a8b9ff145078:DLS/master.m3u8
 #EXTINF:-1 tvg-id="davinci.VN" tvg-name="DaVinci HD - Việt Nam" tvg-chno="479" tvg-logo="https://freem3u.xyz/static/images/global/davinci.png" group-title="Quốc Tế",DaVinci HD - Việt Nam
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=mpd
@@ -1256,7 +1259,7 @@ https://livevlisctcdnw.seenow.vn/Live_DASHDRM1/QPTV/manifest.mpd
 https://freem3u.xyz/api/live/play.m3u8?vid=25
 #EXTINF:-1 tvg-id="thvl2hd.VN" tvg-name="THVL2 | TH Vĩnh Long" tvg-chno="77" tvg-logo="https://freem3u.xyz/static/images/diaphuong/vinhlong2.png" group-title="Địa Phương",THVL2 | TH Vĩnh Long
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://live.thvli.vn/thvl2/playlist.m3u8?app=141214&sig=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2ZXIiOjIsInVpZCI6IjhlYmVjZmI3LWVlZTktNDMyZC04OTM4LTA1MzEyZWZkMjYwNiIsImFwcCI6MTQxMjE0LCJkZXYiOiJNb3ppbGxhLzUuMCAoTGludXg7IEFuZHJvaWQgMTA7IEspIEFwcGxlV2ViS2l0LzUzNy4zNiAoS0hUTUwsIGxpa2UgR2Vja28pIENocm9tZS8xNTQuMC4wLjAgTW9iaWxlIFNhZmFyaS81MzcuMzYiLCJjaXAiOiIxMTMuMTY1LjEyOC4xODIiLCJwbGEiOiJ3ZWIiLCJpYXQiOjE3OTE0MjQ4MDV9.V9jvmh4LVnPGG-VGHoX7p3HbM4GaYhsf8v5VsAidR5w
+https://live.thvli.vn/thvl2/playlist.m3u8?app=141214&sig=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2ZXIiOjIsInVpZCI6IjMzZDcxNzI5LTMyOWYtNDA2OS1hOTBjLTFmZWJlNjE1ZDA0OCIsImFwcCI6MTQxMjE0LCJkZXYiOiJNb3ppbGxhLzUuMCAoTGludXg7IEFuZHJvaWQgMTU7IFNNLVM5MThCIEJ1aWxkL0FQM0EuMjQwOTA1LjAxNS5BMjsgd3YpIEFwcGxlV2ViS2l0LzUzNy4zNiAoS0hUTUwsIGxpa2UgR2Vja28pIFZlcnNpb24vNC4wIENocm9tZS8xMzUuMC43MDQ5LjExMSBNb2JpbGUgU2FmYXJpLzUzNy4zNiB2QXBwVFYvMS4wLjIiLCJjaXAiOiI0Mi4xMTIuNDYuNTMiLCJwbGEiOiJ3ZWIiLCJpYXQiOjE3OTE0MjUwMDl9.i6PQNbUESmI4GhZvDL00et6DykYWt5cVLD8adFSr1WQ
 #EXTINF:-1 tvg-id="thvl3hd.VN" tvg-name="THVL3 | TH Vĩnh Long" tvg-chno="78" tvg-logo="https://freem3u.xyz/static/images/diaphuong/vinhlong3.png" group-title="Địa Phương",THVL3 | TH Vĩnh Long
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
 https://freem3u.xyz/api/live/play.m3u8?vid=219
@@ -1470,7 +1473,7 @@ https://livecdn-global-vnd.vieon.vn/htv_drm/live_event/trailer_vieon_tvc/playlis
 https://freem3u.xyz/api/live/play.m3u8?vid=25
 #EXTINF:-1 tvg-id="thvl2hd.VN" tvg-name="THVL2 | TH Vĩnh Long" tvg-chno="77" tvg-logo="https://freem3u.xyz/static/images/diaphuong/vinhlong2.png" group-title="Miền Nam",THVL2 | TH Vĩnh Long
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://live.thvli.vn/thvl2/playlist.m3u8?app=141214&sig=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2ZXIiOjIsInVpZCI6IjhlYmVjZmI3LWVlZTktNDMyZC04OTM4LTA1MzEyZWZkMjYwNiIsImFwcCI6MTQxMjE0LCJkZXYiOiJNb3ppbGxhLzUuMCAoTGludXg7IEFuZHJvaWQgMTA7IEspIEFwcGxlV2ViS2l0LzUzNy4zNiAoS0hUTUwsIGxpa2UgR2Vja28pIENocm9tZS8xNTQuMC4wLjAgTW9iaWxlIFNhZmFyaS81MzcuMzYiLCJjaXAiOiIxMTMuMTY1LjEyOC4xODIiLCJwbGEiOiJ3ZWIiLCJpYXQiOjE3OTE0MjQ4MDV9.V9jvmh4LVnPGG-VGHoX7p3HbM4GaYhsf8v5VsAidR5w
+https://live.thvli.vn/thvl2/playlist.m3u8?app=141214&sig=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2ZXIiOjIsInVpZCI6IjMzZDcxNzI5LTMyOWYtNDA2OS1hOTBjLTFmZWJlNjE1ZDA0OCIsImFwcCI6MTQxMjE0LCJkZXYiOiJNb3ppbGxhLzUuMCAoTGludXg7IEFuZHJvaWQgMTU7IFNNLVM5MThCIEJ1aWxkL0FQM0EuMjQwOTA1LjAxNS5BMjsgd3YpIEFwcGxlV2ViS2l0LzUzNy4zNiAoS0hUTUwsIGxpa2UgR2Vja28pIFZlcnNpb24vNC4wIENocm9tZS8xMzUuMC43MDQ5LjExMSBNb2JpbGUgU2FmYXJpLzUzNy4zNiB2QXBwVFYvMS4wLjIiLCJjaXAiOiI0Mi4xMTIuNDYuNTMiLCJwbGEiOiJ3ZWIiLCJpYXQiOjE3OTE0MjUwMDl9.i6PQNbUESmI4GhZvDL00et6DykYWt5cVLD8adFSr1WQ
 #EXTINF:-1 tvg-id="thvl3hd.VN" tvg-name="THVL3 | TH Vĩnh Long" tvg-chno="78" tvg-logo="https://freem3u.xyz/static/images/diaphuong/vinhlong3.png" group-title="Miền Nam",THVL3 | TH Vĩnh Long
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
 https://freem3u.xyz/api/live/play.m3u8?vid=219
