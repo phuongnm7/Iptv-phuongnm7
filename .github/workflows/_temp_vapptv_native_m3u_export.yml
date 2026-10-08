@@ -102,8 +102,59 @@ jobs:
               except: pass
               return []
 
+          def resolve_nested_payload(payload, inherited_headers=None, depth=0):
+              if depth > 3:
+                  return []
+              headers = inherited_headers or {}
+              out = []
+
+              if isinstance(payload, dict):
+                  # vAppTV flow/play.json can return a complete second-stage
+                  # provider specification inside data: {provider,url,jsonPath,httpConfig,...}.
+                  if isinstance(payload.get("provider"), str) and isinstance(payload.get("url"), str):
+                      spec = dict(payload)
+                      if not isinstance(spec.get("headers"), dict):
+                          spec["headers"] = headers
+                      return resolve_spec(spec)
+
+                  if "data" in payload and isinstance(payload.get("data"), (dict, list, str)):
+                      out += resolve_nested_payload(payload.get("data"), headers, depth + 1)
+
+                  if isinstance(payload.get("url"), str):
+                      u = payload["url"].strip()
+                      h = dict(headers)
+                      if isinstance(payload.get("headers"), dict):
+                          h.update({str(k):str(v) for k,v in payload["headers"].items()})
+                      if looks_stream(u):
+                          out.append({"url":u,"headers":h,"source":"nested-url"})
+                      else:
+                          out += resolve_nonstream(u,h,depth+1)
+
+                  # A returned object can itself be an implicit JSON provider.
+                  if isinstance(payload.get("url"), str) and (
+                      "jsonPath" in payload or "httpConfig" in payload
+                  ):
+                      spec = dict(payload)
+                      spec.setdefault("provider","json")
+                      if not isinstance(spec.get("headers"), dict):
+                          spec["headers"] = headers
+                      out += resolve_spec(spec)
+
+              elif isinstance(payload, list):
+                  for item in payload:
+                      out += resolve_nested_payload(item, headers, depth + 1)
+
+              elif isinstance(payload, str):
+                  u = payload.strip()
+                  if looks_stream(u):
+                      out.append({"url":u,"headers":headers,"source":"nested-text"})
+                  elif http_url(u):
+                      out += resolve_nonstream(u,headers,depth+1)
+
+              return out
+
           def resolve_nonstream(u, headers=None, depth=0):
-              if not http_url(u) or depth>1: return []
+              if not http_url(u) or depth>3: return []
               if looks_stream(u): return [{"url":u,"headers":headers or {}, "source":"resolved"}]
               try:
                   txt,_=http_text(u,headers)
@@ -137,12 +188,7 @@ jobs:
                           txt,_=http_text(url,headers)
                           try:
                               obj=json.loads(txt)
-                              found=[]; extract_urls(obj,found)
-                              for v in found:
-                                  if looks_stream(v):
-                                      results.append({"url":v,"headers":headers,"source":"play-json"})
-                                  else:
-                                      results += resolve_nonstream(v,headers,0)
+                              results += resolve_nested_payload(obj,headers,0)
                           except:
                               results += resolve_nonstream(txt.strip(),headers,0)
                       except: pass
@@ -159,15 +205,11 @@ jobs:
               try:
                   if provider=="flow":
                       txt,_=http_text(url,headers)
-                      obj=None
-                      try: obj=json.loads(txt)
-                      except: obj=txt
-                      found=[]; extract_urls(obj,found)
-                      for v in found:
-                          if looks_stream(v):
-                              results.append({"url":v,"headers":headers,"source":"flow-resolved"})
-                          else:
-                              results += resolve_nonstream(v,headers,0)
+                      try:
+                          obj=json.loads(txt)
+                      except:
+                          obj=txt
+                      results += resolve_nested_payload(obj,headers,0)
                       return results
 
                   if provider=="json":
@@ -181,13 +223,7 @@ jobs:
                       txt,_=http_text(url,h,body_bytes,method)
                       obj=json.loads(txt)
                       val=json_path(obj,spec.get("jsonPath"))
-                      found=[]; extract_urls(val,found)
-                      if isinstance(val,str) and http_url(val): found.append(val)
-                      for v in dict.fromkeys(found):
-                          if looks_stream(v):
-                              results.append({"url":v,"headers":h,"source":"json-resolved"})
-                          else:
-                              results += resolve_nonstream(v,h,0)
+                      results += resolve_nested_payload(val,h,0)
                       return results
 
                   if provider=="parser":
