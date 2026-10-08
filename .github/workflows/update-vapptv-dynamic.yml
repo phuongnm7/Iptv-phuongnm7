@@ -1,0 +1,467 @@
+name: Update vAppTV Dynamic NM7 Playlist
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "*/10 * * * *"
+  push:
+    paths:
+      - ".github/workflows/update-vapptv-dynamic.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-vapptv-dynamic
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          ref: main
+          fetch-depth: 1
+
+      - name: Fetch current vAppTV catalog
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 4 --retry-delay 2             -H "User-Agent: okhttp/4.12.0"             -H "Accept: application/json,text/plain,*/*"             "https://freem3u.xyz/api/channels/x_1.0.1/app.json"             -o app.json
+
+      - name: Resolve current playable sources and generate M3U
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mkdir -p generated
+
+          cat > build_vapptv_playlist.py <<'PY'
+          import json
+          import re
+          import urllib.parse
+          import urllib.request
+          from concurrent.futures import ThreadPoolExecutor, as_completed
+          from datetime import datetime, timezone
+          from html import escape
+          from pathlib import Path
+
+          APP_URL = "https://freem3u.xyz/api/channels/x_1.0.1/app.json"
+          DATA = json.loads(Path("app.json").read_text(encoding="utf-8"))
+          CHANNELS = list(DATA.get("channels") or [])
+
+          BASE_UA = "okhttp/4.12.0"
+          BROWSER_UA = (
+              "Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) "
+              "AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 "
+              "Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2"
+          )
+          DESKTOP_UA = (
+              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+              "AppleWebKit/537.36 (KHTML, like Gecko) "
+              "Chrome/151.0 Safari/537.36"
+          )
+
+          def clean(v):
+              return str(v or "").replace("\r", " ").replace("\n", " ").strip()
+
+          def is_http(v):
+              return isinstance(v, str) and re.match(r"^https?://", v.strip(), re.I)
+
+          def looks_stream(v):
+              if not is_http(v):
+                  return False
+              s = v.lower()
+              return bool(
+                  re.search(r"\.(m3u8|mpd)(\?|$)", s, re.I)
+                  or "/api/live/play.m3u8" in s
+                  or "/manifest" in s
+                  or "/playlist" in s
+                  or "/chunklist" in s
+                  or "/hls/" in s
+                  or ".smil/" in s
+                  or "/stream/" in s
+              )
+
+          def request_text(url, headers=None, data=None, method="GET", timeout=15):
+              h = {
+                  "User-Agent": BASE_UA,
+                  "Accept": "*/*",
+              }
+              if headers:
+                  h.update({str(k): str(v) for k, v in headers.items()})
+              req = urllib.request.Request(
+                  url,
+                  headers=h,
+                  data=data,
+                  method=method,
+              )
+              with urllib.request.urlopen(req, timeout=timeout) as r:
+                  return r.read().decode("utf-8", "replace"), dict(r.headers)
+
+          def extract_urls(value, out=None):
+              out = [] if out is None else out
+              if isinstance(value, str):
+                  if is_http(value):
+                      out.append(value.strip())
+              elif isinstance(value, list):
+                  for x in value:
+                      extract_urls(x, out)
+              elif isinstance(value, dict):
+                  for x in value.values():
+                      extract_urls(x, out)
+              return out
+
+          def json_path(value, path):
+              if not path:
+                  return value
+              cur = value
+              for part in re.findall(r"[^.\[\]]+", str(path)):
+                  if isinstance(cur, dict) and part in cur:
+                      cur = cur[part]
+                  elif isinstance(cur, list):
+                      try:
+                          cur = cur[int(part)]
+                      except Exception:
+                          return None
+                  else:
+                      return None
+              return cur
+
+          def parse_shaka(url):
+              try:
+                  q = urllib.parse.parse_qs(urllib.parse.urlparse(url).query)
+                  video = q.get("videoUrl", [None])[0]
+                  audio = q.get("audioUrl", [None])[0]
+                  keys = q.get("keys", [None])[0]
+                  if is_http(video) and looks_stream(video):
+                      return {"url": video, "clearkey": keys, "headers": {}}
+                  if is_http(audio) and looks_stream(audio):
+                      return {"url": audio, "clearkey": None, "headers": {}}
+              except Exception:
+                  pass
+              return None
+
+          def resolve_spec(spec, depth=0):
+              if not isinstance(spec, dict) or not is_http(spec.get("url")) or depth > 3:
+                  return []
+
+              url = clean(spec["url"])
+              provider = clean(spec.get("provider"))
+              headers = dict(spec.get("headers") or {})
+              if not headers:
+                  headers = {"User-Agent": BROWSER_UA}
+
+              if not provider:
+                  shaka = parse_shaka(url)
+                  if shaka:
+                      shaka["headers"] = headers
+                      return [shaka]
+                  if looks_stream(url):
+                      return [{"url": url, "clearkey": None, "headers": headers}]
+                  return []
+
+              if provider == "webview":
+                  shaka = parse_shaka(url)
+                  if shaka:
+                      shaka["headers"] = headers
+                      return [shaka]
+                  if looks_stream(url):
+                      return [{"url": url, "clearkey": None, "headers": headers}]
+                  return []
+
+              try:
+                  if provider == "flow":
+                      txt, _ = request_text(url, headers=headers)
+                      try:
+                          payload = json.loads(txt)
+                      except Exception:
+                          payload = txt
+
+                      # A flow endpoint may return a nested provider spec
+                      # such as {data:{provider:"json",url:...,jsonPath:...}}.
+                      payload_data = payload.get("data") if isinstance(payload, dict) and "data" in payload else payload
+
+                      nested = []
+                      if isinstance(payload_data, dict) and payload_data.get("provider") and payload_data.get("url"):
+                          nested = resolve_spec(payload_data, depth + 1)
+                          if nested:
+                              return nested
+
+                      found = extract_urls(payload_data)
+                      for u in found:
+                          if looks_stream(u):
+                              return [{"url": u, "clearkey": None, "headers": headers}]
+                      return []
+
+                  if provider == "json":
+                      cfg = spec.get("httpConfig") if isinstance(spec.get("httpConfig"), dict) else {}
+                      method = clean(cfg.get("method") or "GET").upper()
+                      cfg_headers = dict(cfg.get("headers") or {})
+                      body = cfg.get("body")
+                      body_bytes = None
+                      if body is not None and method not in ("GET", "HEAD"):
+                          body_bytes = str(body).encode("utf-8")
+
+                      header_profiles = [
+                          {**headers, **cfg_headers},
+                          {**cfg_headers, "User-Agent": BROWSER_UA, "Origin": "https://vieon.vn", "Referer": "https://vieon.vn/"},
+                          {**cfg_headers, "User-Agent": DESKTOP_UA},
+                      ]
+
+                      for hh in header_profiles:
+                          try:
+                              txt, _ = request_text(url, headers=hh, data=body_bytes, method=method)
+                              payload = json.loads(txt)
+                              value = json_path(payload, spec.get("jsonPath"))
+                              found = extract_urls(value)
+                              if isinstance(value, str) and is_http(value):
+                                  found.insert(0, value)
+                              for u in dict.fromkeys(found):
+                                  if looks_stream(u):
+                                      return [{"url": u, "clearkey": None, "headers": hh}]
+                          except Exception:
+                              continue
+                      return []
+
+                  if provider == "parser":
+                      txt, _ = request_text(url, headers=headers)
+                      start = clean(spec.get("startWith"))
+                      end = clean(spec.get("endWith"))
+                      count = max(1, int(spec.get("startWithIndex") or 1))
+                      pos = 0
+                      for _ in range(count):
+                          pos = txt.find(start, pos)
+                          if pos < 0:
+                              return []
+                          pos += len(start)
+                      end_pos = txt.find(end, pos) if end else -1
+                      value = txt[pos:end_pos if end_pos >= 0 else None].strip()
+                      if is_http(value) and looks_stream(value):
+                          return [{"url": value, "clearkey": None, "headers": headers}]
+                      for u in extract_urls(value):
+                          if looks_stream(u):
+                              return [{"url": u, "clearkey": None, "headers": headers}]
+                      return []
+
+              except Exception:
+                  return []
+
+              return []
+
+          def source_rank(x):
+              url = clean(x.get("url")).lower()
+              key = x.get("clearkey")
+              # Native ClearKey MPD is preferred when vAppTV supplied it.
+              if key and re.search(r"\.mpd(\?|$)", url, re.I):
+                  return 0
+              if re.search(r"\.m3u8(\?|$)", url, re.I):
+                  return 1
+              if "/api/live/play.m3u8" in url:
+                  return 2
+              if re.search(r"\.mpd(\?|$)", url, re.I):
+                  return 3
+              return 4
+
+          def channel_index(c):
+              try:
+                  return int(c.get("channelIndex"))
+              except Exception:
+                  return 999999
+
+          CHANNELS.sort(key=channel_index)
+
+          jobs = []
+          for ci, channel in enumerate(CHANNELS):
+              for ui, spec in enumerate(channel.get("urls") or []):
+                  jobs.append((ci, ui, spec))
+
+          resolved = {}
+          with ThreadPoolExecutor(max_workers=32) as ex:
+              future_map = {
+                  ex.submit(resolve_spec, spec): (ci, ui)
+                  for ci, ui, spec in jobs
+              }
+              for f in as_completed(future_map):
+                  key = future_map[f]
+                  try:
+                      resolved[key] = f.result()
+                  except Exception:
+                      resolved[key] = []
+
+          main_groups = [
+              clean(x.get("title"))
+              for x in (DATA.get("group") or [])
+              if clean(x.get("title"))
+          ]
+
+          group_order = []
+          seen_groups = set()
+          for g in main_groups:
+              if g not in seen_groups:
+                  seen_groups.add(g)
+                  group_order.append(g)
+          for c in CHANNELS:
+              for g in c.get("group") or []:
+                  g = clean(g)
+                  if g and g not in seen_groups:
+                      seen_groups.add(g)
+                      group_order.append(g)
+
+          by_group = {g: [] for g in group_order}
+          unresolved = []
+          resolved_channels = 0
+          drm_channels = 0
+          variant_count = 0
+
+          for ci, channel in enumerate(CHANNELS):
+              cid = clean(channel.get("id"))
+              title = clean(channel.get("title") or cid)
+              tvgid = clean(channel.get("tvgId") or cid)
+              logo = clean(channel.get("thumbnail") or channel.get("logo"))
+              groups = [clean(g) for g in channel.get("group") or [] if clean(g)]
+              groups = groups or ["vAppTV"]
+
+              candidates = []
+              for ui, _spec in enumerate(channel.get("urls") or []):
+                  candidates.extend(resolved.get((ci, ui), []))
+
+              unique = {}
+              for c in sorted(candidates, key=source_rank):
+                  u = clean(c.get("url"))
+                  k = clean(c.get("clearkey"))
+                  if not is_http(u):
+                      continue
+                  key = (u, k)
+                  if key not in unique:
+                      unique[key] = c
+              candidates = list(unique.values())
+
+              if candidates:
+                  resolved_channels += 1
+                  variant_count += len(candidates)
+                  if any(c.get("clearkey") for c in candidates):
+                      drm_channels += 1
+              else:
+                  unresolved.append({"id": cid, "title": title})
+
+              # Pick best current source. Keep source metadata for headers/DRM.
+              chosen = sorted(candidates, key=source_rank)[0] if candidates else None
+
+              for group in groups:
+                  by_group.setdefault(group, [])
+                  if chosen:
+                      by_group[group].append((channel_index(channel), cid, title, tvgid, logo, chosen))
+
+          epg = [clean(x) for x in DATA.get("epgList") or [] if is_http(clean(x))]
+          header = "#EXTM3U"
+          if epg:
+              header += ' x-tvg-url="' + escape(",".join(epg), quote=True) + '"'
+
+          out = [header]
+
+          for group in group_order + [g for g in by_group if g not in group_order]:
+              entries = sorted(by_group.get(group, []), key=lambda x: (x[0], x[2]))
+              for idx, cid, title, tvgid, logo, chosen in entries:
+                  url = clean(chosen.get("url"))
+                  key = clean(chosen.get("clearkey"))
+                  headers = chosen.get("headers") if isinstance(chosen.get("headers"), dict) else {}
+
+                  line = '#EXTINF:-1'
+                  if tvgid:
+                      line += ' tvg-id="' + escape(tvgid, quote=True) + '"'
+                  line += ' tvg-name="' + escape(title, quote=True) + '"'
+                  if idx != 999999:
+                      line += ' tvg-chno="' + str(idx) + '"'
+                  if logo:
+                      line += ' tvg-logo="' + escape(logo, quote=True) + '"'
+                  line += ' group-title="' + escape(group, quote=True) + '",' + title
+
+                  out.append(line)
+
+                  if key and re.search(r"\.mpd(\?|$)", url, re.I):
+                      out.append("#KODIPROP:inputstream=inputstream.adaptive")
+                      out.append("#KODIPROP:inputstream.adaptive.manifest_type=mpd")
+                      out.append("#KODIPROP:inputstream.adaptive.license_type=clearkey")
+                      out.append("#KODIPROP:inputstream.adaptive.license_key=" + key)
+
+                  ref = headers.get("Referer") or headers.get("referer")
+                  ua = headers.get("User-Agent") or headers.get("user-agent")
+                  if ref:
+                      out.append("#EXTVLCOPT:http-referrer=" + str(ref))
+                  if ua:
+                      out.append("#EXTVLCOPT:http-user-agent=" + str(ua))
+
+                  out.append(url)
+
+          output = Path("generated/vapptv-live.m3u")
+          output.write_text("\n".join(out) + "\n", encoding="utf-8")
+
+          summary = {
+              "source": APP_URL,
+              "api_index": DATA.get("index"),
+              "generated_utc": datetime.now(timezone.utc).isoformat(),
+              "channel_objects": len(CHANNELS),
+              "resolved_channels": resolved_channels,
+              "unresolved_channels": len(unresolved),
+              "playable_variants_found": variant_count,
+              "channels_with_clearkey_variant": drm_channels,
+              "groups": group_order,
+              "unresolved": unresolved[:200],
+          }
+
+          Path("generated/vapptv-live-summary.json").write_text(
+              json.dumps(summary, ensure_ascii=False, indent=2) + "\n",
+              encoding="utf-8"
+          )
+
+          if len(CHANNELS) < 200:
+              raise SystemExit("Catalog unexpectedly dropped below 200 channels; refusing to publish.")
+
+          if resolved_channels < len(CHANNELS) * 0.75:
+              raise SystemExit(
+                  f"Playable resolution dropped too low: {resolved_channels}/{len(CHANNELS)}"
+              )
+
+          print(json.dumps(summary, ensure_ascii=False, indent=2))
+          PY
+
+          python3 build_vapptv_playlist.py
+
+      - name: Commit generated playlist
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add generated/vapptv-live.m3u generated/vapptv-live-summary.json
+
+          if git diff --cached --quiet; then
+            echo "vAppTV dynamic playlist unchanged."
+            exit 0
+          fi
+
+          git commit -m "Update dynamic vAppTV NM7 playlist"
+
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            if ! git rebase origin/main; then
+              git rebase --abort || true
+              exit 1
+            fi
+
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+
+            sleep $((attempt * 2))
+          done
+
+          echo "Failed to push generated vAppTV playlist."
+          exit 1
