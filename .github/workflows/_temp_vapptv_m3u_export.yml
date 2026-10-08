@@ -1,0 +1,121 @@
+name: _TEMP_vAppTV_M3U_EXPORT
+
+on:
+  push:
+    paths:
+      - ".github/workflows/_temp_vapptv_m3u_export.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch vAppTV channel data
+        run: |
+          curl -L --fail --retry 3 \
+            -H "User-Agent: okhttp/4.12.0" \
+            "https://freem3u.xyz/api/channels/x_1.0.1/app.json" \
+            -o app.json
+
+      - name: Convert to complete M3U
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+
+          const data = JSON.parse(fs.readFileSync('app.json', 'utf8'));
+          const channels = Array.isArray(data.channels) ? data.channels.slice() : [];
+
+          channels.sort((a, b) => {
+            const ai = Number.isFinite(Number(a.channelIndex)) ? Number(a.channelIndex) : 999999;
+            const bi = Number.isFinite(Number(b.channelIndex)) ? Number(b.channelIndex) : 999999;
+            return ai - bi;
+          });
+
+          function esc(v) {
+            return String(v ?? '')
+              .replace(/&/g, '&amp;')
+              .replace(/"/g, '&quot;')
+              .replace(/\r?\n/g, ' ')
+              .trim();
+          }
+
+          function pickUrl(channel) {
+            const urls = Array.isArray(channel.urls)
+              ? channel.urls.filter(x => x && typeof x.url === 'string' && /^https?:\\/\\//i.test(x.url))
+              : [];
+
+            if (!urls.length) return null;
+
+            const direct = urls.filter(x => !x.provider);
+            const preferred = direct.filter(x => /\\.(m3u8|mpd)(?:\\?|$)/i.test(x.url));
+            if (preferred.length) return preferred[0];
+            if (direct.length) return direct[0];
+
+            const fallbackStream = urls.filter(x => /\\.(m3u8|mpd)(?:\\?|$)/i.test(x.url));
+            if (fallbackStream.length) return fallbackStream[0];
+
+            return urls[0];
+          }
+
+          const out = ['#EXTM3U'];
+          let included = 0;
+
+          for (const ch of channels) {
+            const u = pickUrl(ch);
+            if (!u) continue;
+
+            const title = ch.title || ch.id || 'Unknown channel';
+            const tvgId = ch.tvgId || ch.id || '';
+            const logo = ch.thumbnail || ch.logo || '';
+            const groups = Array.isArray(ch.group) ? ch.group.filter(Boolean) : [];
+            const group = groups[0] || 'vAppTV';
+
+            out.push(
+              '#EXTINF:-1' +
+              (tvgId ? ' tvg-id="' + esc(tvgId) + '"' : '') +
+              ' tvg-name="' + esc(title) + '"' +
+              (logo ? ' tvg-logo="' + esc(logo) + '"' : '') +
+              ' group-title="' + esc(group) + '",' +
+              title
+            );
+
+            const headers = u.headers && typeof u.headers === 'object' ? u.headers : {};
+            const referer = headers.Referer || headers.referer;
+            const userAgent = headers['User-Agent'] || headers['user-agent'];
+
+            if (referer) out.push('#EXTVLCOPT:http-referrer=' + referer);
+            if (userAgent) out.push('#EXTVLCOPT:http-user-agent=' + userAgent);
+
+            out.push(u.url);
+            included++;
+          }
+
+          fs.writeFileSync(
+            'vAppTV_1.0.2_full_channels.m3u',
+            out.join('\n') + '\n',
+            'utf8'
+          );
+
+          const summary = [
+            'Source endpoint: https://freem3u.xyz/api/channels/x_1.0.1/app.json',
+            'API index: ' + String(data.index ?? ''),
+            'API groups: ' + String(Array.isArray(data.group) ? data.group.length : 0),
+            'Channels in JSON: ' + channels.length,
+            'M3U entries written: ' + included,
+            'Generated: ' + new Date().toISOString()
+          ].join('\n') + '\n';
+
+          fs.writeFileSync('vAppTV_export_summary.txt', summary, 'utf8');
+          NODE
+
+      - name: Upload M3U artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vAppTV-M3U-export
+          path: |
+            vAppTV_1.0.2_full_channels.m3u
+            vAppTV_export_summary.txt
+          if-no-files-found: error
