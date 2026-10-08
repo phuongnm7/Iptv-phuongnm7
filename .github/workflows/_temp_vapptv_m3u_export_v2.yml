@@ -1,0 +1,114 @@
+name: _TEMP_vAppTV_M3U_EXPORT_V2
+
+on:
+  push:
+    paths:
+      - ".github/workflows/_temp_vapptv_m3u_export_v2.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch vAppTV channel data
+        run: |
+          curl -L --fail --retry 3 \
+            -H "User-Agent: okhttp/4.12.0" \
+            "https://freem3u.xyz/api/channels/x_1.0.1/app.json" \
+            -o app.json
+
+      - name: Convert to complete M3U
+        run: |
+          python3 - <<'PY'
+          import json, re
+          from pathlib import Path
+          from html import escape
+          from datetime import datetime, timezone
+
+          data = json.loads(Path("app.json").read_text(encoding="utf-8"))
+          channels = list(data.get("channels") or [])
+
+          def idx(ch):
+              try:
+                  return int(ch.get("channelIndex"))
+              except Exception:
+                  return 999999999
+
+          channels.sort(key=idx)
+
+          def pick_url(channel):
+              urls = [
+                  x for x in (channel.get("urls") or [])
+                  if isinstance(x, dict)
+                  and isinstance(x.get("url"), str)
+                  and x["url"].lower().startswith(("http://", "https://"))
+              ]
+              if not urls:
+                  return None
+              direct = [x for x in urls if not x.get("provider")]
+              preferred = [x for x in direct if re.search(r"\.(m3u8|mpd)(\?|$)", x["url"], re.I)]
+              if preferred:
+                  return preferred[0]
+              if direct:
+                  return direct[0]
+              fallback = [x for x in urls if re.search(r"\.(m3u8|mpd)(\?|$)", x["url"], re.I)]
+              if fallback:
+                  return fallback[0]
+              return urls[0]
+
+          out = ["#EXTM3U"]
+          included = 0
+          for ch in channels:
+              u = pick_url(ch)
+              if not u:
+                  continue
+              title = str(ch.get("title") or ch.get("id") or "Unknown channel")
+              tvg_id = str(ch.get("tvgId") or ch.get("id") or "")
+              logo = str(ch.get("thumbnail") or ch.get("logo") or "")
+              groups = [str(x) for x in (ch.get("group") or []) if x]
+              group = groups[0] if groups else "vAppTV"
+
+              line = "#EXTINF:-1"
+              if tvg_id:
+                  line += ' tvg-id="' + escape(tvg_id, quote=True) + '"'
+              line += ' tvg-name="' + escape(title, quote=True) + '"'
+              if logo:
+                  line += ' tvg-logo="' + escape(logo, quote=True) + '"'
+              line += ' group-title="' + escape(group, quote=True) + '",' + title
+              out.append(line)
+
+              headers = u.get("headers") if isinstance(u.get("headers"), dict) else {}
+              referer = headers.get("Referer") or headers.get("referer")
+              user_agent = headers.get("User-Agent") or headers.get("user-agent")
+              if referer:
+                  out.append("#EXTVLCOPT:http-referrer=" + str(referer))
+              if user_agent:
+                  out.append("#EXTVLCOPT:http-user-agent=" + str(user_agent))
+              out.append(u["url"])
+              included += 1
+
+          Path("vAppTV_1.0.2_full_channels.m3u").write_text("\n".join(out) + "\n", encoding="utf-8")
+          Path("vAppTV_export_summary.txt").write_text(
+              "\n".join([
+                  "Source endpoint: https://freem3u.xyz/api/channels/x_1.0.1/app.json",
+                  "API index: " + str(data.get("index", "")),
+                  "API groups: " + str(len(data.get("group") or [])),
+                  "Channels in JSON: " + str(len(channels)),
+                  "M3U entries written: " + str(included),
+                  "Generated UTC: " + datetime.now(timezone.utc).isoformat()
+              ]) + "\n",
+              encoding="utf-8"
+          )
+          PY
+
+      - name: Upload M3U artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vAppTV-M3U-export-v2
+          path: |
+            vAppTV_1.0.2_full_channels.m3u
+            vAppTV_export_summary.txt
+          if-no-files-found: error
