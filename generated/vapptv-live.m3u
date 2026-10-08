@@ -35,12 +35,8 @@ https://livevlisctcdnw.seenow.vn/mean/THETHAO_TINTUC_HD/manifest.mpd
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
 https://livevlisctcdnw.seenow.vn/mean/THETHAO_GOLF_HD/manifest.mpd
 #EXTINF:-1 tvg-id="vtv6hd.VN" tvg-name="VTV6" tvg-chno="34" tvg-logo="https://freem3u.xyz/static/images/vtv/vtv6_new_2.png" group-title="Thể Thao",VTV6
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=d8099c6c4ebc4ab88ce6f694f912e26d:ec57977de110995b8fc5d42e4ffdbcc9
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livebytatm.vtvprime.vn/live/data8/VTV6/Live_DASHDRM/VTV6.mpd
+https://freem3u.xyz/api/live/play.m3u8?vid=10043
 #EXTINF:-1 tvg-id="htvthethaohd.VN" tvg-name="HTV Thể Thao" tvg-chno="43" tvg-logo="https://freem3u.xyz/static/images/hplus/htvthethao.png" group-title="Thể Thao",HTV Thể Thao
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
 https://freem3u.xyz/api/live/play.m3u8?vid=195
@@ -80,41 +76,23 @@ https://qp-pldt-live-grp-11-prod.akamaized.net/out/u/dr_spotvhd.mpd
 #EXTVLCOPT:http-user-agent=ExoPlayerDemo/2.15.1 (Linux; Android 13) ExoPlayerLib/2.15.1
 https://qp-pldt-live-bpk-01-prod.akamaized.net/bpk-tv/dr_spotv2hd/default/index.mpd
 #EXTINF:-1 tvg-id="onphimviet.VN" tvg-name="VTVCab 2 - ON Phim Việt" tvg-chno="13" tvg-logo="https://freem3u.xyz/static/images/vtvcab/vtvcab2.png" group-title="Phim Truyện",VTVCab 2 - ON Phim Việt
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=7417db88928243fda4e03596bbd19a27:eebb689de1191ae1b207d32f0d5ca9fe
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livevlisctcdnw.seenow.vn/livesnv2/PHIM_VIET/manifest.mpd
+https://freem3u.xyz/api/live/play.m3u8?vid=175
 #EXTINF:-1 tvg-id="onmovies.VN" tvg-name="VTVCab 4 - ON Movies" tvg-chno="15" tvg-logo="https://freem3u.xyz/static/images/vtvcab/vtvcab4.png" group-title="Phim Truyện",VTVCab 4 - ON Movies
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=2f571f6db60340e8a3cc3a5395d21611:553752778fe0d3ea79d434bf5f867f26
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livevlisctcdnw.seenow.vn/livesnv2/VAN_HOA/manifest.mpd
+https://freem3u.xyz/api/live/play.m3u8?vid=181
 #EXTINF:-1 tvg-id="oncine.VN" tvg-name="VTVCab 10 - ON Cine" tvg-chno="21" tvg-logo="https://freem3u.xyz/static/images/vtvcab/vtvcab10.png" group-title="Phim Truyện",VTVCab 10 - ON Cine
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=0aad542fff274b2685264603b5075632:7555eb438217938dbb48665863b46fa1
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livevlisctcdnw.seenow.vn/mean/FILM_TV/manifest.mpd
+https://freem3u.xyz/api/live/play.m3u8?vid=176
 #EXTINF:-1 tvg-id="onviedramas.VN" tvg-name="VTVCab 19 - ON Vie DRAMAS" tvg-chno="28" tvg-logo="https://freem3u.xyz/static/images/vtvcab/vtvcab19.png" group-title="Phim Truyện",VTVCab 19 - ON Vie DRAMAS
-#EXTVLCOPT:http-referrer=https://vieon.vn/
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livecdn-global-vnd.vieon.vn/htv_drm/live_event/trailer_vieon_tvc/playlist.m3u8
+https://freem3u.xyz/api/live/play.m3u8?vid=177
 #EXTINF:-1 tvg-id="htvcphimhd.VN" tvg-name="HTVC Phim" tvg-chno="47" tvg-logo="https://freem3u.xyz/static/images/hplus/htvcphim.png" group-title="Phim Truyện",HTVC Phim
-#EXTVLCOPT:http-referrer=https://vieon.vn/
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livecdn-global-vnd.vieon.vn/htv_drm/live_event/trailer_vieon_tvc/playlist.m3u8
+https://freem3u.xyz/api/live/play.m3u8?vid=15
 #EXTINF:-1 tvg-id="sctv2hd.VN" tvg-name="SCTV2" tvg-chno="52" tvg-logo="https://freem3u.xyz/static/images/sctv/sctv2.png" group-title="Phim Truyện",SCTV2
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=9121ebe293bc46cd89e5d83a78c1a53c:9285615a491a424fb025f9e8d571bcd5
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://liveatmvng.vtvprime.vn/live/data8/SCTV2/Live_DASHDRM/SCTV2.mpd
+https://freem3u.xyz/api/live/play.m3u8?vid=201
 #EXTINF:-1 tvg-id="sctv4hd.VN" tvg-name="SCTV4" tvg-chno="54" tvg-logo="https://freem3u.xyz/static/images/sctv/sctv4.png" group-title="Phim Truyện",SCTV4
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=mpd
@@ -123,12 +101,8 @@ https://liveatmvng.vtvprime.vn/live/data8/SCTV2/Live_DASHDRM/SCTV2.mpd
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
 https://liveatmvng.vtvprime.vn/live/data8/SCTV4/Live_DASHDRM/SCTV4.mpd
 #EXTINF:-1 tvg-id="sctv6hd.VN" tvg-name="SCTV6" tvg-chno="56" tvg-logo="https://freem3u.xyz/static/images/sctv/sctv6.png" group-title="Phim Truyện",SCTV6
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=9121ebe293bc46cd89e5d83a78c1a53c:9285615a491a424fb025f9e8d571bcd5
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://liveatmvng.vtvprime.vn/live/data8/SCTV6/Live_DASHDRM/SCTV6.mpd
+https://freem3u.xyz/api/live/play.m3u8?vid=232
 #EXTINF:-1 tvg-id="sctv9hd.VN" tvg-name="SCTV9" tvg-chno="59" tvg-logo="https://freem3u.xyz/static/images/sctv/sctv9.png" group-title="Phim Truyện",SCTV9
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=mpd
@@ -173,36 +147,20 @@ https://s2129134.cdn.mytvnet.vn/pkg20/live_dzones/cinemaworld.smil/manifest.mpd
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
 https://s2129134.cdn.mytvnet.vn/pkg20/live_dzones/max.smil/manifest.mpd
 #EXTINF:-1 tvg-id="boxmovie1.VN" tvg-name="Box Movie - Việt Nam" tvg-chno="203" tvg-logo="https://freem3u.xyz/static/images/global/boxmovies.png" group-title="Phim Truyện",Box Movie - Việt Nam
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=a7c942778e874d43be92b8d0a0cd11b4:6d54358306571658ffdb952c6560688b
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livesct.vtvprime.vn/Live_DASHDRM1/BM1/manifest.mpd
+https://toiyeuvietnam.dpdns.org/OnliveTV/box-movie-1-hd/Free.m3u8
 #EXTINF:-1 tvg-id="tvb-vietnam" tvg-name="TVB Việt Nam" tvg-chno="480" tvg-logo="https://freem3u.xyz/static/images/tvb/tvbv.png" group-title="Phim Truyện",TVB Việt Nam
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
 https://amg01868-amg01868c3-tvbanywhere-us-4491.playouts.now.amagi.tv/playlist/amg01868-tvbusa-tvbvietnam-tvbanywhereus/playlist.m3u8
 #EXTINF:-1 tvg-id="onbibi.VN" tvg-name="VTVCab 8 - ON BiBi" tvg-chno="19" tvg-logo="https://freem3u.xyz/static/images/vtvcab/vtvcab8.png" group-title="Thiếu Nhi",VTVCab 8 - ON BiBi
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=4196ec8c5fca4f1cb50e8f2668c63b10:a52178cddaf1b8726aadf6fa697b5bf4
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livevlisctcdnw.seenow.vn/livesnv2/BIBI/manifest.mpd
+https://freem3u.xyz/api/live/play.m3u8?vid=178
 #EXTINF:-1 tvg-id="onkids.VN" tvg-name="VTVcab 21 - On Kids HD" tvg-chno="30" tvg-logo="https://freem3u.xyz/static/images/vtvcab/vtvcab21.png" group-title="Thiếu Nhi",VTVcab 21 - On Kids HD
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=c07669233e07416594577b29d60372a6:e8cfcf678750f494312dfcbdaee5132e
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livevlisctcdnw.seenow.vn/livesnv2/BIBI_PLUS_clear/manifest.mpd
+https://freem3u.xyz/api/live/play.m3u8?vid=179
 #EXTINF:-1 tvg-id="htv3.VN" tvg-name="HTV3" tvg-chno="39" tvg-logo="https://freem3u.xyz/static/images/hplus/htv3.png" group-title="Thiếu Nhi",HTV3
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=7b4db62fb5424a6eb2908842a8292775:e37c493320374e4aa42679bffb85c742
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livebytatm.vtvprime.vn/live/data8/HTV3/Live_DASHDRM/HTV3.mpd
+https://freem3u.xyz/api/live/play.m3u8?vid=192
 #EXTINF:-1 tvg-id="sctv3hd.VN" tvg-name="SCTV3" tvg-chno="53" tvg-logo="https://freem3u.xyz/static/images/sctv/sctv3.png" group-title="Thiếu Nhi",SCTV3
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=mpd
@@ -218,12 +176,8 @@ https://liveatmvng.vtvprime.vn/live/data8/SCTV3/Live_DASHDRM/SCTV3.mpd
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
 https://s2129134.cdn.mytvnet.vn/pkg20/live_dzones/boomerang.smil/manifest.mpd
 #EXTINF:-1 tvg-id="happykids.VN" tvg-name="Happy Kids HD - Việt Nam" tvg-chno="171" tvg-logo="https://freem3u.xyz/static/images/global/happykid.png" group-title="Thiếu Nhi",Happy Kids HD - Việt Nam
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=a7c942778e874d43be92b8d0a0cd11b4:6d54358306571658ffdb952c6560688b
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livevlisctcdnw.seenow.vn/livesnv2/HK/manifest.mpd
+https://toiyeuvietnam.dpdns.org/TuyetDoiKhongKinhDoanh/happy-kids-hd/KenhCoBan.m3u8
 #EXTINF:-1 tvg-id="cartoonhd.VN" tvg-name="Cartoon Network - Việt Nam" tvg-chno="179" tvg-logo="https://freem3u.xyz/static/images/global/cartoon-network.png" group-title="Thiếu Nhi",Cartoon Network - Việt Nam
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
 https://freem3u.xyz/api/live/play.m3u8?tid=cn
@@ -234,57 +188,29 @@ https://s2129134.cdn.mytvnet.vn/pkg20/live_dzones/cbb.smil/manifest.mpd
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
 https://c.mjh.nz/abc-kids.m3u8
 #EXTINF:-1 tvg-id="onmusic.VN" tvg-name="VTVCab 15 - ON Music" tvg-chno="24" tvg-logo="https://freem3u.xyz/static/images/vtvcab/vtvcab15.png" group-title="Âm Nhạc",VTVCab 15 - ON Music
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=e518bbb7e8614a7da4d8d974d62486da:b509751f1fa3c676f482cde476670dd6
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livevlisctcdnw.seenow.vn/livesnv2/M_CHANNEL/manifest.mpd
+https://freem3u.xyz/api/live/play.m3u8?vid=185
 #EXTINF:-1 tvg-id="htvccanhachd.VN" tvg-name="HTVC Ca Nhạc" tvg-chno="44" tvg-logo="https://freem3u.xyz/static/images/hplus/htvccanhac.png" group-title="Âm Nhạc",HTVC Ca Nhạc
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=a7c942778e874d43be92b8d0a0cd11b4:6d54358306571658ffdb952c6560688b
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livebytatm.vtvprime.vn/live/data8/HTVCCANHAC/Live_DASHDRM/HTVCCANHAC.mpd
+https://freem3u.xyz/api/live/play.m3u8?vid=14
 #EXTINF:-1 tvg-id="giong-ca-de-doi" tvg-name="Giọng Ca Để Đời" tvg-chno="133" tvg-logo="https://freem3u.xyz/static/images/internet/giongcadedoi.jpg" group-title="Âm Nhạc",Giọng Ca Để Đời
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
 http://dvrfl05.bozztv.com/vch_vchannel5/index.m3u8
 #EXTINF:-1 tvg-id="boxmusic.VN" tvg-name="Box Music - Việt Nam" tvg-chno="186" tvg-logo="https://freem3u.xyz/static/images/global/music_box.png" group-title="Âm Nhạc",Box Music - Việt Nam
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=2942ed303e0d40c9b99c94c587bbf509:96cda24109734fb7920d799d58d1a9ae
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livesct.vtvprime.vn/Live_DASHDRM1/MUSICBOX/manifest.mpd
+https://toiyeuvietnam.dpdns.org/TuyetDoiKhongKinhDoanh/music-box/KenhCoBan.m3u8
 #EXTINF:-1 tvg-id="arirang.VN" tvg-name="Arirang - Việt Nam" tvg-chno="202" tvg-logo="https://freem3u.xyz/static/images/global/arirang.png" group-title="Âm Nhạc",Arirang - Việt Nam
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=a362f6885b1041f2b2e8282782e19e16:9e7f26762856474396e11bd3cfe4a778
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livebytatm.vtvprime.vn/live/data8/ARIRANG/Live_DASHDRM/ARIRANG.mpd
+https://freem3u.xyz/api/live/play.m3u8?vid=111
 #EXTINF:-1 tvg-id="boxhits.VN" tvg-name="Box Hits - Việt Nam" tvg-chno="204" tvg-logo="https://freem3u.xyz/static/images/global/boxhits.png" group-title="Âm Nhạc",Box Hits - Việt Nam
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=a7c942778e874d43be92b8d0a0cd11b4:6d54358306571658ffdb952c6560688b
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livevlisctcdnw.seenow.vn/mean/BOXHIT/manifest.mpd
+https://toiyeuvietnam.dpdns.org/OnliveTV/box-hits/Free.m3u8
 #EXTINF:-1 tvg-id="htvcdulichhd.VN" tvg-name="HTVC Du Lịch và Cuộc Sống" tvg-chno="45" tvg-logo="https://freem3u.xyz/static/images/hplus/htvcdulich.png" group-title="Khám Phá",HTVC Du Lịch và Cuộc Sống
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=a7c942778e874d43be92b8d0a0cd11b4:6d54358306571658ffdb952c6560688b
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livebytatm.vtvprime.vn/live/data8/HTVCDLCS/Live_DASHDRM/HTVCDLCS.mpd
+https://freem3u.xyz/api/live/play.m3u8?vid=133
 #EXTINF:-1 tvg-id="outdoorhd.VN" tvg-name="Outdoor HD - Việt Nam" tvg-chno="187" tvg-logo="https://freem3u.xyz/static/images/global/outdoor.png" group-title="Khám Phá",Outdoor HD - Việt Nam
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=a7c942778e874d43be92b8d0a0cd11b4:6d54358306571658ffdb952c6560688b
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livevlisctcdnw.seenow.vn/mean/OUTDOORCHANNEL/manifest.mpd
+https://freem3u.xyz/api/live/play.m3u8?vid=216
 #EXTINF:-1 tvg-id="discoveryhd.VN" tvg-name="Discovery - Việt Nam" tvg-chno="190" tvg-logo="https://freem3u.xyz/static/images/global/discovery-channel.png" group-title="Khám Phá",Discovery - Việt Nam
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=mpd
@@ -293,12 +219,8 @@ https://livevlisctcdnw.seenow.vn/mean/OUTDOORCHANNEL/manifest.mpd
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
 https://s2129134.cdn.mytvnet.vn/pkg20/live_dzones/dsc.smil/manifest.mpd
 #EXTINF:-1 tvg-id="historyhd.VN" tvg-name="History HD - Việt Nam" tvg-chno="198" tvg-logo="https://freem3u.xyz/static/images/global/history.png" group-title="Khám Phá",History HD - Việt Nam
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=a362f6885b1041f2b2e8282782e19e16:9e7f26762856474396e11bd3cfe4a778
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livebytatm.vtvprime.vn/live/data8/HISTORY/Live_DASHDRM/HISTORY.mpd
+https://freem3u.xyz/api/live/play.m3u8?vid=9856
 #EXTINF:-1 tvg-id="animalhd.VN" tvg-name="Animal Planet - Việt Nam" tvg-chno="481" tvg-logo="https://freem3u.xyz/static/images/global/animal-planet.png" group-title="Khám Phá",Animal Planet - Việt Nam
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=mpd
@@ -321,12 +243,8 @@ https://freem3u.xyz/api/live/play.mpd?fl=096fde45d23058e1cb7e560726804c3993db6e3
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
 https://s129135.cdn.mytvnet.vn/pkg20/live_dzones/tlc.smil/manifest.mpd
 #EXTINF:-1 tvg-id="vtv1hd.VN" tvg-name="VTV1" tvg-chno="1" tvg-logo="https://freem3u.xyz/static/images/vtv/vtv1.png" group-title="Tin Tức",VTV1
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=cca908f736f54dfc90ec844fe123942c:9fea9e1b52e1e87a7d4c1dec0c46307f
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livesct.vtvprime.vn/Live_DASHDRM1/VTV1_HD/manifest.mpd
+https://toiyeuvietnam.dpdns.org/TuyetDoiKhongKinhDoanh/vtv1-hd/KenhCoBan.m3u8
 #EXTINF:-1 tvg-id="tv5monde.VN" tvg-name="TV5 - Việt Nam" tvg-chno="189" tvg-logo="https://freem3u.xyz/static/images/global/tv5monde.png" group-title="Tin Tức",TV5 - Việt Nam
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=mpd
@@ -335,26 +253,14 @@ https://livesct.vtvprime.vn/Live_DASHDRM1/VTV1_HD/manifest.mpd
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
 https://livebytsct.vtvprime.vn/mean/5V5/manifest.mpd
 #EXTINF:-1 tvg-id="france24eng.VN" tvg-name="France 24 - Việt Nam" tvg-chno="196" tvg-logo="https://freem3u.xyz/static/images/global/france24_fr.png" group-title="Tin Tức",France 24 - Việt Nam
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=a362f6885b1041f2b2e8282782e19e16:9e7f26762856474396e11bd3cfe4a778
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livebytsct.vtvprime.vn/mean/FRANCE24/manifest.mpd
+https://freem3u.xyz/api/live/play.m3u8?vid=96
 #EXTINF:-1 tvg-id="369813" tvg-name="CNBC SD - Việt Nam" tvg-chno="197" tvg-logo="https://freem3u.xyz/static/images/global/cnbc.png?t=1" group-title="Tin Tức",CNBC SD - Việt Nam
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=a362f6885b1041f2b2e8282782e19e16:9e7f26762856474396e11bd3cfe4a778
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livebytatm.vtvprime.vn/live/data8/CNBC/Live_DASHDRM/CNBC.mpd
+https://freem3u.xyz/api/live/play.m3u8?vid=9855
 #EXTINF:-1 tvg-id="dw.VN" tvg-name="DW - Deutsche Welle  - Việt Nam" tvg-chno="199" tvg-logo="https://freem3u.xyz/static/images/global/dw.png" group-title="Tin Tức",DW - Deutsche Welle  - Việt Nam
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=a362f6885b1041f2b2e8282782e19e16:9e7f26762856474396e11bd3cfe4a778
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livebytatm.vtvprime.vn/live/data8/DW/Live_DASHDRM/DW.mpd
+https://freem3u.xyz/api/live/play.m3u8?vid=109
 #EXTINF:-1 tvg-id="cnn" tvg-name="CNN - Tiếng Anh" tvg-chno="200" tvg-logo="https://freem3u.xyz/static/images/global/cnn.png" group-title="Tin Tức",CNN - Tiếng Anh
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
 https://turnerlive.warnermediacdn.com/hls/live/586495/cnngo/cnn_slate/VIDEO_3_1464000.m3u8
@@ -398,7 +304,7 @@ https://s7771.cdn.mytvnet.vn/pkg20/live_dzones/bbcearth.smil/manifest.mpd
 https://s935.cdn.mytvnet.vn/pkg20/live_dzones/aplus.smil/manifest.mpd
 #EXTINF:-1 tvg-id="bloomberg-tieng-anh" tvg-name="BLOOMBERG - Tiếng Anh" tvg-chno="306" tvg-logo="https://github.com/tv-logo/tv-logos/blob/main/countries/united-states/bloomberg-television-us.png?raw=true" group-title="Tin Tức",BLOOMBERG - Tiếng Anh
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://dai.google.com/linear/hls/pa/event/PwTJe4aZRvSBjbWY7_VSzA/stream/e78eac99-817c-4c2c-846b-a8b9ff145078:DLS/master.m3u8
+https://dai.google.com/linear/hls/pa/event/PwTJe4aZRvSBjbWY7_VSzA/stream/9dcdfde9-1bfe-4754-8779-61432180188b:ATL/master.m3u8
 #EXTINF:-1 tvg-id="cnn.VN" tvg-name="CNN - Việt Nam" tvg-chno="499" tvg-logo="https://freem3u.xyz/static/images/global/cnn.png" group-title="Tin Tức",CNN - Việt Nam
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=mpd
@@ -407,103 +313,50 @@ https://dai.google.com/linear/hls/pa/event/PwTJe4aZRvSBjbWY7_VSzA/stream/e78eac9
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
 https://s7771.cdn.mytvnet.vn/pkg20/live_dzones/cnn.smil/manifest.mpd
 #EXTINF:-1 tvg-id="vtv1hd.VN" tvg-name="VTV1" tvg-chno="1" tvg-logo="https://freem3u.xyz/static/images/vtv/vtv1.png" group-title="VTV",VTV1
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=cca908f736f54dfc90ec844fe123942c:9fea9e1b52e1e87a7d4c1dec0c46307f
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livesct.vtvprime.vn/Live_DASHDRM1/VTV1_HD/manifest.mpd
+https://toiyeuvietnam.dpdns.org/TuyetDoiKhongKinhDoanh/vtv1-hd/KenhCoBan.m3u8
 #EXTINF:-1 tvg-id="vtv2hd.VN" tvg-name="VTV2" tvg-chno="2" tvg-logo="https://freem3u.xyz/static/images/vtv/vtv2.png" group-title="VTV",VTV2
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=a7c942778e874d43be92b8d0a0cd11b4:6d54358306571658ffdb952c6560688b
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livesct.vtvprime.vn/Live_DASHDRM1/VTV2_HD/manifest.mpd
+https://toiyeuvietnam.dpdns.org/TuyetDoiKhongKinhDoanh/vtv2-hd/KenhCoBan.m3u8
 #EXTINF:-1 tvg-id="vtv3hd.VN" tvg-name="VTV3" tvg-chno="3" tvg-logo="https://freem3u.xyz/static/images/vtv/vtv3.png" group-title="VTV",VTV3
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=d8099c6c4ebc4ab88ce6f694f912e26d:ec57977de110995b8fc5d42e4ffdbcc9
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livebytatm.vtvprime.vn/live/data8/VTV3_HD/Live_DASHDRM/VTV3_HD.mpd
+https://toiyeuvietnam.dpdns.org/TuyetDoiKhongKinhDoanh/vtv3-hd/KenhCoBan.m3u8
 #EXTINF:-1 tvg-id="vtv4hd.VN" tvg-name="VTV4" tvg-chno="4" tvg-logo="https://freem3u.xyz/static/images/vtv/vtv4.png" group-title="VTV",VTV4
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=a7c942778e874d43be92b8d0a0cd11b4:6d54358306571658ffdb952c6560688b
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livesct.vtvprime.vn/Live_DASHDRM1/VTV4_HD/manifest.mpd
+https://toiyeuvietnam.dpdns.org/TuyetDoiKhongKinhDoanh/vtv4-hd/KenhCoBan.m3u8
 #EXTINF:-1 tvg-id="vtv5hd.VN" tvg-name="VTV5" tvg-chno="5" tvg-logo="https://freem3u.xyz/static/images/vtv/vtv5.png" group-title="VTV",VTV5
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=a7c942778e874d43be92b8d0a0cd11b4:6d54358306571658ffdb952c6560688b
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livesct.vtvprime.vn/Live_DASHDRM1/VTV5_HD/manifest.mpd
+https://toiyeuvietnam.dpdns.org/TuyetDoiKhongKinhDoanh/vtv5-hd/KenhCoBan.m3u8
 #EXTINF:-1 tvg-id="vtv5hdtnb.VN" tvg-name="VTV5 Tây Nam Bộ" tvg-chno="6" tvg-logo="https://freem3u.xyz/static/images/vtv/vtv5_tnb.png" group-title="VTV",VTV5 Tây Nam Bộ
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=6e3b28cfcb3b4eb8b993c67e93ff9b43:a320388a40b54ff788c846043c50083f
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livesct.vtvprime.vn/Live_DASHDRM1/VTV5_TNB/manifest.mpd
+https://toiyeuvietnam.dpdns.org/TuyetDoiKhongKinhDoanh/vtv5-tay-nam-bo/KenhCoBan.m3u8
 #EXTINF:-1 tvg-id="vtv5hdtn.VN" tvg-name="VTV5 Tây Nguyên" tvg-chno="7" tvg-logo="https://freem3u.xyz/static/images/vtv/vtv5_tn.png" group-title="VTV",VTV5 Tây Nguyên
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=ea293eba54ad4ca0b028576afcee88c2:18ac6a360d0e48979d4b6c612f04b31f
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livesct.vtvprime.vn/Live_DASHDRM1/VTV5_TN/manifest.mpd
+https://toiyeuvietnam.dpdns.org/TuyetDoiKhongKinhDoanh/vtv5-tay-nguyen/KenhCoBan.m3u8
 #EXTINF:-1 tvg-id="vtvcantho.VN" tvg-name="VTV10" tvg-chno="8" tvg-logo="https://freem3u.xyz/static/images/vtv/vtv10.png" group-title="VTV",VTV10
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=d8099c6c4ebc4ab88ce6f694f912e26d:ec57977de110995b8fc5d42e4ffdbcc9
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livezenatm.vtvprime.vn/live/data8/VTV6_HD/Live_DASHDRM/VTV6_HD.mpd
+https://toiyeuvietnam.dpdns.org/TuyetDoiKhongKinhDoanh/vtv-can-tho/KenhCoBan.m3u8
 #EXTINF:-1 tvg-id="vtv7hd.VN" tvg-name="VTV7" tvg-chno="9" tvg-logo="https://freem3u.xyz/static/images/vtv/vtv7.png" group-title="VTV",VTV7
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=d8099c6c4ebc4ab88ce6f694f912e26d:ec57977de110995b8fc5d42e4ffdbcc9
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livezenatm.vtvprime.vn/live/data8/VTV7_HD/Live_DASHDRM/VTV7_HD.mpd
+https://toiyeuvietnam.dpdns.org/TuyetDoiKhongKinhDoanh/vtv7-hd/KenhCoBan.m3u8
 #EXTINF:-1 tvg-id="vtv8hd.VN" tvg-name="VTV8" tvg-chno="10" tvg-logo="https://freem3u.xyz/static/images/vtv/vtv8.png" group-title="VTV",VTV8
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=73a685e226374dc7b756a12c270744b5:95504c377fb04cab81ba5e955f4ae189
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livesct.vtvprime.vn/Live_DASHDRM1/VTV8_HD/manifest.mpd
+https://toiyeuvietnam.dpdns.org/TuyetDoiKhongKinhDoanh/vtv8-hd/KenhCoBan.m3u8
 #EXTINF:-1 tvg-id="vtv9hd.VN" tvg-name="VTV9" tvg-chno="11" tvg-logo="https://freem3u.xyz/static/images/vtv/vtv9.png" group-title="VTV",VTV9
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=d8099c6c4ebc4ab88ce6f694f912e26d:ec57977de110995b8fc5d42e4ffdbcc9
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livezenatm.vtvprime.vn/live/data8/VTV9_HD/Live_DASHDRM/VTV9_HD.mpd
+https://toiyeuvietnam.dpdns.org/TuyetDoiKhongKinhDoanh/vtv9-hd/KenhCoBan.m3u8
 #EXTINF:-1 tvg-id="vtv6hd.VN" tvg-name="VTV6" tvg-chno="34" tvg-logo="https://freem3u.xyz/static/images/vtv/vtv6_new_2.png" group-title="VTV",VTV6
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=d8099c6c4ebc4ab88ce6f694f912e26d:ec57977de110995b8fc5d42e4ffdbcc9
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livebytatm.vtvprime.vn/live/data8/VTV6/Live_DASHDRM/VTV6.mpd
+https://freem3u.xyz/api/live/play.m3u8?vid=10043
 #EXTINF:-1 tvg-id="vietnamtoday.VN" tvg-name="VietNam Today" tvg-chno="81" tvg-logo="https://freem3u.xyz/static/images/vtv/vietnam_today.png" group-title="VTV",VietNam Today
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
 https://freem3u.xyz/api/live/play.m3u8?vid=9951
 #EXTINF:-1 tvg-id="onviegiaitri.VN" tvg-name="VTVCab 1 - ON Vie Giải Trí" tvg-chno="12" tvg-logo="https://freem3u.xyz/static/images/vtvcab/vtvcab1.png" group-title="VTVCab",VTVCab 1 - ON Vie Giải Trí
-#EXTVLCOPT:http-referrer=https://vieon.vn/
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livecdn-global-vnd.vieon.vn/htv_drm/live_event/trailer_vieon_tvc/playlist.m3u8
+https://freem3u.xyz/api/live/play.m3u8?vid=180
 #EXTINF:-1 tvg-id="onphimviet.VN" tvg-name="VTVCab 2 - ON Phim Việt" tvg-chno="13" tvg-logo="https://freem3u.xyz/static/images/vtvcab/vtvcab2.png" group-title="VTVCab",VTVCab 2 - ON Phim Việt
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=7417db88928243fda4e03596bbd19a27:eebb689de1191ae1b207d32f0d5ca9fe
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livevlisctcdnw.seenow.vn/livesnv2/PHIM_VIET/manifest.mpd
+https://freem3u.xyz/api/live/play.m3u8?vid=175
 #EXTINF:-1 tvg-id="onsports.VN" tvg-name="VTVCab 3 - ON Sports HD" tvg-chno="14" tvg-logo="https://freem3u.xyz/static/images/vtvcab/vtvcab3.png" group-title="VTVCab",VTVCab 3 - ON Sports HD
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=mpd
@@ -512,19 +365,11 @@ https://livevlisctcdnw.seenow.vn/livesnv2/PHIM_VIET/manifest.mpd
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
 https://livezenatm.vtvprime.vn/live/data8/THETHAO_HD/Live_DASHDRM/THETHAO_HD.mpd
 #EXTINF:-1 tvg-id="onmovies.VN" tvg-name="VTVCab 4 - ON Movies" tvg-chno="15" tvg-logo="https://freem3u.xyz/static/images/vtvcab/vtvcab4.png" group-title="VTVCab",VTVCab 4 - ON Movies
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=2f571f6db60340e8a3cc3a5395d21611:553752778fe0d3ea79d434bf5f867f26
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livevlisctcdnw.seenow.vn/livesnv2/VAN_HOA/manifest.mpd
+https://freem3u.xyz/api/live/play.m3u8?vid=181
 #EXTINF:-1 tvg-id="onechannel.VN" tvg-name="VTVCab 5 - ON E Channel" tvg-chno="16" tvg-logo="https://freem3u.xyz/static/images/vtvcab/vtvcab5.png" group-title="VTVCab",VTVCab 5 - ON E Channel
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=04c8d53c9d4f48a78efdfd74888ffc38:8dfc9ea0293e3b94e5f44b8d9f2fac9f
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livevlisctcdnw.seenow.vn/livesnv2/E_CHANNEL/manifest.mpd
+https://freem3u.xyz/api/live/play.m3u8?vid=182
 #EXTINF:-1 tvg-id="onsportsplus.VN" tvg-name="VTVCab 6 - ON Sports+" tvg-chno="17" tvg-logo="https://freem3u.xyz/static/images/vtvcab/vtvcab6.png" group-title="VTVCab",VTVCab 6 - ON Sports+
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=mpd
@@ -533,40 +378,20 @@ https://livevlisctcdnw.seenow.vn/livesnv2/E_CHANNEL/manifest.mpd
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
 https://livevlisctcdnw.seenow.vn/livesnv2/HAY_TV/manifest.mpd
 #EXTINF:-1 tvg-id="ono2tv.VN" tvg-name="VTVCab 7 - ON O2TV" tvg-chno="18" tvg-logo="https://freem3u.xyz/static/images/vtvcab/vtvcab7.png" group-title="VTVCab",VTVCab 7 - ON O2TV
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=1b5a915f267e417085e0f68200395a41:5544d7c1e523a53d404ab2823132ee7e
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livevlisctcdnw.seenow.vn/livesnv2/O2_TV/manifest.mpd
+https://freem3u.xyz/api/live/play.m3u8?vid=136
 #EXTINF:-1 tvg-id="onbibi.VN" tvg-name="VTVCab 8 - ON BiBi" tvg-chno="19" tvg-logo="https://freem3u.xyz/static/images/vtvcab/vtvcab8.png" group-title="VTVCab",VTVCab 8 - ON BiBi
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=4196ec8c5fca4f1cb50e8f2668c63b10:a52178cddaf1b8726aadf6fa697b5bf4
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livevlisctcdnw.seenow.vn/livesnv2/BIBI/manifest.mpd
+https://freem3u.xyz/api/live/play.m3u8?vid=178
 #EXTINF:-1 tvg-id="oninfotv.VN" tvg-name="VTVCab 9 - ON Info TV" tvg-chno="20" tvg-logo="https://freem3u.xyz/static/images/vtvcab/vtvcab9.png" group-title="VTVCab",VTVCab 9 - ON Info TV
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=39425f1a9f7f4db985b5e7b2e65e4208:63e3aad2bc5bed77e59724ba8d2e94f0
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livevlisctcdnw.seenow.vn/livesnv2/INFO_TV/manifest.mpd
+https://freem3u.xyz/api/live/play.m3u8?vid=189
 #EXTINF:-1 tvg-id="oncine.VN" tvg-name="VTVCab 10 - ON Cine" tvg-chno="21" tvg-logo="https://freem3u.xyz/static/images/vtvcab/vtvcab10.png" group-title="VTVCab",VTVCab 10 - ON Cine
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=0aad542fff274b2685264603b5075632:7555eb438217938dbb48665863b46fa1
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livevlisctcdnw.seenow.vn/mean/FILM_TV/manifest.mpd
+https://freem3u.xyz/api/live/play.m3u8?vid=176
 #EXTINF:-1 tvg-id="onstyle.VN" tvg-name="VTVCab 12 - ON Style TV" tvg-chno="22" tvg-logo="https://freem3u.xyz/static/images/vtvcab/vtvcab12.png" group-title="VTVCab",VTVCab 12 - ON Style TV
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=414a288afe3d4f3985407d9613ec21eb:31d12c6d561e208f4c79b4a6c280dd5b
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livevlisctcdnw.seenow.vn/livesnv2/STYLE_TV_HD/manifest.mpd
+https://freem3u.xyz/api/live/play.m3u8?vid=184
 #EXTINF:-1 tvg-id="onhomeshopping.VN" tvg-name="VTVcab13 - On Homeshopping" tvg-chno="23" tvg-logo="https://freem3u.xyz/static/images/vtvcab/vtvcab13.png" group-title="VTVCab",VTVcab13 - On Homeshopping
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=mpd
@@ -575,12 +400,8 @@ https://livevlisctcdnw.seenow.vn/livesnv2/STYLE_TV_HD/manifest.mpd
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
 https://livevlisctcdnw.seenow.vn/mean/VTVCAB13/manifest.mpd
 #EXTINF:-1 tvg-id="onmusic.VN" tvg-name="VTVCab 15 - ON Music" tvg-chno="24" tvg-logo="https://freem3u.xyz/static/images/vtvcab/vtvcab15.png" group-title="VTVCab",VTVCab 15 - ON Music
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=e518bbb7e8614a7da4d8d974d62486da:b509751f1fa3c676f482cde476670dd6
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livevlisctcdnw.seenow.vn/livesnv2/M_CHANNEL/manifest.mpd
+https://freem3u.xyz/api/live/play.m3u8?vid=185
 #EXTINF:-1 tvg-id="onfootball.VN" tvg-name="VTVCab 16 - ON Football HD" tvg-chno="25" tvg-logo="https://freem3u.xyz/static/images/vtvcab/vtvcab16.png" group-title="VTVCab",VTVCab 16 - ON Football HD
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=mpd
@@ -589,12 +410,8 @@ https://livevlisctcdnw.seenow.vn/livesnv2/M_CHANNEL/manifest.mpd
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
 https://livevliatmcdw.seenow.vn/live/data8/BONGDA_HD/Live_DASHDRM/BONGDA_HD.mpd
 #EXTINF:-1 tvg-id="ontrending.VN" tvg-name="VTVCab 17 - ON Trending TV" tvg-chno="26" tvg-logo="https://freem3u.xyz/static/images/vtvcab/vtvcab17.png" group-title="VTVCab",VTVCab 17 - ON Trending TV
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=765c826c381e4d58849784bb206c8e90:2970317ebf86d70fa11434eab4c59c5d
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livevlisctcdnw.seenow.vn/livesnv2/YEAH1_TV/manifest.mpd
+https://freem3u.xyz/api/live/play.m3u8?vid=186
 #EXTINF:-1 tvg-id="onsportsnews.VN" tvg-name="VTVCab 18 - ON Sports News" tvg-chno="27" tvg-logo="https://freem3u.xyz/static/images/vtvcab/vtvcab18.png" group-title="VTVCab",VTVCab 18 - ON Sports News
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=mpd
@@ -603,30 +420,17 @@ https://livevlisctcdnw.seenow.vn/livesnv2/YEAH1_TV/manifest.mpd
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
 https://livevlisctcdnw.seenow.vn/mean/THETHAO_TINTUC_HD/manifest.mpd
 #EXTINF:-1 tvg-id="onviedramas.VN" tvg-name="VTVCab 19 - ON Vie DRAMAS" tvg-chno="28" tvg-logo="https://freem3u.xyz/static/images/vtvcab/vtvcab19.png" group-title="VTVCab",VTVCab 19 - ON Vie DRAMAS
-#EXTVLCOPT:http-referrer=https://vieon.vn/
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livecdn-global-vnd.vieon.vn/htv_drm/live_event/trailer_vieon_tvc/playlist.m3u8
+https://freem3u.xyz/api/live/play.m3u8?vid=177
 #EXTINF:-1 tvg-id="onvfamily.VN" tvg-name="VTVCab 20 - ON VFamily" tvg-chno="29" tvg-logo="https://freem3u.xyz/static/images/vtvcab/vtvcab20.png" group-title="VTVCab",VTVCab 20 - ON VFamily
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=c01b22c5f5b44d72b9902b33a4c36fb7:8fe81a99e5b1cc891bb9e9f848b6e2e7
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livevlisctcdnw.seenow.vn/livesnv2/VFAMILY/manifest.mpd
+https://freem3u.xyz/api/live/play.m3u8?vid=187
 #EXTINF:-1 tvg-id="onkids.VN" tvg-name="VTVcab 21 - On Kids HD" tvg-chno="30" tvg-logo="https://freem3u.xyz/static/images/vtvcab/vtvcab21.png" group-title="VTVCab",VTVcab 21 - On Kids HD
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=c07669233e07416594577b29d60372a6:e8cfcf678750f494312dfcbdaee5132e
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livevlisctcdnw.seenow.vn/livesnv2/BIBI_PLUS_clear/manifest.mpd
+https://freem3u.xyz/api/live/play.m3u8?vid=179
 #EXTINF:-1 tvg-id="onlife.VN" tvg-name="VTVcab 22 - Life TV HD" tvg-chno="31" tvg-logo="https://freem3u.xyz/static/images/vtvcab/vtvcab22.png" group-title="VTVCab",VTVcab 22 - Life TV HD
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=ca9c781a5ba142f2b03a8028fcecb847:c69c101846413ae8faa8d353c7979121
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livevlisctcdnw.seenow.vn/livesnv2/LIFE_TV/manifest.mpd
+https://freem3u.xyz/api/live/play.m3u8?vid=188
 #EXTINF:-1 tvg-id="ongolf.VN" tvg-name="VTVcab 23 - Golf Channel" tvg-chno="32" tvg-logo="https://freem3u.xyz/static/images/vtvcab/vtvcab23.png" group-title="VTVCab",VTVcab 23 - Golf Channel
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=mpd
@@ -642,12 +446,8 @@ https://livevlisctcdnw.seenow.vn/mean/THETHAO_GOLF_HD/manifest.mpd
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
 https://liveatmvng.vtvprime.vn/live/data8/SCTV1/Live_DASHDRM/SCTV1.mpd
 #EXTINF:-1 tvg-id="sctv2hd.VN" tvg-name="SCTV2" tvg-chno="52" tvg-logo="https://freem3u.xyz/static/images/sctv/sctv2.png" group-title="SCTV",SCTV2
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=9121ebe293bc46cd89e5d83a78c1a53c:9285615a491a424fb025f9e8d571bcd5
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://liveatmvng.vtvprime.vn/live/data8/SCTV2/Live_DASHDRM/SCTV2.mpd
+https://freem3u.xyz/api/live/play.m3u8?vid=201
 #EXTINF:-1 tvg-id="sctv3hd.VN" tvg-name="SCTV3" tvg-chno="53" tvg-logo="https://freem3u.xyz/static/images/sctv/sctv3.png" group-title="SCTV",SCTV3
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=mpd
@@ -666,12 +466,8 @@ https://liveatmvng.vtvprime.vn/live/data8/SCTV4/Live_DASHDRM/SCTV4.mpd
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
 https://liveh12byt.vtvprime.vn/hls/SCTV5/index.m3u8
 #EXTINF:-1 tvg-id="sctv6hd.VN" tvg-name="SCTV6" tvg-chno="56" tvg-logo="https://freem3u.xyz/static/images/sctv/sctv6.png" group-title="SCTV",SCTV6
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=9121ebe293bc46cd89e5d83a78c1a53c:9285615a491a424fb025f9e8d571bcd5
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://liveatmvng.vtvprime.vn/live/data8/SCTV6/Live_DASHDRM/SCTV6.mpd
+https://freem3u.xyz/api/live/play.m3u8?vid=232
 #EXTINF:-1 tvg-id="sctv7hd.VN" tvg-name="SCTV7" tvg-chno="57" tvg-logo="https://freem3u.xyz/static/images/sctv/sctv7.png" group-title="SCTV",SCTV7
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=mpd
@@ -788,90 +584,48 @@ https://liveatmvng.vtvprime.vn/live/data8/SCTV22/Live_DASHDRM/SCTV22.mpd
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
 https://liveatmvng.vtvprime.vn/live/data8/SCTVPHIM/Live_DASHDRM/SCTVPHIM.mpd
 #EXTINF:-1 tvg-id="htv1.VN" tvg-name="HTV1" tvg-chno="37" tvg-logo="https://freem3u.xyz/static/images/hplus/htv1.png" group-title="HTV - TP.HCM",HTV1
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=7b4db62fb5424a6eb2908842a8292775:e37c493320374e4aa42679bffb85c742
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livebytatm.vtvprime.vn/live/data8/HTV1/Live_DASHDRM/HTV1.mpd
+https://freem3u.xyz/api/live/play.m3u8?vid=190
 #EXTINF:-1 tvg-id="htv2hd.VN" tvg-name="HTV2" tvg-chno="38" tvg-logo="https://freem3u.xyz/static/images/hplus/htv2.png" group-title="HTV - TP.HCM",HTV2
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=7b4db62fb5424a6eb2908842a8292775:e37c493320374e4aa42679bffb85c742
+#EXTVLCOPT:http-referrer=https://vieon.vn/
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livebytatm.vtvprime.vn/live/data8/HTV2/Live_DASHDRM/HTV2.mpd
+https://livecdn-global-vnd.vieon.vn/htv_drm/live_event/trailer_vieon_tvc/playlist.m3u8
 #EXTINF:-1 tvg-id="htv3.VN" tvg-name="HTV3" tvg-chno="39" tvg-logo="https://freem3u.xyz/static/images/hplus/htv3.png" group-title="HTV - TP.HCM",HTV3
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=7b4db62fb5424a6eb2908842a8292775:e37c493320374e4aa42679bffb85c742
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livebytatm.vtvprime.vn/live/data8/HTV3/Live_DASHDRM/HTV3.mpd
+https://freem3u.xyz/api/live/play.m3u8?vid=192
 #EXTINF:-1 tvg-id="htvkey.VN" tvg-name="HTV4" tvg-chno="40" tvg-logo="https://freem3u.xyz/static/images/hplus/htv4.png" group-title="HTV - TP.HCM",HTV4
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=7b4db62fb5424a6eb2908842a8292775:e37c493320374e4aa42679bffb85c742
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livebytatm.vtvprime.vn/live/data8/HTVKey/Live_DASHDRM/HTVKey.mpd
+https://freem3u.xyz/api/live/play.m3u8?vid=9
 #EXTINF:-1 tvg-id="htv7hd.VN" tvg-name="HTV7" tvg-chno="41" tvg-logo="https://freem3u.xyz/static/images/hplus/htv7.png" group-title="HTV - TP.HCM",HTV7
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=7b4db62fb5424a6eb2908842a8292775:e37c493320374e4aa42679bffb85c742
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livebytatm.vtvprime.vn/live/data8/HTV7HD/Live_DASHDRM/HTV7HD.mpd
+https://freem3u.xyz/api/live/play.m3u8?vid=193
 #EXTINF:-1 tvg-id="htv9hd.VN" tvg-name="HTV9" tvg-chno="42" tvg-logo="https://freem3u.xyz/static/images/hplus/htv9.png" group-title="HTV - TP.HCM",HTV9
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=7b4db62fb5424a6eb2908842a8292775:e37c493320374e4aa42679bffb85c742
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livebytatm.vtvprime.vn/live/data8/HTV9/Live_DASHDRM/HTV9.mpd
+https://freem3u.xyz/api/live/play.m3u8?vid=194
 #EXTINF:-1 tvg-id="htvthethaohd.VN" tvg-name="HTV Thể Thao" tvg-chno="43" tvg-logo="https://freem3u.xyz/static/images/hplus/htvthethao.png" group-title="HTV - TP.HCM",HTV Thể Thao
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
 https://freem3u.xyz/api/live/play.m3u8?vid=195
 #EXTINF:-1 tvg-id="htvccanhachd.VN" tvg-name="HTVC Ca Nhạc" tvg-chno="44" tvg-logo="https://freem3u.xyz/static/images/hplus/htvccanhac.png" group-title="HTV - TP.HCM",HTVC Ca Nhạc
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=a7c942778e874d43be92b8d0a0cd11b4:6d54358306571658ffdb952c6560688b
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livebytatm.vtvprime.vn/live/data8/HTVCCANHAC/Live_DASHDRM/HTVCCANHAC.mpd
+https://freem3u.xyz/api/live/play.m3u8?vid=14
 #EXTINF:-1 tvg-id="htvcdulichhd.VN" tvg-name="HTVC Du Lịch và Cuộc Sống" tvg-chno="45" tvg-logo="https://freem3u.xyz/static/images/hplus/htvcdulich.png" group-title="HTV - TP.HCM",HTVC Du Lịch và Cuộc Sống
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=a7c942778e874d43be92b8d0a0cd11b4:6d54358306571658ffdb952c6560688b
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livebytatm.vtvprime.vn/live/data8/HTVCDLCS/Live_DASHDRM/HTVCDLCS.mpd
+https://freem3u.xyz/api/live/play.m3u8?vid=133
 #EXTINF:-1 tvg-id="htvcgiadinhhd.VN" tvg-name="HTVC Gia Đình" tvg-chno="46" tvg-logo="https://freem3u.xyz/static/images/hplus/htvcgiadinh.png" group-title="HTV - TP.HCM",HTVC Gia Đình
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=a7c942778e874d43be92b8d0a0cd11b4:6d54358306571658ffdb952c6560688b
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livebytatm.vtvprime.vn/live/data8/HTVCGIADINH/Live_DASHDRM/HTVCGIADINH.mpd
+https://freem3u.xyz/api/live/play.m3u8?vid=11
 #EXTINF:-1 tvg-id="htvcphimhd.VN" tvg-name="HTVC Phim" tvg-chno="47" tvg-logo="https://freem3u.xyz/static/images/hplus/htvcphim.png" group-title="HTV - TP.HCM",HTVC Phim
-#EXTVLCOPT:http-referrer=https://vieon.vn/
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livecdn-global-vnd.vieon.vn/htv_drm/live_event/trailer_vieon_tvc/playlist.m3u8
+https://freem3u.xyz/api/live/play.m3u8?vid=15
 #EXTINF:-1 tvg-id="htvcphunuhd.VN" tvg-name="HTVC Phụ Nữ" tvg-chno="48" tvg-logo="https://freem3u.xyz/static/images/hplus/htvcphunu.png" group-title="HTV - TP.HCM",HTVC Phụ Nữ
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=a7c942778e874d43be92b8d0a0cd11b4:6d54358306571658ffdb952c6560688b
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livebytatm.vtvprime.vn/live/data8/HTVPHUNU/Live_DASHDRM/HTVPHUNU.mpd
+https://freem3u.xyz/api/live/play.m3u8?vid=12
 #EXTINF:-1 tvg-id="htvcthuanviethd.VN" tvg-name="HTVC Thuần Việt" tvg-chno="49" tvg-logo="https://freem3u.xyz/static/images/hplus/htvcthuanviet.png" group-title="HTV - TP.HCM",HTVC Thuần Việt
-#EXTVLCOPT:http-referrer=https://vieon.vn/
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livecdn-global-vnd.vieon.vn/htv_drm/live_event/trailer_vieon_tvc/playlist.m3u8
+https://freem3u.xyz/api/live/play.m3u8?vid=190
 #EXTINF:-1 tvg-id="htvcplushd.VN" tvg-name="HTVC+" tvg-chno="50" tvg-logo="https://freem3u.xyz/static/images/hplus/htvcplus.png" group-title="HTV - TP.HCM",HTVC+
-#EXTVLCOPT:http-referrer=https://vieon.vn/
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livecdn-global-vnd.vieon.vn/htv_drm/live_event/trailer_vieon_tvc/playlist.m3u8
+https://freem3u.xyz/api/live/play.m3u8?vid=132
 #EXTINF:-1 tvg-id="anvienhd.VN" tvg-name="HTV5 | BChannel" tvg-chno="88" tvg-logo="https://freem3u.xyz/static/images/hplus/htv5.png" group-title="HTV - TP.HCM",HTV5 | BChannel
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
 https://fo-hlc.tv360.vn/bpk-tv/246/output/index.m3u8?auth=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJtZXRob2QiOiJHRVQiLCJleHAiOjE3OTE0NDE4MTksInVyaSI6Ii9icGstdHYvMjQ2L291dHB1dC9pbmRleC5tM3U4In0.ci6s5gjgdt4JGr2JPJx_o9XzD21OT2-AGw6enu82T8M&minrate=0&maxrate=12000000&uid=64230292
@@ -880,7 +634,7 @@ https://fo-hlc.tv360.vn/bpk-tv/246/output/index.m3u8?auth=eyJhbGciOiJIUzI1NiIsIn
 https://freem3u.xyz/api/live/play.m3u8?vid=25
 #EXTINF:-1 tvg-id="thvl2hd.VN" tvg-name="THVL2 | TH Vĩnh Long" tvg-chno="77" tvg-logo="https://freem3u.xyz/static/images/diaphuong/vinhlong2.png" group-title="THVL",THVL2 | TH Vĩnh Long
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://live.thvli.vn/thvl2/playlist.m3u8?app=141214&sig=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2ZXIiOjIsInVpZCI6IjMzZDcxNzI5LTMyOWYtNDA2OS1hOTBjLTFmZWJlNjE1ZDA0OCIsImFwcCI6MTQxMjE0LCJkZXYiOiJNb3ppbGxhLzUuMCAoTGludXg7IEFuZHJvaWQgMTU7IFNNLVM5MThCIEJ1aWxkL0FQM0EuMjQwOTA1LjAxNS5BMjsgd3YpIEFwcGxlV2ViS2l0LzUzNy4zNiAoS0hUTUwsIGxpa2UgR2Vja28pIFZlcnNpb24vNC4wIENocm9tZS8xMzUuMC43MDQ5LjExMSBNb2JpbGUgU2FmYXJpLzUzNy4zNiB2QXBwVFYvMS4wLjIiLCJjaXAiOiI0Mi4xMTIuNDYuNTMiLCJwbGEiOiJ3ZWIiLCJpYXQiOjE3OTE0MjUwMDl9.i6PQNbUESmI4GhZvDL00et6DykYWt5cVLD8adFSr1WQ
+http://freem3u.xyz/api/live/play.m3u8?vid=26
 #EXTINF:-1 tvg-id="thvl3hd.VN" tvg-name="THVL3 | TH Vĩnh Long" tvg-chno="78" tvg-logo="https://freem3u.xyz/static/images/diaphuong/vinhlong3.png" group-title="THVL",THVL3 | TH Vĩnh Long
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
 https://freem3u.xyz/api/live/play.m3u8?vid=219
@@ -892,7 +646,7 @@ https://freem3u.xyz/api/live/play.m3u8?vid=220
 https://freem3u.xyz/api/live/play.m3u8?vid=91
 #EXTINF:-1 tvg-id="vinhlong.FM90_2.VN" tvg-name="VINH LONG (FM90.2MHz)" tvg-chno="278" tvg-logo="https://freem3u.xyz/static/images/radio/vinhlong.png" group-title="THVL",VINH LONG (FM90.2MHz)
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://catchup.thvli.vn/-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImY4ZWY3NGJhLWI1NGMtNDMzMS04M2U1LWVhZmVhMzYyY2JiNSIsImV4cCI6MTc5MTQ0NjIxNSwidXJpIjoiL3JhZGlvIiwiaWF0IjoxNzkxNDI0NjE1fQ.6wKpw-Gx1O6IeXPjJ78Qck1b1Fgqz6LmI8-EKm9k-jk-/radio/playlist.m3u8
+https://catchup.thvli.vn/-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImVkMzFjOTUzLTU2NDMtNDVhYi1hYzRiLWJjOWE1OTAyM2RhMyIsImV4cCI6MTc5MTQ0Njg1MiwidXJpIjoiL3JhZGlvIiwiaWF0IjoxNzkxNDI1MjUyfQ.OlgBUMia6d5nseCBw2jHc0OF-haeTNsGuWuyeyw3fKk-/radio/playlist.m3u8
 #EXTINF:-1 tvg-id="cgtn" tvg-name="CGTN - China Global Television Network" tvg-chno="106" tvg-logo="https://freem3u.xyz/static/images/china/CGTN.png" group-title="Quốc Tế",CGTN - China Global Television Network
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
 https://english-livebkali.cgtn.com/live/encgtn_0.m3u8
@@ -913,26 +667,14 @@ https://russian-livews.cgtn.com/hls/LSvexABhNipibK5KRuUkvHZ7220802LSTeze9o8tdFXM
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
 https://s2129134.cdn.mytvnet.vn/pkg20/live_dzones/boomerang.smil/manifest.mpd
 #EXTINF:-1 tvg-id="hollywoodclassics.VN" tvg-name="Hollywood Classic - Việt Nam" tvg-chno="168" tvg-logo="https://freem3u.xyz/static/images/global/hollywood_classic.png" group-title="Quốc Tế",Hollywood Classic - Việt Nam
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=a362f6885b1041f2b2e8282782e19e16:9e7f26762856474396e11bd3cfe4a778
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livebytatm.vtvprime.vn/live/data8/HISTORY/Live_DASHDRM/HISTORY.mpd
+https://toiyeuvietnam.dpdns.org/TuyetDoiKhongKinhDoanh/hollywood-classic-hd/KenhCoBan.m3u8
 #EXTINF:-1 tvg-id="kix.VN" tvg-name="Kix - Việt Nam" tvg-chno="170" tvg-logo="https://freem3u.xyz/static/images/global/kix.png" group-title="Quốc Tế",Kix - Việt Nam
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=a362f6885b1041f2b2e8282782e19e16:9e7f26762856474396e11bd3cfe4a778
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livebytatm.vtvprime.vn/live/data8/KIX/Live_DASHDRM/KIX.mpd
+https://freem3u.xyz/api/live/play.m3u8?vid=9901
 #EXTINF:-1 tvg-id="happykids.VN" tvg-name="Happy Kids HD - Việt Nam" tvg-chno="171" tvg-logo="https://freem3u.xyz/static/images/global/happykid.png" group-title="Quốc Tế",Happy Kids HD - Việt Nam
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=a7c942778e874d43be92b8d0a0cd11b4:6d54358306571658ffdb952c6560688b
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livevlisctcdnw.seenow.vn/livesnv2/HK/manifest.mpd
+https://toiyeuvietnam.dpdns.org/TuyetDoiKhongKinhDoanh/happy-kids-hd/KenhCoBan.m3u8
 #EXTINF:-1 tvg-id="woman.VN" tvg-name="Woman HD - Việt Nam" tvg-chno="172" tvg-logo="https://freem3u.xyz/static/images/global/woman.png" group-title="Quốc Tế",Woman HD - Việt Nam
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=mpd
@@ -976,26 +718,14 @@ https://s2129134.cdn.mytvnet.vn/pkg20/live_dzones/dmax.smil/manifest.mpd
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
 https://s2129134.cdn.mytvnet.vn/pkg20/live_dzones/dreamwork.smil/manifest.mpd
 #EXTINF:-1 tvg-id="boxmusic.VN" tvg-name="Box Music - Việt Nam" tvg-chno="186" tvg-logo="https://freem3u.xyz/static/images/global/music_box.png" group-title="Quốc Tế",Box Music - Việt Nam
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=2942ed303e0d40c9b99c94c587bbf509:96cda24109734fb7920d799d58d1a9ae
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livesct.vtvprime.vn/Live_DASHDRM1/MUSICBOX/manifest.mpd
+https://toiyeuvietnam.dpdns.org/TuyetDoiKhongKinhDoanh/music-box/KenhCoBan.m3u8
 #EXTINF:-1 tvg-id="outdoorhd.VN" tvg-name="Outdoor HD - Việt Nam" tvg-chno="187" tvg-logo="https://freem3u.xyz/static/images/global/outdoor.png" group-title="Quốc Tế",Outdoor HD - Việt Nam
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=a7c942778e874d43be92b8d0a0cd11b4:6d54358306571658ffdb952c6560688b
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livevlisctcdnw.seenow.vn/mean/OUTDOORCHANNEL/manifest.mpd
+https://freem3u.xyz/api/live/play.m3u8?vid=216
 #EXTINF:-1 tvg-id="cna.VN" tvg-name="Channel News Asia - Việt Nam" tvg-chno="188" tvg-logo="https://freem3u.xyz/static/images/global/cna.png" group-title="Quốc Tế",Channel News Asia - Việt Nam
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=a362f6885b1041f2b2e8282782e19e16:9e7f26762856474396e11bd3cfe4a778
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livebytatm.vtvprime.vn/live/data8/CAN/Live_DASHDRM/CAN.mpd
+https://freem3u.xyz/api/live/play.m3u8?vid=112
 #EXTINF:-1 tvg-id="tv5monde.VN" tvg-name="TV5 - Việt Nam" tvg-chno="189" tvg-logo="https://freem3u.xyz/static/images/global/tv5monde.png" group-title="Quốc Tế",TV5 - Việt Nam
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=mpd
@@ -1011,61 +741,29 @@ https://livebytsct.vtvprime.vn/mean/5V5/manifest.mpd
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
 https://s2129134.cdn.mytvnet.vn/pkg20/live_dzones/dsc.smil/manifest.mpd
 #EXTINF:-1 tvg-id="afnhd.VN" tvg-name="Asia Food Network HD (AFN HD) - Việt Nam" tvg-chno="191" tvg-logo="https://freem3u.xyz/static/images/global/afn.png" group-title="Quốc Tế",Asia Food Network HD (AFN HD) - Việt Nam
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=a362f6885b1041f2b2e8282782e19e16:9e7f26762856474396e11bd3cfe4a778
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livebytatm.vtvprime.vn/live/data8/AFC/Live_DASHDRM/AFC.mpd
+https://freem3u.xyz/api/live/play.m3u8?vid=215
 #EXTINF:-1 tvg-id="hgtv.VN" tvg-name="HGTV - Việt Nam" tvg-chno="192" tvg-logo="https://freem3u.xyz/static/images/global/hgtv.png" group-title="Quốc Tế",HGTV - Việt Nam
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=a362f6885b1041f2b2e8282782e19e16:9e7f26762856474396e11bd3cfe4a778
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livebytatm.vtvprime.vn/live/data8/HGTV/Live_DASHDRM/HGTV.mpd
+https://freem3u.xyz/api/v1/live/play.mpd?fl=https://toiyeuvietnam.dpdns.org/TuyetDoiKhongKinhDoanh/hgtv/KenhCoBan.m3u8
 #EXTINF:-1 tvg-id="kbsworld.VN" tvg-name="KBS World - Việt Nam" tvg-chno="193" tvg-logo="https://freem3u.xyz/static/images/global/kbsworld.png" group-title="Quốc Tế",KBS World - Việt Nam
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=a362f6885b1041f2b2e8282782e19e16:9e7f26762856474396e11bd3cfe4a778
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livebytsct.vtvprime.vn/mean/KBS/manifest.mpd
+https://freem3u.xyz/api/live/play.m3u8?vid=213
 #EXTINF:-1 tvg-id="nhkworld.VN" tvg-name="NHK World Japan - Việt Nam" tvg-chno="194" tvg-logo="https://freem3u.xyz/static/images/global/nhkworldjp.png" group-title="Quốc Tế",NHK World Japan - Việt Nam
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=a362f6885b1041f2b2e8282782e19e16:9e7f26762856474396e11bd3cfe4a778
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livebytsct.vtvprime.vn/mean/NHKWORLD/manifest.mpd
+https://freem3u.xyz/api/live/play.m3u8?vid=106
 #EXTINF:-1 tvg-id="france24eng.VN" tvg-name="France 24 - Việt Nam" tvg-chno="196" tvg-logo="https://freem3u.xyz/static/images/global/france24_fr.png" group-title="Quốc Tế",France 24 - Việt Nam
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=a362f6885b1041f2b2e8282782e19e16:9e7f26762856474396e11bd3cfe4a778
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livebytsct.vtvprime.vn/mean/FRANCE24/manifest.mpd
+https://freem3u.xyz/api/live/play.m3u8?vid=96
 #EXTINF:-1 tvg-id="369813" tvg-name="CNBC SD - Việt Nam" tvg-chno="197" tvg-logo="https://freem3u.xyz/static/images/global/cnbc.png?t=1" group-title="Quốc Tế",CNBC SD - Việt Nam
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=a362f6885b1041f2b2e8282782e19e16:9e7f26762856474396e11bd3cfe4a778
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livebytatm.vtvprime.vn/live/data8/CNBC/Live_DASHDRM/CNBC.mpd
+https://freem3u.xyz/api/live/play.m3u8?vid=9855
 #EXTINF:-1 tvg-id="historyhd.VN" tvg-name="History HD - Việt Nam" tvg-chno="198" tvg-logo="https://freem3u.xyz/static/images/global/history.png" group-title="Quốc Tế",History HD - Việt Nam
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=a362f6885b1041f2b2e8282782e19e16:9e7f26762856474396e11bd3cfe4a778
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livebytatm.vtvprime.vn/live/data8/HISTORY/Live_DASHDRM/HISTORY.mpd
+https://freem3u.xyz/api/live/play.m3u8?vid=9856
 #EXTINF:-1 tvg-id="dw.VN" tvg-name="DW - Deutsche Welle  - Việt Nam" tvg-chno="199" tvg-logo="https://freem3u.xyz/static/images/global/dw.png" group-title="Quốc Tế",DW - Deutsche Welle  - Việt Nam
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=a362f6885b1041f2b2e8282782e19e16:9e7f26762856474396e11bd3cfe4a778
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livebytatm.vtvprime.vn/live/data8/DW/Live_DASHDRM/DW.mpd
+https://freem3u.xyz/api/live/play.m3u8?vid=109
 #EXTINF:-1 tvg-id="cnn" tvg-name="CNN - Tiếng Anh" tvg-chno="200" tvg-logo="https://freem3u.xyz/static/images/global/cnn.png" group-title="Quốc Tế",CNN - Tiếng Anh
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
 https://turnerlive.warnermediacdn.com/hls/live/586495/cnngo/cnn_slate/VIDEO_3_1464000.m3u8
@@ -1073,26 +771,14 @@ https://turnerlive.warnermediacdn.com/hls/live/586495/cnngo/cnn_slate/VIDEO_3_14
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
 https://c.mjh.nz/abc-nsw.m3u8
 #EXTINF:-1 tvg-id="arirang.VN" tvg-name="Arirang - Việt Nam" tvg-chno="202" tvg-logo="https://freem3u.xyz/static/images/global/arirang.png" group-title="Quốc Tế",Arirang - Việt Nam
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=a362f6885b1041f2b2e8282782e19e16:9e7f26762856474396e11bd3cfe4a778
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livebytatm.vtvprime.vn/live/data8/ARIRANG/Live_DASHDRM/ARIRANG.mpd
+https://freem3u.xyz/api/live/play.m3u8?vid=111
 #EXTINF:-1 tvg-id="boxmovie1.VN" tvg-name="Box Movie - Việt Nam" tvg-chno="203" tvg-logo="https://freem3u.xyz/static/images/global/boxmovies.png" group-title="Quốc Tế",Box Movie - Việt Nam
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=a7c942778e874d43be92b8d0a0cd11b4:6d54358306571658ffdb952c6560688b
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livesct.vtvprime.vn/Live_DASHDRM1/BM1/manifest.mpd
+https://toiyeuvietnam.dpdns.org/OnliveTV/box-movie-1-hd/Free.m3u8
 #EXTINF:-1 tvg-id="boxhits.VN" tvg-name="Box Hits - Việt Nam" tvg-chno="204" tvg-logo="https://freem3u.xyz/static/images/global/boxhits.png" group-title="Quốc Tế",Box Hits - Việt Nam
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=a7c942778e874d43be92b8d0a0cd11b4:6d54358306571658ffdb952c6560688b
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livevlisctcdnw.seenow.vn/mean/BOXHIT/manifest.mpd
+https://toiyeuvietnam.dpdns.org/OnliveTV/box-hits/Free.m3u8
 #EXTINF:-1 tvg-id="ack_tv_main" tvg-name="ACK TV - Tiếng Anh" tvg-chno="207" tvg-logo="https://freem3u.xyz/static/images/global/ack_tv.png" group-title="Quốc Tế",ACK TV - Tiếng Anh
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
 https://install.akctvcontrol.com/speed/broadcast/138/desktop-playlist.m3u8
@@ -1139,14 +825,10 @@ https://s7771.cdn.mytvnet.vn/pkg20/live_dzones/bbcearth.smil/manifest.mpd
 https://s935.cdn.mytvnet.vn/pkg20/live_dzones/aplus.smil/manifest.mpd
 #EXTINF:-1 tvg-id="bloomberg-tieng-anh" tvg-name="BLOOMBERG - Tiếng Anh" tvg-chno="306" tvg-logo="https://github.com/tv-logo/tv-logos/blob/main/countries/united-states/bloomberg-television-us.png?raw=true" group-title="Quốc Tế",BLOOMBERG - Tiếng Anh
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://dai.google.com/linear/hls/pa/event/PwTJe4aZRvSBjbWY7_VSzA/stream/e78eac99-817c-4c2c-846b-a8b9ff145078:DLS/master.m3u8
+https://dai.google.com/linear/hls/pa/event/PwTJe4aZRvSBjbWY7_VSzA/stream/9dcdfde9-1bfe-4754-8779-61432180188b:ATL/master.m3u8
 #EXTINF:-1 tvg-id="davinci.VN" tvg-name="DaVinci HD - Việt Nam" tvg-chno="479" tvg-logo="https://freem3u.xyz/static/images/global/davinci.png" group-title="Quốc Tế",DaVinci HD - Việt Nam
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=a362f6885b1041f2b2e8282782e19e16:9e7f26762856474396e11bd3cfe4a778
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livebytsct.vtvprime.vn/mean/DAVINCY/manifest.mpd
+https://freem3u.xyz/api/live/play.m3u8?vid=214
 #EXTINF:-1 tvg-id="tvb-vietnam" tvg-name="TVB Việt Nam" tvg-chno="480" tvg-logo="https://freem3u.xyz/static/images/tvb/tvbv.png" group-title="Quốc Tế",TVB Việt Nam
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
 https://amg01868-amg01868c3-tvbanywhere-us-4491.playouts.now.amagi.tv/playlist/amg01868-tvbusa-tvbvietnam-tvbanywhereus/playlist.m3u8
@@ -1233,25 +915,17 @@ https://freem3u.xyz/api/live/play.m3u8?vidl=379
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
 https://freem3u.xyz/api/live/play.m3u8?vid=9838
 #EXTINF:-1 tvg-id="antvhd.VN" tvg-name="ANTV HD" tvg-chno="74" tvg-logo="https://freem3u.xyz/static/images/thietyeu/antv.png" group-title="Địa Phương",ANTV HD
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=cca908f736f54dfc90ec844fe123942c:9fea9e1b52e1e87a7d4c1dec0c46307f
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livevlisctcdnw.seenow.vn/Live_DASHDRM1/ANNINHTV/manifest.mpd
+https://freem3u.xyz/api/live/play.m3u8?vid=20
 #EXTINF:-1 tvg-id="qpvnhd.VN" tvg-name="QPVN HD" tvg-chno="75" tvg-logo="https://freem3u.xyz/static/images/thietyeu/qpvn.png" group-title="Địa Phương",QPVN HD
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=cca908f736f54dfc90ec844fe123942c:9fea9e1b52e1e87a7d4c1dec0c46307f
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livevlisctcdnw.seenow.vn/Live_DASHDRM1/QPTV/manifest.mpd
+https://freem3u.xyz/api/live/play.m3u8?vid=19
 #EXTINF:-1 tvg-id="thvl1hd.VN" tvg-name="THVL1 | TH Vĩnh Long" tvg-chno="76" tvg-logo="https://freem3u.xyz/static/images/diaphuong/vinhlong1.png" group-title="Địa Phương",THVL1 | TH Vĩnh Long
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
 https://freem3u.xyz/api/live/play.m3u8?vid=25
 #EXTINF:-1 tvg-id="thvl2hd.VN" tvg-name="THVL2 | TH Vĩnh Long" tvg-chno="77" tvg-logo="https://freem3u.xyz/static/images/diaphuong/vinhlong2.png" group-title="Địa Phương",THVL2 | TH Vĩnh Long
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://live.thvli.vn/thvl2/playlist.m3u8?app=141214&sig=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2ZXIiOjIsInVpZCI6IjMzZDcxNzI5LTMyOWYtNDA2OS1hOTBjLTFmZWJlNjE1ZDA0OCIsImFwcCI6MTQxMjE0LCJkZXYiOiJNb3ppbGxhLzUuMCAoTGludXg7IEFuZHJvaWQgMTU7IFNNLVM5MThCIEJ1aWxkL0FQM0EuMjQwOTA1LjAxNS5BMjsgd3YpIEFwcGxlV2ViS2l0LzUzNy4zNiAoS0hUTUwsIGxpa2UgR2Vja28pIFZlcnNpb24vNC4wIENocm9tZS8xMzUuMC43MDQ5LjExMSBNb2JpbGUgU2FmYXJpLzUzNy4zNiB2QXBwVFYvMS4wLjIiLCJjaXAiOiI0Mi4xMTIuNDYuNTMiLCJwbGEiOiJ3ZWIiLCJpYXQiOjE3OTE0MjUwMDl9.i6PQNbUESmI4GhZvDL00et6DykYWt5cVLD8adFSr1WQ
+http://freem3u.xyz/api/live/play.m3u8?vid=26
 #EXTINF:-1 tvg-id="thvl3hd.VN" tvg-name="THVL3 | TH Vĩnh Long" tvg-chno="78" tvg-logo="https://freem3u.xyz/static/images/diaphuong/vinhlong3.png" group-title="Địa Phương",THVL3 | TH Vĩnh Long
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
 https://freem3u.xyz/api/live/play.m3u8?vid=219
@@ -1310,9 +984,8 @@ https://618b88f69e53b.streamlock.net/THDT/thdttv/playlist.m3u8
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
 https://618b88f69e53b.streamlock.net/THDT2/thdttv2/playlist.m3u8
 #EXTINF:-1 tvg-id="cantho2.VN" tvg-name="Cần Thơ TV 2 | TH Cần Thơ" tvg-chno="105" tvg-logo="https://freem3u.xyz/static/images/diaphuong/caicach/cantho2_new.png" group-title="Địa Phương",Cần Thơ TV 2 | TH Cần Thơ
-#EXTVLCOPT:http-referrer=https://vieon.vn/
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livecdn-global-vnd.vieon.vn/htv_drm/live_event/trailer_vieon_tvc/playlist.m3u8
+https://freem3u.xyz/api/live/play.m3u8?vid=61
 #EXTINF:-1 tvg-id="danang1.VN" tvg-name="DaNangTV1 HD" tvg-chno="107" tvg-logo="https://freem3u.xyz/static/images/diaphuong/caicach/danang1.png" group-title="Địa Phương",DaNangTV1 HD
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
 https://live.mediatech.vn/live/285b59a111d76974225a8e3004bfc31a509/playlist.m3u8
@@ -1346,12 +1019,8 @@ https://live.mediatech.vn/live/285aaa79b4b265a457d81bb72bc32e2c114/playlist.m3u8
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
 https://tructuyen.baoquangtri.vn:5443/LiveApp/streams/20VcR6dL2B9Krwob13486956694488871.m3u8
 #EXTINF:-1 tvg-id="hanoi1.VN" tvg-name="HanoiTV1 HD" tvg-chno="123" tvg-logo="https://freem3u.xyz/static/images/diaphuong/hanoi1.png" group-title="Địa Phương",HanoiTV1 HD
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=a362f6885b1041f2b2e8282782e19e16:9e7f26762856474396e11bd3cfe4a778
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livebytatm.vtvprime.vn/live/data8/HANOI1TV/Live_DASHDRM/HANOI1TV.mpd
+https://cloudstreamhntv.tek4tv.vn/capture/smil:HN1.smil/playlist.m3u8
 #EXTINF:-1 tvg-id="hanoi2.VN" tvg-name="HanoiTV2 HD" tvg-chno="124" tvg-logo="https://freem3u.xyz/static/images/diaphuong/hanoi2.png" group-title="Địa Phương",HanoiTV2 HD
 #EXTVLCOPT:http-referrer=https://vieon.vn/
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
@@ -1465,7 +1134,7 @@ https://livecdn-global-vnd.vieon.vn/htv_drm/live_event/trailer_vieon_tvc/playlis
 https://freem3u.xyz/api/live/play.m3u8?vid=25
 #EXTINF:-1 tvg-id="thvl2hd.VN" tvg-name="THVL2 | TH Vĩnh Long" tvg-chno="77" tvg-logo="https://freem3u.xyz/static/images/diaphuong/vinhlong2.png" group-title="Miền Nam",THVL2 | TH Vĩnh Long
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://live.thvli.vn/thvl2/playlist.m3u8?app=141214&sig=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2ZXIiOjIsInVpZCI6IjMzZDcxNzI5LTMyOWYtNDA2OS1hOTBjLTFmZWJlNjE1ZDA0OCIsImFwcCI6MTQxMjE0LCJkZXYiOiJNb3ppbGxhLzUuMCAoTGludXg7IEFuZHJvaWQgMTU7IFNNLVM5MThCIEJ1aWxkL0FQM0EuMjQwOTA1LjAxNS5BMjsgd3YpIEFwcGxlV2ViS2l0LzUzNy4zNiAoS0hUTUwsIGxpa2UgR2Vja28pIFZlcnNpb24vNC4wIENocm9tZS8xMzUuMC43MDQ5LjExMSBNb2JpbGUgU2FmYXJpLzUzNy4zNiB2QXBwVFYvMS4wLjIiLCJjaXAiOiI0Mi4xMTIuNDYuNTMiLCJwbGEiOiJ3ZWIiLCJpYXQiOjE3OTE0MjUwMDl9.i6PQNbUESmI4GhZvDL00et6DykYWt5cVLD8adFSr1WQ
+http://freem3u.xyz/api/live/play.m3u8?vid=26
 #EXTINF:-1 tvg-id="thvl3hd.VN" tvg-name="THVL3 | TH Vĩnh Long" tvg-chno="78" tvg-logo="https://freem3u.xyz/static/images/diaphuong/vinhlong3.png" group-title="Miền Nam",THVL3 | TH Vĩnh Long
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
 https://freem3u.xyz/api/live/play.m3u8?vid=219
@@ -1520,16 +1189,11 @@ https://618b88f69e53b.streamlock.net/THDT/thdttv/playlist.m3u8
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
 https://618b88f69e53b.streamlock.net/THDT2/thdttv2/playlist.m3u8
 #EXTINF:-1 tvg-id="cantho2.VN" tvg-name="Cần Thơ TV 2 | TH Cần Thơ" tvg-chno="105" tvg-logo="https://freem3u.xyz/static/images/diaphuong/caicach/cantho2_new.png" group-title="Miền Nam",Cần Thơ TV 2 | TH Cần Thơ
-#EXTVLCOPT:http-referrer=https://vieon.vn/
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livecdn-global-vnd.vieon.vn/htv_drm/live_event/trailer_vieon_tvc/playlist.m3u8
+https://freem3u.xyz/api/live/play.m3u8?vid=61
 #EXTINF:-1 tvg-id="hanoi1.VN" tvg-name="HanoiTV1 HD" tvg-chno="123" tvg-logo="https://freem3u.xyz/static/images/diaphuong/hanoi1.png" group-title="Miền Bắc",HanoiTV1 HD
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=a362f6885b1041f2b2e8282782e19e16:9e7f26762856474396e11bd3cfe4a778
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livebytatm.vtvprime.vn/live/data8/HANOI1TV/Live_DASHDRM/HANOI1TV.mpd
+https://cloudstreamhntv.tek4tv.vn/capture/smil:HN1.smil/playlist.m3u8
 #EXTINF:-1 tvg-id="hanoi2.VN" tvg-name="HanoiTV2 HD" tvg-chno="124" tvg-logo="https://freem3u.xyz/static/images/diaphuong/hanoi2.png" group-title="Miền Bắc",HanoiTV2 HD
 #EXTVLCOPT:http-referrer=https://vieon.vn/
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
@@ -1653,10 +1317,10 @@ https://live.baoquangninh.vn/qtvlive/qnr1.m3u8
 https://live.baoquangninh.vn/qtvlive/qnr2.m3u8
 #EXTINF:-1 tvg-id="hanoi.FM90.VN" tvg-name="HANOI FM90" tvg-chno="245" tvg-logo="https://freem3u.xyz/static/images/radio/hanoi_fm90.png" group-title="Radio Miền Bắc",HANOI FM90
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://cloudcdnfm90.tek4tv.vn/HANOIFM90/stream.m3u8
+https://freem3u.xyz/api/live/play.m3u8?vid=9905
 #EXTINF:-1 tvg-id="hanoi.FM96.VN" tvg-name="HANOI FM96" tvg-chno="246" tvg-logo="https://freem3u.xyz/static/images/radio/hanoi_fm96.png" group-title="Radio Miền Bắc",HANOI FM96
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://cloudcdnfm90.tek4tv.vn/HANOI96/stream.m3u8
+https://freem3u.xyz/api/live/play.m3u8?vid=9906
 #EXTINF:-1 tvg-id="haiphong.FM93_7.VN" tvg-name="HAI PHONG FM93.7" tvg-chno="248" tvg-logo="https://freem3u.xyz/static/images/radio/haiphong_93_7.png" group-title="Radio Miền Bắc",HAI PHONG FM93.7
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
 https://live.mediatech.vn/live/2853ef29ebf29c64155acb32d102dd69a4a/playlist.m3u8
@@ -1703,31 +1367,26 @@ https://play.vovgiaothong.vn/live/mekong/playlist.m3u8
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
 https://play.vovgiaothong.vn/live/gthn/playlist.m3u8
 #EXTINF:-1 tvg-id="voh.FM99_9.VN" tvg-name="VOH FM 99.9Mhz" tvg-chno="230" tvg-logo="https://freem3u.xyz/static/images/voh/voh_fm99_9.png" group-title="Radio VOH",VOH FM 99.9Mhz
-#EXTVLCOPT:http-referrer=https://vieon.vn/
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livecdn-global-vnd.vieon.vn/htv_drm/live_event/trailer_vieon_tvc/playlist.m3u8
+https://freem3u.xyz/api/live/play.m3u8?vid=10037
 #EXTINF:-1 tvg-id="voh.FM95_6.VN" tvg-name="VOH FM 95.6Mhz" tvg-chno="231" tvg-logo="https://freem3u.xyz/static/images/voh/voh_fm95_6.png" group-title="Radio VOH",VOH FM 95.6Mhz
-#EXTVLCOPT:http-referrer=https://vieon.vn/
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livecdn-global-vnd.vieon.vn/htv_drm/live_event/trailer_vieon_tvc/playlist.m3u8
+https://freem3u.xyz/api/live/play.m3u8?vid=10039
 #EXTINF:-1 tvg-id="voh.FM87_7.VN" tvg-name="VOH FM 87.7Mhz" tvg-chno="232" tvg-logo="https://freem3u.xyz/static/images/voh/voh_fm87_7.png" group-title="Radio VOH",VOH FM 87.7Mhz
-#EXTVLCOPT:http-referrer=https://vieon.vn/
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livecdn-global-vnd.vieon.vn/htv_drm/live_event/trailer_vieon_tvc/playlist.m3u8
+https://freem3u.xyz/api/live/play.m3u8?vid=10038
 #EXTINF:-1 tvg-id="voh.AM610.VN" tvg-name="VOH AM 610Khz" tvg-chno="233" tvg-logo="https://freem3u.xyz/static/images/voh/voh_am.png" group-title="Radio VOH",VOH AM 610Khz
-#EXTVLCOPT:http-referrer=https://vieon.vn/
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livecdn-global-vnd.vieon.vn/htv_drm/live_event/trailer_vieon_tvc/playlist.m3u8
+https://freem3u.xyz/api/live/play.m3u8?vid=10036
 #EXTINF:-1 tvg-id="voh-m-fm92-5mhz" tvg-name="VOH-M (FM 92-92.5MHz)" tvg-chno="276" tvg-logo="https://freem3u.xyz/static/images/voh/voh_m.jpg" group-title="Radio VOH",VOH-M (FM 92-92.5MHz)
-#EXTVLCOPT:http-referrer=https://vieon.vn/
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://livecdn-global-vnd.vieon.vn/htv_drm/live_event/trailer_vieon_tvc/playlist.m3u8
+https://freem3u.xyz/api/live/play.m3u8?vid=10040
 #EXTINF:-1 tvg-id="dong-nai-radio-fm97-5mhz" tvg-name="DONG NAI RADIO (FM97.5MHz)" tvg-chno="277" tvg-logo="https://freem3u.xyz/static/images/radio/dongnai.png" group-title="Radio Miền Nam",DONG NAI RADIO (FM97.5MHz)
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
 http://118.107.85.5:1935/radio/dongnai_aac/playlist.m3u8
 #EXTINF:-1 tvg-id="vinhlong.FM90_2.VN" tvg-name="VINH LONG (FM90.2MHz)" tvg-chno="278" tvg-logo="https://freem3u.xyz/static/images/radio/vinhlong.png" group-title="Radio Miền Nam",VINH LONG (FM90.2MHz)
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
-https://catchup.thvli.vn/-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImY4ZWY3NGJhLWI1NGMtNDMzMS04M2U1LWVhZmVhMzYyY2JiNSIsImV4cCI6MTc5MTQ0NjIxNSwidXJpIjoiL3JhZGlvIiwiaWF0IjoxNzkxNDI0NjE1fQ.6wKpw-Gx1O6IeXPjJ78Qck1b1Fgqz6LmI8-EKm9k-jk-/radio/playlist.m3u8
+https://catchup.thvli.vn/-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImVkMzFjOTUzLTU2NDMtNDVhYi1hYzRiLWJjOWE1OTAyM2RhMyIsImV4cCI6MTc5MTQ0Njg1MiwidXJpIjoiL3JhZGlvIiwiaWF0IjoxNzkxNDI1MjUyfQ.OlgBUMia6d5nseCBw2jHc0OF-haeTNsGuWuyeyw3fKk-/radio/playlist.m3u8
 #EXTINF:-1 tvg-id="dongthap.FM98_4.VN" tvg-name="DONG THAP (FM98.4MHz)" tvg-chno="282" tvg-logo="https://freem3u.xyz/static/images/radio/dongthap.png" group-title="Radio Miền Nam",DONG THAP (FM98.4MHz)
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2
 https://618b88f69e53b.streamlock.net/THDTR/thdtradio/playlist.m3u8
