@@ -163,6 +163,27 @@ jobs:
                       return [shaka]
                   if looks_stream(url):
                       return [{"url": url, "clearkey": None, "headers": headers}]
+
+                  # vAppTV also uses direct play.json endpoints such as
+                  # /api/live/play.json?vid=151. Resolve them exactly like flow.
+                  if "/api/live/play.json" in url.lower():
+                      try:
+                          txt, _ = request_text(url, headers=headers)
+                          payload = json.loads(txt)
+                          data = payload.get("data") if isinstance(payload, dict) else payload
+
+                          if isinstance(data, dict) and data.get("provider") and data.get("url"):
+                              nested = resolve_spec(data, depth + 1)
+                              if nested:
+                                  return nested
+
+                          found = extract_urls(data)
+                          for u in found:
+                              if looks_stream(u):
+                                  return [{"url": u, "clearkey": None, "headers": headers}]
+                      except Exception:
+                          pass
+
                   return []
 
               if provider == "webview":
@@ -360,7 +381,8 @@ jobs:
           epg = [clean(x) for x in DATA.get("epgList") or [] if is_http(clean(x))]
           header = "#EXTM3U"
           if epg:
-              header += ' x-tvg-url="' + escape(",".join(epg), quote=True) + '"'
+              # Keep the EPG URL literal; escaping & as &amp; breaks some M3U clients.
+              header += ' x-tvg-url="' + ",".join(epg) + '"'
 
           out = [header]
 
