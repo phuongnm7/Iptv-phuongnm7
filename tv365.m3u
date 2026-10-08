@@ -465,14 +465,9 @@ https://live.fptplay53.net/epzhd1/htv7hd_vhls.smil/chunklist_b5000000.m3u8
 #KODIPROP:inputstream.adaptive.license_key=a7c942778e874d43be92b8d0a0cd11b4:6d54358306571658ffdb952c6560688b
 https://livevlisctcdnw.seenow.vn/livesnv2/HTV9/manifest.mpd
 
-#EXTINF:-1 tvg-id="htvthethaohd.VN" tvg-name="HTV Thể Thao" tvg-chno="43" tvg-logo="https://freem3u.xyz/static/images/hplus/htvthethao.png" group-title="HTV - TP.HCM",HTV Thể Thao
-#X-APP-CHANNEL-ID:htv-the-thao
-#X-APP-CHANNEL-INDEX:43
-#KODIPROP:inputstream=inputstream.adaptive
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=a7c942778e874d43be92b8d0a0cd11b4:6d54358306571658ffdb952c6560688b
-https://livebytatm.vtvprime.vn/live/data8/HTV_THETHAO/Live_DASHDRM/HTV_THETHAO.mpd
+#EXTINF:-1 tvg-id="htvthethaohd" group-title="HTV" tvg-logo="https://img-zlr1.tv360.vn/image1/2023/04/03/16/1680514594557/ab2557f0b015_640_360.png" http://sv.cvtv.xyz:3000/mytvod.m3u8?id=18&time=${start}&offset=${duration}", HTV Thể Thao
+https://vips-livecdn.fptplay.net/live/media/htvthethao/live247-hls-avc/htvthethao-avc1_5600000=10000-mp4a_131600=20000.m3u8
+
 
 #EXTINF:-1 tvg-logo="https://img-ali1.tv360.vn/image1/2020_09_23/1600823449894/0834e6a36f71_640_360.png" group-title="HTV",HTVC Ca Nhạc
 https://live.fptplay53.net/epzhd1/htvcmusic_vhls.smil/chunklist.m3u8
