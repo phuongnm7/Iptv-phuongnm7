@@ -1,0 +1,52 @@
+{
+  "source": "https://freem3u.xyz/api/channels/x_1.0.1/app.json",
+  "api_index": "505",
+  "generated_utc": "2026-10-08T02:02:16.988451+00:00",
+  "channel_objects": 245,
+  "resolved_channels": 241,
+  "unresolved_channels": 4,
+  "playable_variants_found": 436,
+  "channels_with_clearkey_variant": 102,
+  "groups": [
+    "Thể Thao",
+    "Phim Truyện",
+    "Thiếu Nhi",
+    "Âm Nhạc",
+    "Khám Phá",
+    "Tin Tức",
+    "VTV",
+    "VTVCab",
+    "SCTV",
+    "HTV - TP.HCM",
+    "THVL",
+    "Quốc Tế",
+    "Sự Kiện",
+    "Địa Phương",
+    "Miền Trung",
+    "Miền Nam",
+    "Miền Bắc",
+    "Radio Miền Trung",
+    "Radio Miền Bắc",
+    "Radio VOV",
+    "Radio VOH",
+    "Radio Miền Nam"
+  ],
+  "unresolved": [
+    {
+      "id": "htv5-bchannel",
+      "title": "HTV5 | BChannel"
+    },
+    {
+      "id": "thanh-hoa-fm",
+      "title": "THANH HOA RADIO (FM92.3MHz)"
+    },
+    {
+      "id": "lao-cai-fm",
+      "title": "LAO CAI (FM97MHz - FM98.3 MHz - FM 91 MHz)"
+    },
+    {
+      "id": "sctv4k",
+      "title": "SCTV 4K"
+    }
+  ]
+}
