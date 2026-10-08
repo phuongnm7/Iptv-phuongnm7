@@ -13,7 +13,7 @@ jobs:
   export:
     runs-on: ubuntu-latest
     steps:
-      - name: Resolve vAppTV and build NM7 M3U
+      - name: Resolve vAppTV sources and build NM7 M3U
         run: |
           curl -L --fail --retry 3             -H "User-Agent: okhttp/4.12.0"             "https://freem3u.xyz/api/channels/x_1.0.1/app.json"             -o app.json
 
@@ -26,298 +26,325 @@ jobs:
 
           API = "https://freem3u.xyz/api/channels/x_1.0.1/app.json"
           TIMEOUT = 12
-          UA = "okhttp/4.12.0"
-
-          data = json.loads(Path("app.json").read_text(encoding="utf-8"))
-          channels = list(data.get("channels") or [])
-          main_groups = [str(x.get("title")) for x in (data.get("group") or []) if x.get("title")]
-
-          def channel_index(c):
-              try: return int(c.get("channelIndex"))
-              except: return 10**9
-
-          channels.sort(key=channel_index)
-
-          session_headers = {
-              "User-Agent": UA,
+          BASE_HEADERS = {
+              "User-Agent": "okhttp/4.12.0",
               "Accept": "*/*",
           }
 
-          def fetch_text(url, headers=None, data_bytes=None, method=None):
-              h = dict(session_headers)
+          data = json.loads(Path("app.json").read_text(encoding="utf-8"))
+          channels = list(data.get("channels") or [])
+
+          def ch_index(c):
+              try: return int(c.get("channelIndex"))
+              except: return 10**9
+
+          channels.sort(key=ch_index)
+
+          def http_text(url, headers=None, body=None, method=None):
+              h = dict(BASE_HEADERS)
               if headers:
-                  for k,v in headers.items():
-                      h[str(k)] = str(v)
-              req = urllib.request.Request(url, headers=h, data=data_bytes, method=method)
+                  h.update({str(k):str(v) for k,v in headers.items()})
+              req = urllib.request.Request(
+                  url,
+                  headers=h,
+                  data=body,
+                  method=(method or "GET").upper()
+              )
               with urllib.request.urlopen(req, timeout=TIMEOUT) as r:
-                  raw = r.read()
-                  return raw.decode("utf-8", "replace")
+                  return r.read().decode("utf-8","replace"), dict(r.headers)
 
-          def is_http_url(s):
-              return isinstance(s, str) and re.match(r"^https?://", s, re.I)
+          def http_url(x):
+              return isinstance(x,str) and re.match(r"^https?://",x,re.I)
 
-          def is_stream_url(s):
-              if not is_http_url(s): return False
-              return bool(re.search(r"(\.m3u8|\.mpd)(\?|$)", s, re.I) or "/api/live/play.m3u8" in s)
+          def looks_stream(x):
+              if not http_url(x): return False
+              s=x.lower()
+              return bool(
+                  re.search(r"\.(m3u8|mpd)(\?|$)",s,re.I)
+                  or "/api/live/play.m3u8" in s
+                  or "/manifest" in s
+                  or "/playlist" in s
+                  or "/chunklist" in s
+                  or "/hls/" in s
+                  or ".smil/" in s
+                  or "/stream/" in s
+              )
 
-          def clean_url(s):
-              if not isinstance(s, str): return None
-              s = s.strip()
-              return s if is_http_url(s) else None
+          def extract_urls(obj, out):
+              if isinstance(obj,str):
+                  if http_url(obj): out.append(obj.strip())
+              elif isinstance(obj,dict):
+                  for v in obj.values(): extract_urls(v,out)
+              elif isinstance(obj,list):
+                  for v in obj: extract_urls(v,out)
 
-          def extract_json_path(obj, path):
+          def json_path(obj, path):
               if not path: return obj
-              cur = obj
-              parts = re.findall(r"[^.\[\]]+", str(path))
-              for p in parts:
-                  if isinstance(cur, dict) and p in cur:
-                      cur = cur[p]
-                  elif isinstance(cur, list):
-                      try: cur = cur[int(p)]
+              cur=obj
+              for p in re.findall(r"[^.\[\]]+",str(path)):
+                  if isinstance(cur,dict) and p in cur: cur=cur[p]
+                  elif isinstance(cur,list):
+                      try: cur=cur[int(p)]
                       except: return None
-                  else:
-                      return None
+                  else: return None
               return cur
 
-          def recurse_urls(obj, out):
-              if isinstance(obj, str):
-                  if is_http_url(obj): out.append(obj)
-              elif isinstance(obj, dict):
-                  for v in obj.values(): recurse_urls(v, out)
-              elif isinstance(obj, list):
-                  for v in obj: recurse_urls(v, out)
-
-          def make_native_from_shaka(url):
+          def shaka_native(url):
               try:
-                  p = urllib.parse.urlparse(url)
-                  q = urllib.parse.parse_qs(p.query)
-                  video = q.get("videoUrl", [None])[0]
-                  audio = q.get("audioUrl", [None])[0]
-                  keys = q.get("keys", [None])[0]
-                  if video and is_http_url(video):
-                      return {
-                          "url": video,
-                          "clearkey": keys if keys else None,
-                          "source": "shaka-native"
-                      }
-                  if audio and is_http_url(audio) and is_stream_url(audio):
-                      return {"url": audio, "source":"shaka-audio"}
-              except Exception:
-                  pass
-              return None
+                  q=urllib.parse.parse_qs(urllib.parse.urlparse(url).query)
+                  v=q.get("videoUrl",[None])[0]
+                  a=q.get("audioUrl",[None])[0]
+                  keys=q.get("keys",[None])[0]
+                  if v and http_url(v) and looks_stream(v):
+                      return [{"url":v,"clearkey":keys,"source":"shaka-native","headers":{}}]
+                  if a and http_url(a):
+                      return [{"url":a,"clearkey":None,"source":"shaka-audio-page","headers":{}}]
+              except: pass
+              return []
+
+          def resolve_nonstream(u, headers=None, depth=0):
+              if not http_url(u) or depth>1: return []
+              if looks_stream(u): return [{"url":u,"headers":headers or {}, "source":"resolved"}]
+              try:
+                  txt,_=http_text(u,headers)
+                  out=[]
+                  try:
+                      obj=json.loads(txt)
+                      found=[]; extract_urls(obj,found)
+                      for v in found:
+                          if looks_stream(v): out.append({"url":v,"headers":headers or {}, "source":"nested-json"})
+                  except:
+                      for v in re.findall(r'https?://[^\s"<>\\]+',txt):
+                          if looks_stream(v): out.append({"url":v,"headers":headers or {}, "source":"nested-html"})
+                  return out
+              except:
+                  return []
 
           def resolve_spec(spec):
-              results = []
-              if not isinstance(spec, dict) or not isinstance(spec.get("url"), str):
-                  return results
-              url = spec["url"].strip()
-              provider = spec.get("provider")
-              headers = spec.get("headers") if isinstance(spec.get("headers"), dict) else {}
+              if not isinstance(spec,dict) or not isinstance(spec.get("url"),str):
+                  return []
+              url=spec["url"].strip()
+              provider=spec.get("provider")
+              headers=spec.get("headers") if isinstance(spec.get("headers"),dict) else {}
+              results=[]
 
-              # Direct source.
               if not provider:
-                  native = make_native_from_shaka(url)
-                  if native:
-                      results.append({**native, "headers":headers})
-                  elif is_http_url(url):
-                      results.append({"url":url, "headers":headers, "source":"direct"})
+                  sn=shaka_native(url)
+                  if sn: return [{**x,"headers":headers} for x in sn]
+                  if looks_stream(url): return [{"url":url,"headers":headers,"source":"direct"}]
+                  if "/play.json" in url:
+                      try:
+                          txt,_=http_text(url,headers)
+                          try:
+                              obj=json.loads(txt)
+                              found=[]; extract_urls(obj,found)
+                              for v in found:
+                                  if looks_stream(v):
+                                      results.append({"url":v,"headers":headers,"source":"play-json"})
+                                  else:
+                                      results += resolve_nonstream(v,headers,0)
+                          except:
+                              results += resolve_nonstream(txt.strip(),headers,0)
+                      except: pass
+                  else:
+                      results += resolve_nonstream(url,headers,0)
                   return results
 
-              if provider == "webview":
-                  native = make_native_from_shaka(url)
-                  if native:
-                      native["headers"] = headers
-                      results.append(native)
-                  elif is_http_url(url):
-                      results.append({"url":url, "headers":headers, "source":"webview"})
-                  return results
+              if provider=="webview":
+                  sn=shaka_native(url)
+                  if sn:
+                      return [{**x,"headers":headers} for x in sn if looks_stream(x["url"])]
+                  return resolve_nonstream(url,headers,0)
 
               try:
-                  if provider == "flow":
-                      txt = fetch_text(url, headers)
-                      try:
-                          obj = json.loads(txt)
-                          found=[]; recurse_urls(obj, found)
-                          for u in found:
-                              if is_stream_url(u) or is_http_url(u):
-                                  results.append({"url":u,"headers":headers,"source":"flow-resolved"})
-                      except Exception:
-                          if is_stream_url(txt.strip()):
-                              results.append({"url":txt.strip(),"headers":headers,"source":"flow-text"})
-                      return results
-
-                  if provider == "json":
-                      cfg = spec.get("httpConfig") if isinstance(spec.get("httpConfig"), dict) else {}
-                      method = str(cfg.get("method") or "GET").upper()
-                      h = dict(headers)
-                      cfg_headers = cfg.get("headers") if isinstance(cfg.get("headers"), dict) else {}
-                      h.update(cfg_headers)
-                      body = cfg.get("body")
-                      body_bytes = None
-                      if method not in ("GET","HEAD") and body is not None:
-                          body_bytes = str(body).encode("utf-8")
-                      txt = fetch_text(url, h, body_bytes, method)
-                      try:
-                          obj = json.loads(txt)
-                          val = extract_json_path(obj, spec.get("jsonPath"))
-                          vals=[]
-                          if isinstance(val, str): vals=[val]
-                          elif isinstance(val, list): vals=val
+                  if provider=="flow":
+                      txt,_=http_text(url,headers)
+                      obj=None
+                      try: obj=json.loads(txt)
+                      except: obj=txt
+                      found=[]; extract_urls(obj,found)
+                      for v in found:
+                          if looks_stream(v):
+                              results.append({"url":v,"headers":headers,"source":"flow-resolved"})
                           else:
-                              tmp=[]; recurse_urls(val,tmp); vals=tmp
-                          for v in vals:
-                              u=clean_url(v)
-                              if u: results.append({"url":u,"headers":h,"source":"json-resolved"})
-                      except Exception:
-                          pass
+                              results += resolve_nonstream(v,headers,0)
                       return results
 
-                  if provider == "parser":
-                      txt = fetch_text(url, headers)
-                      start = str(spec.get("startWith") or "")
-                      end = str(spec.get("endWith") or "")
-                      n = int(spec.get("startWithIndex") or 1)
-                      pos = 0
+                  if provider=="json":
+                      cfg=spec.get("httpConfig") if isinstance(spec.get("httpConfig"),dict) else {}
+                      method=str(cfg.get("method") or "GET").upper()
+                      h=dict(headers)
+                      ch=cfg.get("headers") if isinstance(cfg.get("headers"),dict) else {}
+                      h.update({str(k):str(v) for k,v in ch.items()})
+                      body=cfg.get("body")
+                      body_bytes=str(body).encode("utf-8") if body is not None and method not in ("GET","HEAD") else None
+                      txt,_=http_text(url,h,body_bytes,method)
+                      obj=json.loads(txt)
+                      val=json_path(obj,spec.get("jsonPath"))
+                      found=[]; extract_urls(val,found)
+                      if isinstance(val,str) and http_url(val): found.append(val)
+                      for v in dict.fromkeys(found):
+                          if looks_stream(v):
+                              results.append({"url":v,"headers":h,"source":"json-resolved"})
+                          else:
+                              results += resolve_nonstream(v,h,0)
+                      return results
+
+                  if provider=="parser":
+                      txt,_=http_text(url,headers)
+                      start=str(spec.get("startWith") or "")
+                      end=str(spec.get("endWith") or "")
+                      n=int(spec.get("startWithIndex") or 1)
+                      pos=0
+                      ok=True
                       for _ in range(max(1,n)):
-                          pos = txt.find(start, pos)
-                          if pos < 0: break
-                          pos += len(start)
-                      else:
-                          if end:
-                              j = txt.find(end, pos)
-                              val = txt[pos:j if j >= 0 else None]
+                          pos=txt.find(start,pos)
+                          if pos<0: ok=False; break
+                          pos+=len(start)
+                      if ok:
+                          j=txt.find(end,pos) if end else -1
+                          val=txt[pos:j if j>=0 else None]
+                          if looks_stream(val.strip()):
+                              results.append({"url":val.strip(),"headers":headers,"source":"parser-resolved"})
                           else:
-                              val = txt[pos:]
-                          u=clean_url(val)
-                          if u: results.append({"url":u,"headers":headers,"source":"parser-resolved"})
+                              results += resolve_nonstream(val.strip(),headers,0)
                       return results
-
-              except Exception:
+              except:
                   return results
               return results
 
-          resolved_map = {}
-          jobs=[]
+          resolved={}
+          tasks=[]
           for ci,c in enumerate(channels):
               for ui,spec in enumerate(c.get("urls") or []):
-                  jobs.append((ci,ui,spec))
+                  tasks.append((ci,ui,spec))
 
-          with ThreadPoolExecutor(max_workers=20) as ex:
-              futs={ex.submit(resolve_spec,spec):(ci,ui) for ci,ui,spec in jobs}
-              for fut in as_completed(futs):
-                  ci,ui=futs[fut]
-                  try: resolved_map[(ci,ui)] = fut.result()
-                  except: resolved_map[(ci,ui)] = []
+          with ThreadPoolExecutor(max_workers=24) as ex:
+              futs={ex.submit(resolve_spec,spec):(ci,ui) for ci,ui,spec in tasks}
+              for f in as_completed(futs):
+                  key=futs[f]
+                  try: resolved[key]=f.result()
+                  except: resolved[key]=[]
 
-          def rank_source(x):
-              u=x.get("url","").lower()
-              if x.get("clearkey") and u.endswith(".mpd"): return 0
-              if re.search(r"\.m3u8(\?|$)",u): return 1
-              if re.search(r"\.mpd(\?|$)",u): return 2
-              if "/api/live/play.m3u8" in u: return 3
-              if x.get("source") in ("flow-resolved","json-resolved","parser-resolved"): return 4
-              return 9
-
-          # Group order = exactly the app-configured groups, followed by secondary tags
-          secondary_groups=[]
+          main_groups=[str(x.get("title")) for x in (data.get("group") or []) if x.get("title")]
+          secondary=[]
           seen=set(main_groups)
           for c in channels:
               for g in c.get("group") or []:
                   g=str(g)
                   if g and g not in seen:
-                      seen.add(g); secondary_groups.append(g)
-          group_order=main_groups+secondary_groups
+                      seen.add(g); secondary.append(g)
+          groups_order=main_groups+secondary
 
-          entries=[]
-          total_sources=0
-          resolved_dynamic=0
-          drm_entries=0
-          multi_group_channels=0
+          def rank(x):
+              u=x.get("url","").lower()
+              if x.get("clearkey") and ".mpd" in u: return 0
+              if ".m3u8" in u: return 1
+              if ".mpd" in u: return 2
+              if "/api/live/play.m3u8" in u: return 3
+              return 4
+
+          entries_by_group={g:[] for g in groups_order}
+          unresolved_only=[]
+          total_variants=0
+          drm_variants=0
+          dynamic_resolved=0
 
           for ci,c in enumerate(channels):
               title=str(c.get("title") or c.get("id") or "Unknown channel")
-              tvgid=str(c.get("tvgId") or c.get("id") or "")
+              cid=str(c.get("id") or title)
+              tvgid=str(c.get("tvgId") or cid)
               logo=str(c.get("thumbnail") or c.get("logo") or "")
-              groups=[str(g) for g in (c.get("group") or []) if g]
-              if len(groups)>1: multi_group_channels += 1
+              memberships=[str(g) for g in c.get("group") or [] if g] or ["vAppTV"]
 
               candidates=[]
-              for ui,spec in enumerate(c.get("urls") or []):
-                  for x in resolved_map.get((ci,ui),[]):
-                      x=dict(x); x["origIndex"]=ui; candidates.append(x)
-              # stable dedupe
-              ded=[]; seen_urls=set()
-              for x in sorted(candidates,key=rank_source):
+              for ui,_spec in enumerate(c.get("urls") or []):
+                  candidates += resolved.get((ci,ui),[])
+              # Prefer unique URL/key pairs; keep first/best headers.
+              best={}
+              for x in sorted(candidates,key=rank):
                   u=x.get("url")
+                  if not http_url(u): continue
                   key=(u,x.get("clearkey") or "")
-                  if u and key not in seen_urls:
-                      seen_urls.add(key); ded.append(x)
-              candidates=ded
-              total_sources += len(candidates)
-              for x in candidates:
-                  if x.get("source") in ("flow-resolved","json-resolved","parser-resolved","shaka-native"):
-                      resolved_dynamic += 1
-                  if x.get("clearkey"): drm_entries += 1
+                  if key not in best:
+                      best[key]=x
+              candidates=list(best.values())
+              candidates.sort(key=rank)
+              total_variants += len(candidates)
+              drm_variants += sum(1 for x in candidates if x.get("clearkey"))
+              dynamic_resolved += sum(1 for x in candidates if x.get("source") in ("shaka-native","flow-resolved","json-resolved","parser-resolved","play-json","nested-json","nested-html"))
 
-              # Preserve every group membership. If a channel has no group, use App.
-              if not groups: groups=["vAppTV"]
+              if not candidates:
+                  # Keep an app-only fallback for completeness; it may require WebView.
+                  for spec in c.get("urls") or []:
+                      if isinstance(spec,dict) and isinstance(spec.get("url"),str):
+                          u=spec["url"]
+                          if http_url(u):
+                              candidates=[{"url":u,"headers":spec.get("headers") if isinstance(spec.get("headers"),dict) else {}, "clearkey":None, "source":"app-fallback"}]
+                              break
 
-              for g in groups:
+              for g in memberships:
+                  if g not in entries_by_group: entries_by_group[g]=[]
                   for n,x in enumerate(candidates):
-                      entries.append((g,channel_index(c),title,tvgid,logo,x,n))
+                      entries_by_group[g].append((ch_index(c),title,cid,tvgid,logo,x,n))
 
-          out=["#EXTM3U"]
-          entry_no=0
-          for group in group_order + (["vAppTV"] if "vAppTV" not in group_order else []):
-              ge=[e for e in entries if e[0]==group]
-              ge.sort(key=lambda e:(e[1], e[2], e[6]))
-              for g,idx,title,tvgid,logo,x,n in ge:
-                  url=x["url"]
-                  display=title if n==0 else f"{title} • Nguồn dự phòng {n+1}"
+          epgs=[str(x) for x in data.get("epgList") or [] if x]
+          header="#EXTM3U"
+          if epgs: header += ' x-tvg-url="' + escape(",".join(epgs),quote=True) + '"'
+          out=[header]
+          entry_count=0
+          for g in groups_order+([g for g in entries_by_group if g not in groups_order]):
+              arr=entries_by_group.get(g,[])
+              arr.sort(key=lambda e:(e[0],e[1],e[6]))
+              for idx,title,cid,tvgid,logo,x,n in arr:
+                  disp=title if n==0 else f"{title} • Nguồn {n+1}"
                   line="#EXTINF:-1"
-                  if tvgid: line += ' tvg-id="'+escape(tvgid,quote=True)+'"'
+                  line += ' tvg-id="'+escape(tvgid,quote=True)+'"'
                   line += ' tvg-name="'+escape(title,quote=True)+'"'
+                  line += ' tvg-chno="'+escape(str(idx),quote=True)+'"'
                   if logo: line += ' tvg-logo="'+escape(logo,quote=True)+'"'
-                  line += ' group-title="'+escape(g,quote=True)+'",'+display
+                  line += ' group-title="'+escape(g,quote=True)+'",'+disp
                   out.append(line)
-                  out.append("#X-APP-CHANNEL-ID:"+str(next((c.get("id") for c in channels if c.get("title")==title),title)))
-                  out.append("#X-APP-CHANNEL-INDEX:"+str(idx if idx<10**9 else ""))
-                  if x.get("clearkey") and re.search(r"\.mpd(\?|$)",url,re.I):
-                      out.append("#KODIPROP:inputstream=inputstream.adaptive")
-                      out.append("#KODIPROP:inputstream.adaptive.manifest_type=mpd")
-                      out.append("#KODIPROP:inputstream.adaptive.license_type=clearkey")
-                      out.append("#KODIPROP:inputstream.adaptive.license_key="+str(x["clearkey"]))
+                  out.append("#X-APP-CHANNEL-ID:"+cid)
+                  out.append("#X-APP-CHANNEL-INDEX:"+str(idx))
+                  u=x.get("url","")
+                  if x.get("clearkey") and re.search(r"\.mpd(\?|$)",u,re.I):
+                      out += [
+                          "#KODIPROP:inputstream=inputstream.adaptive",
+                          "#KODIPROP:inputstream.adaptive.manifest_type=mpd",
+                          "#KODIPROP:inputstream.adaptive.license_type=clearkey",
+                          "#KODIPROP:inputstream.adaptive.license_key="+str(x["clearkey"])
+                      ]
                   hs=x.get("headers") if isinstance(x.get("headers"),dict) else {}
                   ref=hs.get("Referer") or hs.get("referer")
                   ua=hs.get("User-Agent") or hs.get("user-agent")
                   if ref: out.append("#EXTVLCOPT:http-referrer="+str(ref))
                   if ua: out.append("#EXTVLCOPT:http-user-agent="+str(ua))
-                  out.append(url)
-                  entry_no += 1
+                  out.append(u)
+                  entry_count += 1
 
-          m3u=Path("vAppTV_1.0.2_NM7_FULL.m3u")
-          m3u.write_text("\n".join(out)+"\n",encoding="utf-8")
-
+          Path("vAppTV_1.0.2_NM7_FULL.m3u").write_text("\n".join(out)+"\n",encoding="utf-8")
           summary={
             "source_endpoint":API,
             "api_index":data.get("index"),
             "configured_groups":main_groups,
-            "secondary_groups":secondary_groups,
+            "secondary_groups":secondary,
             "channel_objects":len(channels),
-            "channels_with_multiple_groups":multi_group_channels,
-            "resolved_playable_source_variants":total_sources,
-            "dynamic_sources_resolved":resolved_dynamic,
-            "clearkey_drm_variants":drm_entries,
-            "m3u_entries":entry_no,
+            "channels_with_multiple_groups":sum(1 for c in channels if len(c.get("group") or [])>1),
+            "resolved_playable_source_variants":total_variants,
+            "dynamic_sources_resolved":dynamic_resolved,
+            "clearkey_drm_variants":drm_variants,
+            "m3u_entries":entry_count,
+            "epg_urls":len(epgs),
             "generated_utc":datetime.now(timezone.utc).isoformat()
           }
           Path("vAppTV_1.0.2_NM7_SUMMARY.json").write_text(json.dumps(summary,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
           PY
 
-      - name: Upload full M3U
+      - name: Upload final M3U
         uses: actions/upload-artifact@v4
         with:
-          name: vAppTV-1.0.2-NM7-FULL
+          name: vAppTV-1.0.2-NM7-FULL-V2
           path: |
             vAppTV_1.0.2_NM7_FULL.m3u
             vAppTV_1.0.2_NM7_SUMMARY.json
