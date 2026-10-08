@@ -156,7 +156,10 @@ jobs:
               if not headers:
                   headers = {"User-Agent": BROWSER_UA}
 
-              if not provider:
+              # vAppTV marks ordinary playable URLs as provider="direct".
+              # Treat them exactly like provider-less sources so the native
+              # source (for example /api/live/play.m3u8?vid=195) is not lost.
+              if not provider or provider == "direct":
                   shaka = parse_shaka(url)
                   if shaka:
                       shaka["headers"] = headers
@@ -277,12 +280,13 @@ jobs:
           def source_rank(x):
               url = clean(x.get("url")).lower()
               key = x.get("clearkey")
-              # Native ClearKey MPD is preferred when vAppTV supplied it.
-              if key and re.search(r"\.mpd(\?|$)", url, re.I):
+              # Prefer the same HLS/app endpoint that vAppTV itself exposes.
+              # Native ClearKey MPD remains available as a fallback candidate.
+              if "/api/live/play.m3u8" in url:
                   return 0
               if re.search(r"\.m3u8(\?|$)", url, re.I):
                   return 1
-              if "/api/live/play.m3u8" in url:
+              if key and re.search(r"\.mpd(\?|$)", url, re.I):
                   return 2
               if re.search(r"\.mpd(\?|$)", url, re.I):
                   return 3
@@ -370,7 +374,9 @@ jobs:
               else:
                   unresolved.append({"id": cid, "title": title})
 
-              # Pick best current source. Keep source metadata for headers/DRM.
+              # Pick best current source while preserving the direct app endpoint
+              # when vAppTV supplied one. This avoids replacing a working app
+              # resolver with a native DRM MPD that may behave differently in ExoPlayer.
               chosen = sorted(candidates, key=source_rank)[0] if candidates else None
 
               for group in groups:
