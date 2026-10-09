@@ -1,0 +1,63 @@
+name: Update VietMiTV merged playlist
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "tools/build-vietmitv-merge.mjs"
+      - ".github/workflows/update-vietmitv-merge.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-vietmitv-merge
+  cancel-in-progress: false
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v5
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Generate merged playlist and validate it
+        run: |
+          set -euo pipefail
+          node --check tools/build-vietmitv-merge.mjs
+          node tools/build-vietmitv-merge.mjs
+          test -s generated/vietmitv-merge.m3u
+          grep -Eq '^#EXTM3U' generated/vietmitv-merge.m3u
+          grep -Eq '^#EXTINF:' generated/vietmitv-merge.m3u
+          for group in "Giờ Vàng TV" "Gà Vàng 24h TV" "Gà Vàng 33 TV" "S8 TV" "Sao Kê TV"; do
+            grep -Fq "group-title=\"$group\"" generated/vietmitv-merge.m3u || {
+              echo "Missing expected group: $group"
+              exit 1
+            }
+          done
+
+      - name: Commit only when playlist content changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- generated/vietmitv-merge.m3u; then
+            echo "Playlist unchanged; no commit required."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add generated/vietmitv-merge.m3u
+          git commit -m "Update generated VietMiTV merged playlist"
+          git push origin HEAD:main
