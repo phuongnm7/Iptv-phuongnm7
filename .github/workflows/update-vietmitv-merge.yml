@@ -52,12 +52,13 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if git diff --quiet -- generated/vietmitv-merge.m3u; then
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # -f also handles generated/*.m3u if ignored by repository rules.
+          git add -f generated/vietmitv-merge.m3u
+          if git diff --cached --quiet -- generated/vietmitv-merge.m3u; then
             echo "Playlist unchanged; no commit required."
             exit 0
           fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add generated/vietmitv-merge.m3u
           git commit -m "Update generated VietMiTV merged playlist"
           git push origin HEAD:main
