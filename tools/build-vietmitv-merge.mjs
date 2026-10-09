@@ -128,14 +128,104 @@ function uniqueGroups(entries) {
   return [...new Set(entries.map(entryGroup).filter(Boolean))];
 }
 
+// Known non-DRM HLS replacements for the three channels that failed playback.
+// VTV URLs follow the current FPTPlay HLS index endpoints present in recent public playlists.
+// ON Phim Viet uses the vAppTV playlist's plain HLS resolver URL, without KODIPROP/license metadata.
+const PLAYBACK_OVERRIDES = [
+  {
+    key: "vtv1",
+    url: "https://live-a.fptplay53.net/live/media/vtv1/live247-hls-avc/index.m3u8",
+    ua: "",
+  },
+  {
+    key: "vtv10",
+    url: "https://live-a.fptplay53.net/live/media/vtv10/live247-hls-avc/index.m3u8",
+    ua: "",
+  },
+  {
+    key: "onphimviet",
+    url: "https://freem3u.xyz/api/live/play.m3u8?vid=175",
+    ua: "Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2",
+  },
+];
+
+function entryDisplayName(entry) {
+  const extinf = entry.find((line) => /^\\s*#EXTINF:/i.test(line)) || "";
+  const comma = extinf.lastIndexOf(",");
+  return comma >= 0 ? extinf.slice(comma + 1).trim() : "";
+}
+
+function entryChannelId(entry) {
+  const extinf = entry.find((line) => /^\\s*#EXTINF:/i.test(line)) || "";
+  const match = /\\btvg-id\\s*=\\s*["']([^"']*)["']/i.exec(extinf);
+  return match ? match[1].trim() : "";
+}
+
+function applyPlaybackOverrides(entries) {
+  const result = [];
+  const found = new Set();
+
+  for (const entry of entries) {
+    const group = normalizeGroup(entryGroup(entry));
+    const name = normalizeGroup(entryDisplayName(entry));
+    const id = normalizeGroup(entryChannelId(entry));
+    let override = null;
+
+    if (group === normalizeGroup("VTV") && (name === "vtv1" || id === "vtv1hd" || id === "vtv1")) {
+      override = PLAYBACK_OVERRIDES.find((x) => x.key === "vtv1");
+    } else if (group === normalizeGroup("VTV") && (name === "vtv10" || id === "vtv10hd" || id === "vtv10")) {
+      override = PLAYBACK_OVERRIDES.find((x) => x.key === "vtv10");
+    } else if (
+      group === normalizeGroup("VTVcab") &&
+      (name.includes("onphimviet") || id.includes("onphimviet"))
+    ) {
+      override = PLAYBACK_OVERRIDES.find((x) => x.key === "onphimviet");
+    }
+
+    if (!override) {
+      result.push(entry);
+      continue;
+    }
+
+    const updated = entry.filter((line) => !/^\\s*#EXTVLCOPT:http-user-agent=/i.test(line));
+    let replacedUrl = false;
+    for (let i = 0; i < updated.length; i++) {
+      const value = updated[i].trim();
+      if (!value || value.startsWith("#")) continue;
+      if (/^(https?|rtsp|rtmp|udp):\\/\\//i.test(value.split("|")[0])) {
+        updated[i] = override.url;
+        replacedUrl = true;
+        break;
+      }
+    }
+    if (!replacedUrl) {
+      throw new Error("Không tìm thấy URL để thay thế cho kênh " + entryDisplayName(entry));
+    }
+    if (override.ua) {
+      const extinfIndex = updated.findIndex((line) => /^\\s*#EXTINF:/i.test(line));
+      updated.splice(extinfIndex + 1, 0, "#EXTVLCOPT:http-user-agent=" + override.ua);
+    }
+    found.add(override.key);
+    result.push(updated);
+  }
+
+  const missing = PLAYBACK_OVERRIDES.map((x) => x.key).filter((key) => !found.has(key));
+  if (missing.length) {
+    throw new Error("Không tìm thấy đủ kênh cần sửa trong nguồn mới: " + missing.join(", "));
+  }
+  return { entries: result, applied: [...found] };
+}
+
 function composePlaylist(tvM3u, sportsM3u, fallbackM3u) {
   const header = tvM3u.split(/\r?\n/).find((line) => /^\s*#EXTM3U\b/i.test(line)) || "#EXTM3U";
 
   const rawTvEntries = extractEntries(tvM3u);
-  const tvEntries = filterEntries(rawTvEntries, MAIN_GROUP_KEYS, true);
-  if (!tvEntries.length) {
+  const filteredTvEntries = filterEntries(rawTvEntries, MAIN_GROUP_KEYS, true);
+  if (!filteredTvEntries.length) {
     throw new Error("Sau khi lọc, nguồn truyền hình không còn kênh hợp lệ thuộc 10 nhóm yêu cầu");
   }
+  const playback = applyPlaybackOverrides(filteredTvEntries);
+  const tvEntries = playback.entries;
 
   const liveSports = filterEntries(extractEntries(sportsM3u), SPORTS_GROUP_KEYS, true);
   const fallbackSports = filterEntries(extractEntries(fallbackM3u), SPORTS_GROUP_KEYS, true);
@@ -165,6 +255,7 @@ function composePlaylist(tvM3u, sportsM3u, fallbackM3u) {
     m3u: validated,
     rawTvEntries: rawTvEntries.length,
     tvEntries: tvEntries.length,
+    playbackOverrides: playback.applied,
     drmExcludedTv: rawTvEntries.filter((entry) =>
       MAIN_GROUP_KEYS.has(normalizeGroup(entryGroup(entry))) && isDrmEntry(entry)
     ).length,
@@ -206,6 +297,7 @@ async function main() {
     drmFilter: "enabled",
     selectedTvChannels: result.tvEntries,
     removedDrmTvChannels: result.drmExcludedTv,
+    playbackOverrides: result.playbackOverrides,
     tvGroups: result.tvGroups,
     sportsSourceMode: sportsRaw === previousOutput ? "live-unavailable-previous-playlist-fallback" : "live",
     liveSportChannels: result.liveSportEntries,
