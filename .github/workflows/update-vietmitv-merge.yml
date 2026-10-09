@@ -52,7 +52,7 @@ jobs:
           path = Path("generated/vietmitv-merge.m3u")
           text = path.read_text(encoding="utf-8-sig")
           main_groups = {
-              "htv", "htvc", "quoc te", "sctv", "su kien fpt play",
+              "htv", "htvc", "quoc te", "sctv", "su kien fpt",
               "su kien tv360", "the thao", "vtv", "vtvcab", "giai tri",
           }
           sports_groups = {
@@ -108,6 +108,12 @@ jobs:
           missing = expected_sports - groups
           if missing:
               raise SystemExit("Missing sports groups: " + ", ".join(sorted(missing)))
+          replacement_fpt = normalize("Sự kiện FPT")
+          legacy_fpt = normalize("Sự Kiện FPT PLAY")
+          if replacement_fpt not in groups:
+              raise SystemExit("Missing replacement group: Sự kiện FPT")
+          if legacy_fpt in groups:
+              raise SystemExit("Legacy group must be fully removed: Sự Kiện FPT PLAY")
           if not entries:
               raise SystemExit("No valid channel entries generated")
           print(f"Validated {len(entries)} entries; {len(groups)} allowed groups; no DRM-marked entries.")
