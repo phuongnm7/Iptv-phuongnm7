@@ -2,6 +2,8 @@ import { readFile, writeFile, mkdir } from "node:fs/promises";
 import path from "node:path";
 
 const TV_SOURCE_URL = "https://tinyurl.com/vmt47";
+// Replace only the legacy FPT event group with the group supplied by the user's playlist.
+const FPT_EVENT_SOURCE_URL = "https://tinyurl.com/tivinm7";
 // Preserve the existing sports playlist URL exactly; only select the five configured groups.
 const SPORTS_URL =
   "https://raw.githubusercontent.com/phuongnm7/Iptv-phuongnm7/main/sports-auto.m3u?utm_source=chatgpt.com";
@@ -10,7 +12,7 @@ const MAIN_GROUPS = [
   "HTVC",
   "Quốc Tế",
   "SCTV",
-  "Sự Kiện FPT PLAY",
+  "Sự kiện FPT",
   "Sự Kiện TV360",
   "Thể Thao",
   "VTV",
@@ -39,6 +41,14 @@ function normalizeGroup(value) {
 }
 
 const MAIN_GROUP_KEYS = new Set(MAIN_GROUPS.map(normalizeGroup));
+const LEGACY_FPT_GROUP_KEY = normalizeGroup("Sự Kiện FPT PLAY");
+const FPT_EVENT_GROUP_KEY = normalizeGroup("Sự kiện FPT");
+// Source selection still accepts the legacy group so it can be removed in-place.
+// The final output whitelist contains only the replacement group name.
+const SOURCE_MAIN_GROUP_KEYS = new Set([
+  ...MAIN_GROUPS.filter((group) => normalizeGroup(group) !== FPT_EVENT_GROUP_KEY),
+  "Sự Kiện FPT PLAY",
+].map(normalizeGroup));
 const SPORTS_GROUP_KEYS = new Set(SPORTS_GROUPS.map(normalizeGroup));
 
 function validatePlaylist(input, label) {
@@ -103,6 +113,18 @@ function entryGroup(entry) {
   if (match) return match[1].trim();
   const extgrp = entry.find((line) => /^\s*#EXTGRP:/i.test(line)) || "";
   return extgrp.replace(/^\s*#EXTGRP:/i, "").trim();
+}
+
+function setEntryGroup(entry, targetGroup) {
+  return entry.map((line) => {
+    if (/^\s*#EXTINF:/i.test(line)) {
+      return line.replace(/\bgroup-title\s*=\s*(["'])[^"']*\1/i, (_match, quote) =>
+        "group-title=" + quote + targetGroup + quote
+      );
+    }
+    if (/^\s*#EXTGRP:/i.test(line)) return "#EXTGRP:" + targetGroup;
+    return line;
+  });
 }
 
 function isDrmEntry(entry) {
@@ -227,15 +249,50 @@ function applyPlaybackOverrides(entries) {
   return { entries: result, applied: [...found] };
 }
 
-function composePlaylist(tvM3u, sportsM3u, fallbackM3u) {
+function composePlaylist(tvM3u, fptEventM3u, sportsM3u, fallbackM3u) {
   const header = tvM3u.split(/\r?\n/).find((line) => /^\s*#EXTM3U\b/i.test(line)) || "#EXTM3U";
 
   const rawTvEntries = extractEntries(tvM3u);
-  const filteredTvEntries = filterEntries(rawTvEntries, MAIN_GROUP_KEYS, true);
-  if (!filteredTvEntries.length) {
-    throw new Error("Sau khi lọc, nguồn truyền hình không còn kênh hợp lệ thuộc 10 nhóm yêu cầu");
+  const filteredSourceTvEntries = filterEntries(rawTvEntries, SOURCE_MAIN_GROUP_KEYS, true);
+  if (!filteredSourceTvEntries.length) {
+    throw new Error("Sau khi lọc, nguồn truyền hình không còn kênh hợp lệ thuộc các nhóm yêu cầu");
   }
-  const playback = applyPlaybackOverrides(filteredTvEntries);
+
+  // Extract only the requested group from the separate TinyURL playlist.
+  const replacementFptEntries = filterEntries(
+    extractEntries(fptEventM3u),
+    new Set([FPT_EVENT_GROUP_KEY]),
+    true
+  );
+  if (!replacementFptEntries.length) {
+    throw new Error("Nguồn tinyurl.com/tivinm7 không có kênh hợp lệ thuộc nhóm Sự kiện FPT");
+  }
+
+  // Remove every legacy "Sự Kiện FPT PLAY" entry, then insert the replacement group
+  // at the old group's first position. All other TV entries keep their original order.
+  const firstLegacyFptIndex = filteredSourceTvEntries.findIndex(
+    (entry) => normalizeGroup(entryGroup(entry)) === LEGACY_FPT_GROUP_KEY
+  );
+  const baseTvEntries = filteredSourceTvEntries.filter(
+    (entry) => normalizeGroup(entryGroup(entry)) !== LEGACY_FPT_GROUP_KEY
+  );
+  const fallbackInsertionIndex = baseTvEntries.findIndex(
+    (entry) => normalizeGroup(entryGroup(entry)) === normalizeGroup("Sự Kiện TV360")
+  );
+  const insertionIndex = firstLegacyFptIndex >= 0
+    ? filteredSourceTvEntries
+        .slice(0, firstLegacyFptIndex)
+        .filter((entry) => normalizeGroup(entryGroup(entry)) !== LEGACY_FPT_GROUP_KEY).length
+    : fallbackInsertionIndex >= 0 ? fallbackInsertionIndex : baseTvEntries.length;
+  const renamedFptEntries = replacementFptEntries.map(
+    (entry) => setEntryGroup(entry, "Sự kiện FPT")
+  );
+  const tvEntriesBeforeOverrides = [
+    ...baseTvEntries.slice(0, insertionIndex),
+    ...renamedFptEntries,
+    ...baseTvEntries.slice(insertionIndex),
+  ];
+  const playback = applyPlaybackOverrides(tvEntriesBeforeOverrides);
   const tvEntries = playback.entries;
 
   const liveSports = filterEntries(extractEntries(sportsM3u), SPORTS_GROUP_KEYS, true);
@@ -271,6 +328,7 @@ function composePlaylist(tvM3u, sportsM3u, fallbackM3u) {
       MAIN_GROUP_KEYS.has(normalizeGroup(entryGroup(entry))) && isDrmEntry(entry)
     ).length,
     tvGroups: uniqueGroups(tvEntries),
+    fptEventEntries: renamedFptEntries.length,
     sportEntries: sportsEntries.length,
     sportGroups: uniqueGroups(sportsEntries),
     liveSportEntries: liveSports.length,
@@ -288,28 +346,32 @@ async function main() {
   }
 
   const tvPromise = fetchText(TV_SOURCE_URL, "Nguồn M3U https://tinyurl.com/vmt47");
+  const fptEventPromise = fetchText(FPT_EVENT_SOURCE_URL, "Nguồn nhóm Sự kiện FPT https://tinyurl.com/tivinm7");
   let sportsPromise = fetchText(SPORTS_URL, "Nguồn sports-auto.m3u").catch((error) => {
     console.warn("Nguồn thể thao trực tiếp lỗi; sẽ dùng các nhóm còn thiếu từ bản M3U trước:", error instanceof Error ? error.message : String(error));
     return previousOutput;
   });
-  const [tvRaw, sportsRaw] = await Promise.all([tvPromise, sportsPromise]);
+  const [tvRaw, fptEventRaw, sportsRaw] = await Promise.all([tvPromise, fptEventPromise, sportsPromise]);
   const tvM3u = validatePlaylist(tvRaw, "Nguồn truyền hình tinyurl");
+  const fptEventM3u = validatePlaylist(fptEventRaw, "Nguồn nhóm Sự kiện FPT");
   const sportsM3u = validatePlaylist(sportsRaw, "Nguồn thể thao / bản dự phòng");
   const fallbackM3u = previousOutput && /^\s*#EXTM3U\b/im.test(previousOutput) ? previousOutput : sportsM3u;
 
-  const result = composePlaylist(tvM3u, sportsM3u, fallbackM3u);
+  const result = composePlaylist(tvM3u, fptEventM3u, sportsM3u, fallbackM3u);
   await mkdir(path.dirname(OUTPUT_PATH), { recursive: true });
   await writeFile(OUTPUT_PATH, result.m3u, "utf8");
 
   console.log(JSON.stringify({
     output: OUTPUT_PATH,
     tvSource: TV_SOURCE_URL,
+    fptEventSource: FPT_EVENT_SOURCE_URL,
     sportSource: SPORTS_URL,
     drmFilter: "enabled",
     selectedTvChannels: result.tvEntries,
     removedDrmTvChannels: result.drmExcludedTv,
     playbackOverrides: result.playbackOverrides,
     tvGroups: result.tvGroups,
+    replacementFptEventChannels: result.fptEventEntries,
     sportsSourceMode: sportsRaw === previousOutput ? "live-unavailable-previous-playlist-fallback" : "live",
     liveSportChannels: result.liveSportEntries,
     fallbackSportChannels: result.fallbackSportEntries,
