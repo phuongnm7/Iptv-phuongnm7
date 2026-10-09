@@ -150,14 +150,14 @@ const PLAYBACK_OVERRIDES = [
 ];
 
 function entryDisplayName(entry) {
-  const extinf = entry.find((line) => /^\\s*#EXTINF:/i.test(line)) || "";
+  const extinf = entry.find((line) => line.trimStart().toUpperCase().startsWith("#EXTINF:")) || "";
   const comma = extinf.lastIndexOf(",");
   return comma >= 0 ? extinf.slice(comma + 1).trim() : "";
 }
 
 function entryChannelId(entry) {
-  const extinf = entry.find((line) => /^\\s*#EXTINF:/i.test(line)) || "";
-  const match = /\\btvg-id\\s*=\\s*["']([^"']*)["']/i.exec(extinf);
+  const extinf = entry.find((line) => line.trimStart().toUpperCase().startsWith("#EXTINF:")) || "";
+  const match = /tvg-id\s*=\s*["']([^"']*)["']/i.exec(extinf);
   return match ? match[1].trim() : "";
 }
 
@@ -171,13 +171,13 @@ function applyPlaybackOverrides(entries) {
     const id = normalizeGroup(entryChannelId(entry));
     let override = null;
 
-    if (group === normalizeGroup("VTV") && (name === "vtv1" || id === "vtv1hd" || id === "vtv1")) {
+    if (group === normalizeGroup("VTV") && (name === "VTV1".toLocaleLowerCase("vi") || id === "vtv1hd" || id === "vtv1")) {
       override = PLAYBACK_OVERRIDES.find((x) => x.key === "vtv1");
     } else if (group === normalizeGroup("VTV") && (name === "vtv10" || id === "vtv10hd" || id === "vtv10")) {
       override = PLAYBACK_OVERRIDES.find((x) => x.key === "vtv10");
     } else if (
       group === normalizeGroup("VTVcab") &&
-      (name.includes("onphimviet") || id.includes("onphimviet"))
+      (name.replace(/\s+/g, "").includes("onphimviet") || id.includes("onphimviet"))
     ) {
       override = PLAYBACK_OVERRIDES.find((x) => x.key === "onphimviet");
     }
@@ -187,12 +187,12 @@ function applyPlaybackOverrides(entries) {
       continue;
     }
 
-    const updated = entry.filter((line) => !/^\\s*#EXTVLCOPT:http-user-agent=/i.test(line));
+    const updated = entry.filter((line) => !line.trimStart().toUpperCase().startsWith("#EXTVLCOPT:HTTP-USER-AGENT="));
     let replacedUrl = false;
     for (let i = 0; i < updated.length; i++) {
       const value = updated[i].trim();
       if (!value || value.startsWith("#")) continue;
-      if (/^(https?|rtsp|rtmp|udp):\\/\\//i.test(value.split("|")[0])) {
+      if (/^(https?|rtsp|rtmp|udp):\/\//i.test(value.split("|")[0])) {
         updated[i] = override.url;
         replacedUrl = true;
         break;
@@ -202,7 +202,8 @@ function applyPlaybackOverrides(entries) {
       throw new Error("Không tìm thấy URL để thay thế cho kênh " + entryDisplayName(entry));
     }
     if (override.ua) {
-      const extinfIndex = updated.findIndex((line) => /^\\s*#EXTINF:/i.test(line));
+      const extinfIndex = updated.findIndex((line) => line.trimStart().toUpperCase().startsWith("#EXTINF:"));
+      if (extinfIndex < 0) throw new Error("Mục thiếu EXTINF cho kênh " + entryDisplayName(entry));
       updated.splice(extinfIndex + 1, 0, "#EXTVLCOPT:http-user-agent=" + override.ua);
     }
     found.add(override.key);
