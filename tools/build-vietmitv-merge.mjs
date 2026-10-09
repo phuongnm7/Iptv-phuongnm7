@@ -1,41 +1,64 @@
-import { mkdtemp, writeFile, mkdir, rm } from "node:fs/promises";
-import { tmpdir } from "node:os";
+import { readFile, writeFile, mkdir } from "node:fs/promises";
 import path from "node:path";
-import { pathToFileURL } from "node:url";
 
-const MAIN_MODULE_URL =
-  "https://raw.githubusercontent.com/phuongnm7/nm7-tv-web/main/api/vietmitv-source.js";
-const FALLBACK_MODULE_URL =
-  "https://raw.githubusercontent.com/phuongnm7/nm7-tv-web/main/api/vietmitv-sports-fallback.js";
-// Deliberately preserve the original sports playlist URL byte-for-byte.
+const TV_SOURCE_URL = "https://tinyurl.com/vmt47";
+// Preserve the existing sports playlist URL exactly; only select the five configured groups.
 const SPORTS_URL =
   "https://raw.githubusercontent.com/phuongnm7/Iptv-phuongnm7/main/sports-auto.m3u?utm_source=chatgpt.com";
-const TARGET_GROUPS = [
+const MAIN_GROUPS = [
+  "HTV",
+  "HTVC",
+  "Quốc Tế",
+  "SCTV",
+  "Sự Kiện FPT PLAY",
+  "Sự Kiện TV360",
+  "Thể Thao",
+  "VTV",
+  "VTVcab",
+  "Giải Trí",
+];
+const SPORTS_GROUPS = [
   "Giờ Vàng TV",
   "Gà Vàng 24h TV",
   "Gà Vàng 33 TV",
   "S8 TV",
   "Sao Kê TV",
 ];
+const OUTPUT_PATH = path.resolve("generated/vietmitv-merge.m3u");
+// Use the previous generated file only as a last-known-good sports fallback.
+// Its TV channels are never carried forward.
+const FALLBACK_PATH = OUTPUT_PATH;
+
+function normalizeGroup(value) {
+  return String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/gi, "d")
+    .toLocaleLowerCase("vi")
+    .replace(/[^a-z0-9]/g, "");
+}
+
+const MAIN_GROUP_KEYS = new Set(MAIN_GROUPS.map(normalizeGroup));
+const SPORTS_GROUP_KEYS = new Set(SPORTS_GROUPS.map(normalizeGroup));
 
 function validatePlaylist(input, label) {
   const value = String(input || "").replace(/^\uFEFF/, "").replace(/\r\n?/g, "\n");
   if (!/^\s*#EXTM3U\b/im.test(value) || !/^\s*#EXTINF:/im.test(value)) {
     throw new Error(label + " không phải M3U hợp lệ");
   }
-  return value;
+  return value.endsWith("\n") ? value : value + "\n";
 }
 
-async function fetchText(url, label, timeoutMs = 15000) {
+async function fetchText(url, label, timeoutMs = 20000) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
     const response = await fetch(url, {
       headers: {
-        "Accept": "application/x-mpegURL, audio/x-mpegurl, text/plain, */*",
+        Accept: "application/x-mpegURL, audio/x-mpegurl, text/plain, */*",
         "Cache-Control": "no-cache, no-store",
-        "Pragma": "no-cache",
-        "User-Agent": "NM7-VietMiTV-GitHub-Generator/1",
+        Pragma: "no-cache",
+        "User-Agent": "NM7-Filtered-TV-Playlist-Generator/1",
       },
       cache: "no-store",
       redirect: "follow",
@@ -46,10 +69,6 @@ async function fetchText(url, label, timeoutMs = 15000) {
   } finally {
     clearTimeout(timer);
   }
-}
-
-function normalizeGroup(value) {
-  return String(value || "").normalize("NFC").trim().replace(/\s+/g, " ").toLocaleLowerCase("vi");
 }
 
 function extractEntries(m3u) {
@@ -64,7 +83,8 @@ function extractEntries(m3u) {
     });
     if (hasUrl) entries.push(current);
   };
-  for (const line of m3u.split(/\r?\n/)) {
+
+  for (const line of String(m3u || "").replace(/^\uFEFF/, "").split(/\r?\n/)) {
     if (/^\s*#EXTM3U\b/i.test(line)) continue;
     if (/^\s*#EXTINF:/i.test(line)) {
       finish();
@@ -85,84 +105,118 @@ function entryGroup(entry) {
   return extgrp.replace(/^\s*#EXTGRP:/i, "").trim();
 }
 
-function composePlaylist(mainM3u, sportsM3u, fallbackM3u) {
-  const mainLines = mainM3u.split(/\r?\n/);
-  const header = mainLines.find((line) => /^\s*#EXTM3U\b/i.test(line)) || "#EXTM3U";
-  const mainBody = mainLines.filter((line) => !/^\s*#EXTM3U\b/i.test(line)).join("\n").trim();
-  if (!mainBody) throw new Error("M3U chính không có nội dung kênh");
-
-  const targets = new Set(TARGET_GROUPS.map(normalizeGroup));
-  const liveExtras = extractEntries(sportsM3u).filter((entry) => targets.has(normalizeGroup(entryGroup(entry))));
-  const liveGroups = new Set(liveExtras.map((entry) => normalizeGroup(entryGroup(entry))));
-  const missingGroups = new Set([...targets].filter((group) => !liveGroups.has(group)));
-  const fallbackExtras = extractEntries(fallbackM3u).filter((entry) =>
-    targets.has(normalizeGroup(entryGroup(entry))) && missingGroups.has(normalizeGroup(entryGroup(entry)))
+function isDrmEntry(entry) {
+  const text = entry.join("\n");
+  return (
+    /inputstream\.adaptive\.license_(?:type|key|url|data)/i.test(text) ||
+    /(?:^|[^a-z])license[_-]?(?:type|key|url|server|data)\s*["']?\s*[:=]/im.test(text) ||
+    /(?:com\.widevine\.alpha|org\.w3\.clearkey|widevine|playready|clearkey|skd:\/\/)/i.test(text) ||
+    /\bdrm\s*[:=]\s*(?:true|1|yes)\b/i.test(text) ||
+    /#EXT-X-(?:KEY|SESSION-KEY):[^\r\n]*METHOD\s*=\s*SAMPLE-AES(?:-CTR)?/i.test(text)
   );
-  const extras = liveExtras.concat(fallbackExtras);
-  const availableGroups = new Set(extras.map((entry) => normalizeGroup(entryGroup(entry))));
-  const missing = [...targets].filter((group) => !availableGroups.has(group));
-  if (missing.length) throw new Error("Thiếu nhóm thể thao cả ở nguồn chính lẫn dự phòng: " + missing.join(", "));
+}
 
-  const merged = header + "\n" + mainBody + "\n" +
-    extras.map((entry) => entry.join("\n").trim()).join("\n") + "\n";
-  const mainEntries = extractEntries(mainM3u);
-  const mainGroups = [...new Set(mainEntries.map((entry) => entryGroup(entry)).filter(Boolean))];
-  const extraGroups = [...new Set(extras.map((entry) => entryGroup(entry)))];
+function filterEntries(entries, allowedGroups, removeDrm = true) {
+  return entries.filter((entry) => {
+    if (!allowedGroups.has(normalizeGroup(entryGroup(entry)))) return false;
+    if (removeDrm && isDrmEntry(entry)) return false;
+    return true;
+  });
+}
+
+function uniqueGroups(entries) {
+  return [...new Set(entries.map(entryGroup).filter(Boolean))];
+}
+
+function composePlaylist(tvM3u, sportsM3u, fallbackM3u) {
+  const header = tvM3u.split(/\r?\n/).find((line) => /^\s*#EXTM3U\b/i.test(line)) || "#EXTM3U";
+
+  const rawTvEntries = extractEntries(tvM3u);
+  const tvEntries = filterEntries(rawTvEntries, MAIN_GROUP_KEYS, true);
+  if (!tvEntries.length) {
+    throw new Error("Sau khi lọc, nguồn truyền hình không còn kênh hợp lệ thuộc 10 nhóm yêu cầu");
+  }
+
+  const liveSports = filterEntries(extractEntries(sportsM3u), SPORTS_GROUP_KEYS, true);
+  const fallbackSports = filterEntries(extractEntries(fallbackM3u), SPORTS_GROUP_KEYS, true);
+  const liveGroups = new Set(liveSports.map((entry) => normalizeGroup(entryGroup(entry))));
+  const missingGroups = new Set([...SPORTS_GROUP_KEYS].filter((group) => !liveGroups.has(group)));
+  const fallbackExtras = fallbackSports.filter((entry) => missingGroups.has(normalizeGroup(entryGroup(entry))));
+  const sportsEntries = [...liveSports, ...fallbackExtras];
+
+  const availableSportsGroups = new Set(sportsEntries.map((entry) => normalizeGroup(entryGroup(entry))));
+  const missing = [...SPORTS_GROUP_KEYS].filter((group) => !availableSportsGroups.has(group));
+  if (missing.length) {
+    throw new Error("Thiếu nhóm thể thao cả ở nguồn trực tiếp lẫn bản dự phòng: " + missing.join(", "));
+  }
+
+  const allEntries = [...tvEntries, ...sportsEntries];
+  const output = header + "\n" + allEntries.map((entry) => entry.join("\n").trim()).join("\n") + "\n";
+  const validated = validatePlaylist(output, "Playlist đầu ra");
+  const outputEntries = extractEntries(validated);
+  const invalidGroups = uniqueGroups(outputEntries).filter((group) => {
+    const key = normalizeGroup(group);
+    return !MAIN_GROUP_KEYS.has(key) && !SPORTS_GROUP_KEYS.has(key);
+  });
+  if (invalidGroups.length) throw new Error("Có nhóm ngoài danh sách cho phép: " + invalidGroups.join(", "));
+  if (outputEntries.some(isDrmEntry)) throw new Error("Playlist đầu ra còn kênh có metadata DRM");
+
   return {
-    m3u: merged,
-    mainEntries: mainEntries.length,
-    mainGroups,
-    extraEntries: extras.length,
-    extraGroups,
-    totalEntries: extractEntries(merged).length,
+    m3u: validated,
+    rawTvEntries: rawTvEntries.length,
+    tvEntries: tvEntries.length,
+    drmExcludedTv: rawTvEntries.filter((entry) =>
+      MAIN_GROUP_KEYS.has(normalizeGroup(entryGroup(entry))) && isDrmEntry(entry)
+    ).length,
+    tvGroups: uniqueGroups(tvEntries),
+    sportEntries: sportsEntries.length,
+    sportGroups: uniqueGroups(sportsEntries),
+    liveSportEntries: liveSports.length,
+    fallbackSportEntries: fallbackExtras.length,
+    totalEntries: outputEntries.length,
   };
 }
 
-const tempDir = await mkdtemp(path.join(tmpdir(), "nm7-vietmitv-"));
-try {
-  const [mainModuleText, fallbackModuleText] = await Promise.all([
-    fetchText(MAIN_MODULE_URL, "Mã nguồn M3U chính"),
-    fetchText(FALLBACK_MODULE_URL, "Mã nguồn M3U dự phòng"),
-  ]);
-  const mainPath = path.join(tempDir, "vietmitv-source.mjs");
-  const fallbackPath = path.join(tempDir, "vietmitv-fallback.mjs");
-  await Promise.all([
-    writeFile(mainPath, mainModuleText, "utf8"),
-    writeFile(fallbackPath, fallbackModuleText, "utf8"),
-  ]);
-
-  // Execute the existing integrity-checked Node source module in Actions rather than
-  // reimplementing or altering its compressed-data format.
-  const sourceModule = await import(pathToFileURL(mainPath).href + "?v=" + Date.now());
-  const fallbackModule = await import(pathToFileURL(fallbackPath).href + "?v=" + Date.now());
-  const mainM3u = validatePlaylist(sourceModule.getVietMiTVPlaylist(), "M3U chính đã đóng gói");
-  const fallbackM3u = validatePlaylist(fallbackModule.getSportsFallbackM3U(), "M3U thể thao dự phòng");
-
-  let sportsM3u = fallbackM3u;
-  let sportsSource = "bundled-fallback";
+async function main() {
+  let previousOutput = "";
   try {
-    sportsM3u = validatePlaylist(await fetchText(SPORTS_URL, "sports-auto.m3u"), "sports-auto.m3u");
-    sportsSource = "live";
-  } catch (error) {
-    console.warn("Nguồn thể thao trực tiếp lỗi; dùng dữ liệu dự phòng:", error instanceof Error ? error.message : String(error));
+    previousOutput = await readFile(FALLBACK_PATH, "utf8");
+  } catch {
+    // No previous output is acceptable when the live sports source supplies all five groups.
   }
 
-  const result = composePlaylist(mainM3u, sportsM3u, fallbackM3u);
-  const outputPath = path.resolve("generated/vietmitv-merge.m3u");
-  await mkdir(path.dirname(outputPath), { recursive: true });
-  await writeFile(outputPath, result.m3u, "utf8");
+  const tvPromise = fetchText(TV_SOURCE_URL, "Nguồn M3U https://tinyurl.com/vmt47");
+  let sportsPromise = fetchText(SPORTS_URL, "Nguồn sports-auto.m3u").catch((error) => {
+    console.warn("Nguồn thể thao trực tiếp lỗi; sẽ dùng các nhóm còn thiếu từ bản M3U trước:", error instanceof Error ? error.message : String(error));
+    return previousOutput;
+  });
+  const [tvRaw, sportsRaw] = await Promise.all([tvPromise, sportsPromise]);
+  const tvM3u = validatePlaylist(tvRaw, "Nguồn truyền hình tinyurl");
+  const sportsM3u = validatePlaylist(sportsRaw, "Nguồn thể thao / bản dự phòng");
+  const fallbackM3u = previousOutput && /^\s*#EXTM3U\b/im.test(previousOutput) ? previousOutput : sportsM3u;
+
+  const result = composePlaylist(tvM3u, sportsM3u, fallbackM3u);
+  await mkdir(path.dirname(OUTPUT_PATH), { recursive: true });
+  await writeFile(OUTPUT_PATH, result.m3u, "utf8");
 
   console.log(JSON.stringify({
-    output: outputPath,
-    sportsSource,
-    mainChannels: result.mainEntries,
-    mainGroups: result.mainGroups.length,
-    extraChannels: result.extraEntries,
-    extraGroups: result.extraGroups,
+    output: OUTPUT_PATH,
+    tvSource: TV_SOURCE_URL,
+    sportSource: SPORTS_URL,
+    drmFilter: "enabled",
+    selectedTvChannels: result.tvEntries,
+    removedDrmTvChannels: result.drmExcludedTv,
+    tvGroups: result.tvGroups,
+    sportsSourceMode: sportsRaw === previousOutput ? "live-unavailable-previous-playlist-fallback" : "live",
+    liveSportChannels: result.liveSportEntries,
+    fallbackSportChannels: result.fallbackSportEntries,
+    sportGroups: result.sportGroups,
     totalChannels: result.totalEntries,
     bytes: Buffer.byteLength(result.m3u, "utf8"),
-    sha256: (await import("node:crypto")).createHash("sha256").update(result.m3u).digest("hex"),
   }, null, 2));
-} finally {
-  await rm(tempDir, { recursive: true, force: true });
 }
+
+main().catch((error) => {
+  console.error("[NM7 filtered TV playlist] generation failed:", error instanceof Error ? error.stack || error.message : String(error));
+  process.exitCode = 1;
+});
