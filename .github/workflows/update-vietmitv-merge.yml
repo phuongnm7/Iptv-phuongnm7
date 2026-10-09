@@ -1,4 +1,4 @@
-name: Update VietMiTV merged playlist
+name: Update filtered TV merged playlist
 
 on:
   schedule:
@@ -33,7 +33,7 @@ jobs:
         with:
           node-version: "22"
 
-      - name: Generate merged playlist and validate it
+      - name: Generate filtered playlist
         run: |
           set -euo pipefail
           node --check tools/build-vietmitv-merge.mjs
@@ -41,12 +41,77 @@ jobs:
           test -s generated/vietmitv-merge.m3u
           grep -Eq '^#EXTM3U' generated/vietmitv-merge.m3u
           grep -Eq '^#EXTINF:' generated/vietmitv-merge.m3u
-          for group in "Giờ Vàng TV" "Gà Vàng 24h TV" "Gà Vàng 33 TV" "S8 TV" "Sao Kê TV"; do
-            grep -Fq "group-title=\"$group\"" generated/vietmitv-merge.m3u || {
-              echo "Missing expected group: $group"
-              exit 1
-            }
-          done
+
+      - name: Validate selected groups and DRM removal
+        run: |
+          python3 - <<'PY'
+          import re
+          import unicodedata
+          from pathlib import Path
+
+          path = Path("generated/vietmitv-merge.m3u")
+          text = path.read_text(encoding="utf-8-sig")
+          main_groups = {
+              "htv", "htvc", "quoc te", "sctv", "su kien fpt play",
+              "su kien tv360", "the thao", "vtv", "vtvcab", "giai tri",
+          }
+          sports_groups = {
+              "gio vang tv", "ga vang 24h tv", "ga vang 33 tv", "s8 tv", "sao ke tv",
+          }
+
+          def normalize(value):
+              value = unicodedata.normalize("NFD", value).replace("đ", "d").replace("Đ", "D")
+              value = "".join(ch for ch in value if unicodedata.category(ch) != "Mn")
+              return re.sub(r"[^a-z0-9]", "", value.casefold())
+
+          allowed = {normalize(x) for x in main_groups | sports_groups}
+          expected_sports = {normalize(x) for x in sports_groups}
+          entries, current = [], []
+          for line in text.splitlines():
+              if line.lstrip().upper().startswith("#EXTINF:"):
+                  if current:
+                      entries.append(current)
+                  current = [line]
+              elif current:
+                  current.append(line)
+          if current:
+              entries.append(current)
+
+          def group_of(entry):
+              extinf = next((x for x in entry if x.lstrip().upper().startswith("#EXTINF:")), "")
+              match = re.search(r"""\bgroup-title\s*=\s*["']([^"']*)["']""", extinf, re.I)
+              if match:
+                  return match.group(1).strip()
+              extgrp = next((x for x in entry if x.lstrip().upper().startswith("#EXTGRP:")), "")
+              return re.sub(r"^\s*#EXTGRP:", "", extgrp, flags=re.I).strip()
+
+          def is_drm(entry):
+              value = "\n".join(entry)
+              patterns = [
+                  r"inputstream\.adaptive\.license_(?:type|key|url|data)",
+                  r"""(?:^|[^a-z])license[_-]?(?:type|key|url|server|data)\s*["']?\s*[:=]""",
+                  r"(?:com\.widevine\.alpha|org\.w3\.clearkey|widevine|playready|clearkey|skd://)",
+                  r"\bdrm\s*[:=]\s*(?:true|1|yes)\b",
+                  r"#EXT-X-(?:KEY|SESSION-KEY):[^\r\n]*METHOD\s*=\s*SAMPLE-AES(?:-CTR)?",
+              ]
+              return any(re.search(pattern, value, re.I | re.M) for pattern in patterns)
+
+          groups = set()
+          for entry in entries:
+              group = group_of(entry)
+              key = normalize(group)
+              if key not in allowed:
+                  raise SystemExit(f"Unexpected or missing group-title: {group!r}")
+              groups.add(key)
+              if is_drm(entry):
+                  raise SystemExit(f"DRM-marked entry remains in group {group!r}")
+          missing = expected_sports - groups
+          if missing:
+              raise SystemExit("Missing sports groups: " + ", ".join(sorted(missing)))
+          if not entries:
+              raise SystemExit("No valid channel entries generated")
+          print(f"Validated {len(entries)} entries; {len(groups)} allowed groups; no DRM-marked entries.")
+          PY
 
       - name: Commit only when playlist content changes
         shell: bash
@@ -54,11 +119,10 @@ jobs:
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          # -f also handles generated/*.m3u if ignored by repository rules.
           git add -f generated/vietmitv-merge.m3u
           if git diff --cached --quiet -- generated/vietmitv-merge.m3u; then
             echo "Playlist unchanged; no commit required."
             exit 0
           fi
-          git commit -m "Update generated VietMiTV merged playlist"
+          git commit -m "Update filtered TV playlist"
           git push origin HEAD:main
