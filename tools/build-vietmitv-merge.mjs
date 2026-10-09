@@ -204,7 +204,7 @@ function applyPlaybackOverrides(entries) {
     if (override.ua) {
       const extinfIndex = updated.findIndex((line) => line.trimStart().toUpperCase().startsWith("#EXTINF:"));
       if (extinfIndex < 0) throw new Error("Mục thiếu EXTINF cho kênh " + entryDisplayName(entry));
-      updated.splice(extinfIndex + 1, 0, "#EXTVLCOPT:http-user-agent=" + override.ua);
+      updated.splice(extinfIndex + 1, 0, "#EXTVLCOPT:http-user-agent=\"" + override.ua + "\"");
     }
     found.add(override.key);
     result.push(updated);
