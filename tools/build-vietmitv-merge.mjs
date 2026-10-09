@@ -134,18 +134,19 @@ function uniqueGroups(entries) {
 const PLAYBACK_OVERRIDES = [
   {
     key: "vtv1",
-    url: "https://live-a.fptplay53.net/live/media/vtv1/live247-hls-avc/index.m3u8",
+    url: "https://livevlisctcdnw.seenow.vn/livesnv2/VTV1_HD/manifest.mpd",
+    manifestType: "mpd",
     ua: "",
   },
   {
     key: "vtv10",
-    url: "https://live-a.fptplay53.net/live/media/vtv10/live247-hls-avc/index.m3u8",
+    url: "https://vips-livecdn.fptplay.net/live/media/vtv10/live247-hls-avc/index.m3u8",
     ua: "",
   },
   {
     key: "onphimviet",
-    url: "https://freem3u.xyz/api/live/play.m3u8?vid=175",
-    ua: "Mozilla/5.0 (Linux; Android 15; SM-S918B Build/AP3A.240905.015.A2) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/135.0.7049.111 Mobile Safari/537.36 vAppTV/1.0.2",
+    url: "https://vmttv.dpdns.org/tv360/?id=vtvcab-2-phim-viet-hd",
+    ua: "Dalvik/2.1.0",
   },
 ];
 
@@ -187,7 +188,11 @@ function applyPlaybackOverrides(entries) {
       continue;
     }
 
-    const updated = entry.filter((line) => !line.trimStart().toUpperCase().startsWith("#EXTVLCOPT:HTTP-USER-AGENT="));
+    const updated = entry.filter((line) => {
+      const upper = line.trimStart().toUpperCase();
+      return !upper.startsWith("#EXTVLCOPT:HTTP-USER-AGENT=") &&
+        !upper.startsWith("#KODIPROP:INPUTSTREAM.ADAPTIVE.MANIFEST_TYPE=");
+    });
     let replacedUrl = false;
     for (let i = 0; i < updated.length; i++) {
       const value = updated[i].trim();
@@ -201,11 +206,16 @@ function applyPlaybackOverrides(entries) {
     if (!replacedUrl) {
       throw new Error("Không tìm thấy URL để thay thế cho kênh " + entryDisplayName(entry));
     }
-    if (override.ua) {
-      const extinfIndex = updated.findIndex((line) => line.trimStart().toUpperCase().startsWith("#EXTINF:"));
-      if (extinfIndex < 0) throw new Error("Mục thiếu EXTINF cho kênh " + entryDisplayName(entry));
-      updated.splice(extinfIndex + 1, 0, "#EXTVLCOPT:http-user-agent=\"" + override.ua + "\"");
+    const extinfIndex = updated.findIndex((line) => line.trimStart().toUpperCase().startsWith("#EXTINF:"));
+    if (extinfIndex < 0) throw new Error("Mục thiếu EXTINF cho kênh " + entryDisplayName(entry));
+    const metadata = [];
+    if (override.manifestType) {
+      metadata.push("#KODIPROP:inputstream.adaptive.manifest_type=" + override.manifestType);
     }
+    if (override.ua) {
+      metadata.push("#EXTVLCOPT:http-user-agent=\"" + override.ua + "\"");
+    }
+    if (metadata.length) updated.splice(extinfIndex + 1, 0, ...metadata);
     found.add(override.key);
     result.push(updated);
   }
